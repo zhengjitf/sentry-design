@@ -26,6 +26,8 @@ export interface ExtractedNodeRequestData {
 /**
  * Location object on a service worker's `self` object.
  *
+ * (Should be in TS's dom lib, but for some reason isn't.)
+ *
  * See https://developer.mozilla.org/en-US/docs/Web/API/WorkerLocation.
  */
 export interface WorkerLocation {
