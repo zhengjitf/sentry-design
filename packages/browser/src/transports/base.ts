@@ -1,12 +1,5 @@
 import { API } from '@sentry/core';
-import {
-  Event,
-  Response as SentryResponse,
-  SentryRequestType,
-  Status,
-  Transport,
-  TransportOptions,
-} from '@sentry/types';
+import { Event, SentryRequestType, SentryResponseData, Status, Transport, TransportOptions } from '@sentry/types';
 import { logger, parseRetryAfterHeader, PromiseBuffer, SentryError } from '@sentry/utils';
 
 /** Base Transport class implementation */
@@ -20,7 +13,7 @@ export abstract class BaseTransport implements Transport {
   protected readonly _api: API;
 
   /** A simple buffer holding all requests. */
-  protected readonly _buffer: PromiseBuffer<SentryResponse> = new PromiseBuffer(30);
+  protected readonly _buffer: PromiseBuffer<SentryResponseData> = new PromiseBuffer(30);
 
   /** Locks transport after receiving rate limits in a response */
   protected readonly _rateLimits: Record<string, Date> = {};
@@ -34,7 +27,7 @@ export abstract class BaseTransport implements Transport {
   /**
    * @inheritDoc
    */
-  public sendEvent(_: Event): PromiseLike<SentryResponse> {
+  public sendEvent(_: Event): PromiseLike<SentryResponseData> {
     throw new SentryError('Transport Class has to implement `sendEvent` method');
   }
 
@@ -58,7 +51,7 @@ export abstract class BaseTransport implements Transport {
     requestType: SentryRequestType;
     response: Response | XMLHttpRequest;
     headers: Record<string, string | null>;
-    resolve: (value?: SentryResponse | PromiseLike<SentryResponse> | null | undefined) => void;
+    resolve: (value?: SentryResponseData | PromiseLike<SentryResponseData> | null | undefined) => void;
     reject: (reason?: unknown) => void;
   }): void {
     const status = Status.fromHttpCode(response.status);

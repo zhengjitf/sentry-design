@@ -1,4 +1,4 @@
-import { Event, Response, Status, Transport } from '@sentry/types';
+import { Event, SentryResponseData, Status, Transport } from '@sentry/types';
 import { PromiseBuffer, SyncPromise } from '@sentry/utils';
 
 async function sleep(delay: number): Promise<void> {
@@ -11,9 +11,9 @@ export class FakeTransport implements Transport {
   public delay: number = 2000;
 
   /** A simple buffer holding all requests. */
-  protected readonly _buffer: PromiseBuffer<Response> = new PromiseBuffer(9999);
+  protected readonly _buffer: PromiseBuffer<SentryResponseData> = new PromiseBuffer(9999);
 
-  public sendEvent(_event: Event): PromiseLike<Response> {
+  public sendEvent(_event: Event): PromiseLike<SentryResponseData> {
     this.sendCalled += 1;
     return this._buffer.add(
       new SyncPromise(async res => {

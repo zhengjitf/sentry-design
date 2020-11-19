@@ -1,5 +1,5 @@
 import { eventToSentryRequest, sessionToSentryRequest } from '@sentry/core';
-import { Event, Response, SentryRequest, Session } from '@sentry/types';
+import { Event, SentryRequest, SentryResponseData, Session } from '@sentry/types';
 import { SyncPromise } from '@sentry/utils';
 
 import { BaseTransport } from './base';
@@ -9,14 +9,14 @@ export class XHRTransport extends BaseTransport {
   /**
    * @inheritDoc
    */
-  public sendEvent(event: Event): PromiseLike<Response> {
+  public sendEvent(event: Event): PromiseLike<SentryResponseData> {
     return this._sendRequest(eventToSentryRequest(event, this._api), event);
   }
 
   /**
    * @inheritDoc
    */
-  public sendSession(session: Session): PromiseLike<Response> {
+  public sendSession(session: Session): PromiseLike<SentryResponseData> {
     return this._sendRequest(sessionToSentryRequest(session, this._api), session);
   }
 
@@ -24,7 +24,10 @@ export class XHRTransport extends BaseTransport {
    * @param sentryRequest Prepared SentryRequest to be delivered
    * @param originalPayload Original payload used to create SentryRequest
    */
-  private _sendRequest(sentryRequest: SentryRequest, originalPayload: Event | Session): PromiseLike<Response> {
+  private _sendRequest(
+    sentryRequest: SentryRequest,
+    originalPayload: Event | Session,
+  ): PromiseLike<SentryResponseData> {
     if (this._isRateLimited(sentryRequest.type)) {
       return Promise.reject({
         event: originalPayload,
@@ -35,7 +38,7 @@ export class XHRTransport extends BaseTransport {
     }
 
     return this._buffer.add(
-      new SyncPromise<Response>((resolve, reject) => {
+      new SyncPromise<SentryResponseData>((resolve, reject) => {
         const request = new XMLHttpRequest();
 
         request.onreadystatechange = (): void => {

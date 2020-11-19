@@ -7,6 +7,7 @@ export {
   EventHint,
   Exception,
   Response,
+  SentryResponseData,
   Severity,
   StackFrame,
   Stacktrace,

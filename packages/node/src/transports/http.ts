@@ -1,4 +1,4 @@
-import { Event, Response, TransportOptions } from '@sentry/types';
+import { Event, SentryResponseData, TransportOptions } from '@sentry/types';
 import { SentryError } from '@sentry/utils';
 import * as http from 'http';
 
@@ -19,7 +19,7 @@ export class HTTPTransport extends BaseTransport {
   /**
    * @inheritDoc
    */
-  public sendEvent(event: Event): Promise<Response> {
+  public sendEvent(event: Event): Promise<SentryResponseData> {
     if (!this.module) {
       throw new SentryError('No module available in HTTPTransport');
     }

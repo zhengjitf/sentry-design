@@ -1,6 +1,6 @@
 import { DsnLike } from './dsn';
 import { Event } from './event';
-import { Response } from './response';
+import { SentryResponseData } from './response';
 import { Session } from './session';
 
 /** Transport used sending data to Sentry */
@@ -10,14 +10,14 @@ export interface Transport {
    *
    * @param event Event that should be sent to Sentry.
    */
-  sendEvent(event: Event): PromiseLike<Response>;
+  sendEvent(event: Event): PromiseLike<SentryResponseData>;
 
   /**
    * Sends the session to the Store endpoint in Sentry.
    *
    * @param body Session that should be sent to Sentry.
    */
-  sendSession?(session: Session): PromiseLike<Response>;
+  sendSession?(session: Session): PromiseLike<SentryResponseData>;
 
   /**
    * Call this function to wait until all pending requests have been sent.

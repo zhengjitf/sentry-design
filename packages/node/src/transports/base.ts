@@ -1,5 +1,5 @@
 import { API, eventToSentryRequest } from '@sentry/core';
-import { Event, Response, Status, Transport, TransportOptions } from '@sentry/types';
+import { Event, SentryResponseData, Status, Transport, TransportOptions } from '@sentry/types';
 import { logger, parseRetryAfterHeader, PromiseBuffer, SentryError } from '@sentry/utils';
 import * as fs from 'fs';
 import * as http from 'http';
@@ -46,7 +46,7 @@ export abstract class BaseTransport implements Transport {
   protected _api: API;
 
   /** A simple buffer holding all requests. */
-  protected readonly _buffer: PromiseBuffer<Response> = new PromiseBuffer(30);
+  protected readonly _buffer: PromiseBuffer<SentryResponseData> = new PromiseBuffer(30);
 
   /** Locks transport after receiving 429 response */
   private _disabledUntil: Date = new Date(Date.now());
@@ -59,7 +59,7 @@ export abstract class BaseTransport implements Transport {
   /**
    * @inheritDoc
    */
-  public sendEvent(_: Event): PromiseLike<Response> {
+  public sendEvent(_: Event): PromiseLike<SentryResponseData> {
     throw new SentryError('Transport Class has to implement `sendEvent` method.');
   }
 
@@ -96,7 +96,7 @@ export abstract class BaseTransport implements Transport {
   }
 
   /** JSDoc */
-  protected async _sendWithModule(httpModule: HTTPRequest, event: Event): Promise<Response> {
+  protected async _sendWithModule(httpModule: HTTPRequest, event: Event): Promise<SentryResponseData> {
     if (new Date(Date.now()) < this._disabledUntil) {
       return Promise.reject(new SentryError(`Transport locked till ${this._disabledUntil} due to too many requests.`));
     }
@@ -105,7 +105,7 @@ export abstract class BaseTransport implements Transport {
       return Promise.reject(new SentryError('Not adding Promise due to buffer limit reached.'));
     }
     return this._buffer.add(
-      new Promise<Response>((resolve, reject) => {
+      new Promise<SentryResponseData>((resolve, reject) => {
         const sentryReq = eventToSentryRequest(event, this._api);
         const options = this._getRequestOptions(new url.URL(sentryReq.url));
 

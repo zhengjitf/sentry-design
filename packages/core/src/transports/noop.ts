@@ -1,4 +1,4 @@
-import { Event, Response, Status, Transport } from '@sentry/types';
+import { Event, SentryResponseData, Status, Transport } from '@sentry/types';
 import { SyncPromise } from '@sentry/utils';
 
 /** Noop transport */
@@ -6,7 +6,7 @@ export class NoopTransport implements Transport {
   /**
    * @inheritDoc
    */
-  public sendEvent(_: Event): PromiseLike<Response> {
+  public sendEvent(_: Event): PromiseLike<SentryResponseData> {
     return SyncPromise.resolve({
       reason: `NoopTransport: Event has been skipped because no Dsn is configured.`,
       status: Status.Skipped,
