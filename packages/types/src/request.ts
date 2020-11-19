@@ -9,7 +9,7 @@ export interface SentryRequest {
 }
 
 /** Request data included in an event as sent to Sentry */
-export interface Request {
+export interface RequestContextData {
   url?: string;
   method?: string;
   data?: any;

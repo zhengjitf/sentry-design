@@ -6,7 +6,7 @@ import { Runtime, Transaction as TransactionType } from '@sentry/types';
 import * as http from 'http';
 import * as net from 'net';
 
-import { Event, Request, User } from '../src';
+import { Event, RequestContextData, User } from '../src';
 import { NodeClient } from '../src/client';
 import { parseRequest, tracingHandler } from '../src/handlers';
 
@@ -124,7 +124,7 @@ describe('parseRequest', () => {
     test('parseRequest.request only contains the default set of properties from the request', () => {
       const DEFAULT_REQUEST_PROPERTIES = ['cookies', 'data', 'headers', 'method', 'query_string', 'url'];
       const parsedRequest: Event = parseRequest({}, mockReq);
-      expect(Object.keys(parsedRequest.request as Request)).toEqual(DEFAULT_REQUEST_PROPERTIES);
+      expect(Object.keys(parsedRequest.request as RequestContextData)).toEqual(DEFAULT_REQUEST_PROPERTIES);
     });
 
     test('parseRequest.request only contains the specified properties in the options.request array', () => {
@@ -132,7 +132,7 @@ describe('parseRequest', () => {
       const parsedRequest: Event = parseRequest({}, mockReq, {
         request: INCLUDED_PROPERTIES,
       });
-      expect(Object.keys(parsedRequest.request as Request)).toEqual(INCLUDED_PROPERTIES);
+      expect(Object.keys(parsedRequest.request as RequestContextData)).toEqual(INCLUDED_PROPERTIES);
     });
 
     test('parseRequest.request skips `body` property for GET and HEAD requests', () => {

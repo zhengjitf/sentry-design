@@ -1,6 +1,6 @@
 export {
   Breadcrumb,
-  Request,
+  RequestContextData,
   SdkInfo,
   Event,
   Exception,

@@ -2,7 +2,7 @@ import { Breadcrumb } from './breadcrumb';
 import { Contexts } from './context';
 import { Exception } from './exception';
 import { Extras } from './extra';
-import { Request } from './request';
+import { RequestContextData } from './request';
 import { CaptureContext } from './scope';
 import { SdkInfo } from './sdkinfo';
 import { Severity } from './severity';
@@ -25,7 +25,7 @@ export interface Event {
   dist?: string;
   environment?: string;
   sdk?: SdkInfo;
-  request?: Request;
+  request?: RequestContextData;
   transaction?: string;
   modules?: { [key: string]: string };
   fingerprint?: string[];

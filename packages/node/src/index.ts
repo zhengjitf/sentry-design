@@ -1,7 +1,7 @@
 export {
   Breadcrumb,
   BreadcrumbHint,
-  Request,
+  RequestContextData,
   SdkInfo,
   Event,
   EventHint,
