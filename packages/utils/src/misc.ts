@@ -6,6 +6,7 @@ import { snipLine } from './string';
 
 /** Internal */
 interface SentryGlobal {
+  console: Console;
   Sentry?: {
     Integrations?: Integration[];
   };

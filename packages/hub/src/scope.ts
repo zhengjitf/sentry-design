@@ -26,44 +26,46 @@ import { Session } from './session';
  * called by the client before an event will be sent.
  */
 export class Scope implements ScopeInterface {
+  // TODO: Make them private/protected
+
   /** Flag if notifiying is happening. */
-  protected _notifyingListeners: boolean = false;
+  public _notifyingListeners: boolean = false;
 
   /** Callback for client to receive scope changes. */
-  protected _scopeListeners: Array<(scope: Scope) => void> = [];
+  public _scopeListeners: Array<(scope: Scope) => void> = [];
 
   /** Callback list that will be called after {@link applyToEvent}. */
-  protected _eventProcessors: EventProcessor[] = [];
+  public _eventProcessors: EventProcessor[] = [];
 
   /** Array of breadcrumbs. */
-  protected _breadcrumbs: Breadcrumb[] = [];
+  public _breadcrumbs: Breadcrumb[] = [];
 
   /** User */
-  protected _user: User = {};
+  public _user: User = {};
 
   /** Tags */
-  protected _tags: { [key: string]: Primitive } = {};
+  public _tags: { [key: string]: Primitive } = {};
 
   /** Extra */
-  protected _extra: Extras = {};
+  public _extra: Extras = {};
 
   /** Contexts */
-  protected _contexts: Contexts = {};
+  public _contexts: Contexts = {};
 
   /** Fingerprint */
-  protected _fingerprint?: string[];
+  public _fingerprint?: string[];
 
   /** Severity */
-  protected _level?: Severity;
+  public _level?: Severity;
 
   /** Transaction Name */
-  protected _transactionName?: string;
+  public _transactionName?: string;
 
   /** Span */
-  protected _span?: Span;
+  public _span?: Span;
 
   /** Session */
-  protected _session?: Session;
+  public _session?: Session;
 
   /**
    * Inherit values from the parent scope.
