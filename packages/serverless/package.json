@@ -36,7 +36,6 @@
     "eslint": "7.6.0",
     "find-up": "^5.0.0",
     "google-gax": "^2.9.0",
-    "jest": "^24.7.1",
     "nock": "^13.0.4",
     "npm-packlist": "^2.1.4",
     "npm-run-all": "^4.1.2",
@@ -84,7 +83,7 @@
     ],
     "globals": {
       "ts-jest": {
-        "tsConfig": "./tsconfig.json",
+        "tsconfig": "./tsconfig.json",
         "diagnostics": false
       }
     }

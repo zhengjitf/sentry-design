@@ -10,6 +10,15 @@ import { Event, Request, User } from '../src';
 import { NodeClient } from '../src/client';
 import { ExpressRequest, extractRequestData, parseRequest, tracingHandler } from '../src/handlers';
 
+// Allow for spying on the module namespaces
+jest.mock('@sentry/core', () => ({
+  ...jest.requireActual('@sentry/core'),
+}));
+
+jest.mock('@sentry/hub', () => ({
+  ...jest.requireActual('@sentry/hub'),
+}));
+
 describe('parseRequest', () => {
   let mockReq: { [key: string]: any };
 

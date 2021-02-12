@@ -14,6 +14,11 @@ import { addDOMPropertiesToGlobal, getSymbolObjectKeyByName, testOnlyIfNodeVersi
 
 addExtensionMethods();
 
+// Allow for spying on the module namespaces
+jest.mock('@sentry/hub', () => ({
+  ...jest.requireActual('@sentry/hub'),
+}));
+
 const mathRandom = jest.spyOn(Math, 'random');
 jest.spyOn(Transaction.prototype, 'setMetadata');
 jest.spyOn(logger, 'warn');

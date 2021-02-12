@@ -8,6 +8,15 @@ import * as nock from 'nock';
 import { NodeClient } from '../../src/client';
 import { Http as HttpIntegration } from '../../src/integrations/http';
 
+// Allow for spying on the module namespaces
+jest.mock('@sentry/core', () => ({
+  ...jest.requireActual('@sentry/core'),
+}));
+
+jest.mock('@sentry/hub', () => ({
+  ...jest.requireActual('@sentry/hub'),
+}));
+
 describe('tracing', () => {
   function createTransactionOnScope() {
     const hub = new Hub(
