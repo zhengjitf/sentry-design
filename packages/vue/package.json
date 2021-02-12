@@ -20,8 +20,7 @@
     "@sentry/core": "6.2.3",
     "@sentry/minimal": "6.2.3",
     "@sentry/types": "6.2.3",
-    "@sentry/utils": "6.2.3",
-    "tslib": "^1.9.3"
+    "@sentry/utils": "6.2.3"
   },
   "peerDependencies": {
     "vue": "2.x",

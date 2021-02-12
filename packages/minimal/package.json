@@ -17,8 +17,7 @@
   },
   "dependencies": {
     "@sentry/hub": "6.2.3",
-    "@sentry/types": "6.2.3",
-    "tslib": "^1.9.3"
+    "@sentry/types": "6.2.3"
   },
   "devDependencies": {
     "@sentry-internal/eslint-config-sdk": "6.2.3",

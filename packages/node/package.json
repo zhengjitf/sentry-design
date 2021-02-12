@@ -23,8 +23,7 @@
     "@sentry/utils": "6.2.3",
     "cookie": "^0.4.1",
     "https-proxy-agent": "^5.0.0",
-    "lru_map": "^0.3.3",
-    "tslib": "^1.9.3"
+    "lru_map": "^0.3.3"
   },
   "devDependencies": {
     "@sentry-internal/eslint-config-sdk": "6.2.3",

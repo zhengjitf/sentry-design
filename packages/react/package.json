@@ -20,11 +20,11 @@
     "@sentry/minimal": "6.2.3",
     "@sentry/types": "6.2.3",
     "@sentry/utils": "6.2.3",
-    "hoist-non-react-statics": "^3.3.2",
-    "tslib": "^1.9.3"
+    "hoist-non-react-statics": "^3.3.2"
   },
   "peerDependencies": {
-    "react": "15.x || 16.x || 17.x"
+    "react": "15.x || 16.x || 17.x",
+    "react-dom": "15.x || 16.x || 17.x"
   },
   "devDependencies": {
     "@sentry-internal/eslint-config-sdk": "6.2.3",
