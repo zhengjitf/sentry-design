@@ -77,8 +77,10 @@ describe('Dedupe', () => {
 
     it('should drop if there are two events with same messages and no fingerprints', () => {
       const eventA = clone(messageEvent);
+      // @ts-expect-error
       delete eventA.fingerprint;
       const eventB = clone(messageEvent);
+      // @ts-expect-error
       delete eventB.fingerprint;
       expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(true);
     });
@@ -94,6 +96,7 @@ describe('Dedupe', () => {
       const eventB = clone(messageEvent);
       eventA.fingerprint = ['Birdperson'];
       const eventC = clone(messageEvent);
+      // @ts-expect-error
       delete eventC.fingerprint;
       expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
       expect((dedupe as any)._shouldDropEvent(eventA, eventC)).toBe(false);
@@ -135,8 +138,10 @@ describe('Dedupe', () => {
 
     it('should drop if there are two events with same exception and no fingerprints', () => {
       const eventA = clone(exceptionEvent);
+      // @ts-expect-error
       delete eventA.fingerprint;
       const eventB = clone(exceptionEvent);
+      // @ts-expect-error
       delete eventB.fingerprint;
       expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(true);
     });
@@ -152,6 +157,7 @@ describe('Dedupe', () => {
       const eventB = clone(exceptionEvent);
       eventA.fingerprint = ['Birdperson'];
       const eventC = clone(exceptionEvent);
+      // @ts-expect-error
       delete eventC.fingerprint;
       expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
       expect((dedupe as any)._shouldDropEvent(eventA, eventC)).toBe(false);

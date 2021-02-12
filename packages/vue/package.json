@@ -60,32 +60,10 @@
     "fix": "run-s fix:eslint fix:prettier",
     "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
     "fix:eslint": "eslint . --format stylish --fix",
-    "test": "jest --passWithNoTests",
-    "test:watch": "jest --watch",
     "pack": "npm pack"
   },
   "volta": {
     "extends": "../../package.json"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "moduleFileExtensions": [
-      "js",
-      "ts"
-    ],
-    "testEnvironment": "jsdom",
-    "testMatch": [
-      "**/*.test.ts"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "./tsconfig.json",
-        "diagnostics": false
-      }
-    }
   },
   "sideEffects": [
     "./src/index.ts"

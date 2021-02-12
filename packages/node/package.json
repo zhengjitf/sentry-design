@@ -54,33 +54,13 @@
     "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
     "fix:eslint": "eslint . --format stylish --fix",
     "test": "run-s test:jest test:express test:webpack",
-    "test:jest": "jest",
-    "test:watch": "jest --watch",
+    "test:jest": "jest -c ../../jest.config.js",
+    "test:watch": "npm run test -- --watch",
     "test:express": "node test/manual/express-scope-separation/start.js",
     "test:webpack": "cd test/manual/webpack-domain/ && yarn && node npm-build.js",
     "pack": "npm pack"
   },
   "volta": {
     "extends": "../../package.json"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "moduleFileExtensions": [
-      "js",
-      "ts"
-    ],
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/*.test.ts"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "./tsconfig.json",
-        "diagnostics": false
-      }
-    }
   }
 }

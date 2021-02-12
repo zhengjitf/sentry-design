@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history-4';
 import * as React from 'react';

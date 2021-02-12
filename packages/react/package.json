@@ -69,35 +69,12 @@
     "fix": "run-s fix:eslint fix:prettier",
     "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
     "fix:eslint": "eslint . --format stylish --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "jest -c ../../jest.config.js",
+    "test:watch": "npm run test -- --watch",
     "pack": "npm pack"
   },
   "volta": {
     "extends": "../../package.json"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "transform": {
-      "^.+\\.ts$": "ts-jest",
-      "^.+\\.tsx$": "ts-jest"
-    },
-    "moduleFileExtensions": [
-      "js",
-      "ts",
-      "tsx"
-    ],
-    "testEnvironment": "jsdom",
-    "testMatch": [
-      "**/*.test.ts",
-      "**/*.test.tsx"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "./tsconfig.json",
-        "diagnostics": false
-      }
-    }
   },
   "sideEffects": [
     "./src/index.ts"

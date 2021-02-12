@@ -1,8 +1,14 @@
+/**
+ * @jest-environment jsdom
+ */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-var-requires */
+import { Event } from '@sentry/react';
 import { render } from '@testing-library/react';
 import * as React from 'react';
 
-import { onClientEntry } from '../gatsby-browser';
+const { onClientEntry } = require('../gatsby-browser');
 
 beforeAll(() => {
   (global as any).__SENTRY_RELEASE__ = '683f3a6ab819d47d23abfca9a914c81f0524d35b';
@@ -14,7 +20,7 @@ describe('useEffect', () => {
     let calls = 0;
 
     onClientEntry(undefined, {
-      beforeSend: event => {
+      beforeSend: (event: Event) => {
         expect(event).not.toBeUndefined();
         calls += 1;
 

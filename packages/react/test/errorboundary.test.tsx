@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { Scope } from '@sentry/browser';
 import { fireEvent, render, screen } from '@testing-library/react';
 import * as React from 'react';

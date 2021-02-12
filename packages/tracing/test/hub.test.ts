@@ -19,6 +19,10 @@ jest.mock('@sentry/hub', () => ({
   ...jest.requireActual('@sentry/hub'),
 }));
 
+jest.mock('@sentry/utils', () => ({
+  ...jest.requireActual('@sentry/utils'),
+}));
+
 const mathRandom = jest.spyOn(Math, 'random');
 jest.spyOn(Transaction.prototype, 'setMetadata');
 jest.spyOn(logger, 'warn');

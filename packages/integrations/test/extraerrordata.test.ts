@@ -44,8 +44,8 @@ describe('ExtraErrorData()', () => {
 
   it('should not remove previous data existing in extra field', () => {
     event = {
-      // @ts-ignore Allow contexts on event
       contexts: {
+        // @ts-ignore Allow contexts on event
         foo: 42,
       },
     };

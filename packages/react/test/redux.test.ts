@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import * as Sentry from '@sentry/minimal';
 import { Scope } from '@sentry/types';
 import * as Redux from 'redux';

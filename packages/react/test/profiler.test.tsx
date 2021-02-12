@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { SpanContext } from '@sentry/types';
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';

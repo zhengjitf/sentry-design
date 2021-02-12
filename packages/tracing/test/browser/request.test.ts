@@ -13,6 +13,11 @@ import {
 import { addExtensionMethods } from '../../src/hubextensions';
 import * as tracingUtils from '../../src/utils';
 
+// Allow for spying on the module namespaces
+jest.mock('@sentry/utils', () => ({
+  ...jest.requireActual('@sentry/utils'),
+}));
+
 beforeAll(() => {
   addExtensionMethods();
   // @ts-ignore need to override global Request because it's not in the jest environment (even with an
