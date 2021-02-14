@@ -26,9 +26,15 @@ const fakeContext = {
   logGroupName: 'logGroupName',
   logStreamName: 'logStreamName',
   getRemainingTimeInMillis: () => DEFAULT_EXECUTION_TIME,
-  done: () => {},
-  fail: () => {},
-  succeed: () => {},
+  done: () => {
+    // no-empty
+  },
+  fail: () => {
+    // no-empty
+  },
+  succeed: () => {
+    // no-empty
+  },
   ytho: 'o_O',
 };
 const fakeCallback: Callback = (err, result) => {
@@ -84,7 +90,9 @@ describe('AWSLambda', () => {
     test('flushTimeout', async () => {
       expect.assertions(1);
 
-      const handler = () => {};
+      const handler = () => {
+        // no-empty
+      };
       const wrappedHandler = wrapHandler(handler, { flushTimeout: 1337 });
 
       await wrappedHandler(fakeEvent, fakeContext, fakeCallback);

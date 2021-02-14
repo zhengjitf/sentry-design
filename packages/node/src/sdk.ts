@@ -131,6 +131,7 @@ export function lastEventId(): string | undefined {
  *
  * @param timeout Maximum time in ms the client should wait.
  */
+// eslint-disable-next-line @sentry-internal/sdk/no-async-await
 export async function flush(timeout?: number): Promise<boolean> {
   const client = getCurrentHub().getClient<NodeClient>();
   if (client) {
@@ -145,6 +146,7 @@ export async function flush(timeout?: number): Promise<boolean> {
  *
  * @param timeout Maximum time in ms the client should wait.
  */
+// eslint-disable-next-line @sentry-internal/sdk/no-async-await
 export async function close(timeout?: number): Promise<boolean> {
   const client = getCurrentHub().getClient<NodeClient>();
   if (client) {

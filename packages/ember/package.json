@@ -21,7 +21,7 @@
     "link:yarn": "yarn link",
     "lint": "npm-run-all --aggregate-output --continue-on-error --parallel lint:*",
     "lint:hbs": "ember-template-lint .",
-    "lint:js": "eslint . --cache --cache-location '../../eslintcache/'",
+    "lint:js": "eslint .",
     "start": "ember serve",
     "test": "bash ./scripts/run_tests.sh",
     "test:ember": "ember test",

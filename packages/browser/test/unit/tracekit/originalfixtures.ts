@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+
 export const OPERA_854 = {
   name: 'foo',
   message:

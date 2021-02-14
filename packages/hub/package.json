@@ -37,10 +37,10 @@
     "link:yarn": "yarn link",
     "lint": "run-s lint:prettier lint:eslint",
     "lint:prettier": "prettier --check \"{src,test}/**/*.ts\"",
-    "lint:eslint": "eslint . --cache --cache-location '../../eslintcache/' --format stylish",
+    "lint:eslint": "eslint .",
     "fix": "run-s fix:eslint fix:prettier",
     "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
-    "fix:eslint": "eslint . --format stylish --fix",
+    "fix:eslint": "eslint . --fix",
     "test": "jest -c ../../jest.config.js",
     "test:watch": "npm run test -- --watch",
     "pack": "npm pack"

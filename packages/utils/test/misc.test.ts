@@ -120,6 +120,7 @@ describe('getEventDescription()', () => {
 describe('getGlobalObject()', () => {
   test('should return the same object', () => {
     const backup = global.process;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     delete global.process;
     const first = getGlobalObject();

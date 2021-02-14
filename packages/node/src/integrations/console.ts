@@ -19,6 +19,7 @@ export class Console implements Integration {
    * @inheritDoc
    */
   public setupOnce(): void {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const consoleModule = require('console');
     for (const level of ['debug', 'info', 'warn', 'error', 'log']) {
       fill(consoleModule, level, createConsoleWrapper(level));
@@ -50,22 +51,22 @@ function createConsoleWrapper(level: string): (originalConsoleMethod: () => void
         sentryLevel = Severity.Log;
     }
 
-    return function(this: typeof console): void {
+    return function(this: typeof console, ...args: unknown[]): void {
       if (getCurrentHub().getIntegration(Console)) {
         getCurrentHub().addBreadcrumb(
           {
             category: 'console',
             level: sentryLevel,
-            message: util.format.apply(undefined, arguments),
+            message: util.format.apply(undefined, args),
           },
           {
-            input: [...arguments],
+            input: [...args],
             level,
           },
         );
       }
 
-      originalConsoleMethod.apply(this, arguments);
+      originalConsoleMethod.apply(this, args);
     };
   };
 }

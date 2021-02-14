@@ -1,4 +1,5 @@
 // TODO: Fix all tests once moved to a separate plugin package
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import { Event, EventProcessor, Hub, Integration } from '@sentry/types';
 import * as utils from '@sentry/utils';

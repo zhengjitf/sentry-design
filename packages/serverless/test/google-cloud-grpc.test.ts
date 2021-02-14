@@ -27,9 +27,15 @@ class FakeStream extends EventEmitter {
     this.emit('end');
     this.emit('close');
   }
-  end() {}
-  pause() {}
-  resume() {}
+  end() {
+    // no-empty
+  }
+  pause() {
+    // no-empty
+  }
+  resume() {
+    // no-empty
+  }
   write(_data: Buffer, cb: CallableFunction) {
     process.nextTick(cb, null);
   }
@@ -39,7 +45,9 @@ class FakeStream extends EventEmitter {
 class FakeSession extends EventEmitter {
   public socket: EventEmitter = new EventEmitter();
   public request: jest.Mock = jest.fn();
-  ping() {}
+  ping() {
+    // no-empty
+  }
   mockRequest(fn: (stream: FakeStream) => void): FakeStream {
     const stream = new FakeStream();
     this.request.mockImplementationOnce(() => {
@@ -63,8 +71,12 @@ class FakeSession extends EventEmitter {
     this.emit('close');
     this.socket.emit('close');
   }
-  ref() {}
-  unref() {}
+  ref() {
+    // no-empty
+  }
+  unref() {
+    // no-empty
+  }
 }
 
 function mockHttp2Session(): FakeSession {

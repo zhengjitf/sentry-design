@@ -18,7 +18,6 @@ module.exports = {
   globals: {
     QUnit: true,
   },
-  rules: {},
   overrides: [
     {
       files: ['addon/**'],

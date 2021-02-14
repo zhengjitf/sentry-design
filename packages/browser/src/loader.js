@@ -1,3 +1,4 @@
+/* eslint-disable */
 // prettier-ignore
 // Prettier disabled due to trailing comma not working in IE10/11
 (function(

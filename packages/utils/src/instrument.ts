@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any, max-lines */
 import { WrappedFunction } from '@sentry/types';
 
 import { isInstanceOf, isString } from './is';
