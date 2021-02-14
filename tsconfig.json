@@ -1,11 +1,33 @@
 {
-  "extends": "./packages/typescript/tsconfig.json",
   "compilerOptions": {
+    "alwaysStrict": false,
     "baseUrl": "packages",
-    "types": ["node"],
+    "declaration": true,
+    "declarationMap": true,
+    "downlevelIteration": true,
+    "importHelpers": true,
+    "inlineSources": true,
+    "lib": ["es6", "dom"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmitHelpers": true,
+    "noErrorTruncation": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitUseStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "paths": {
       "@sentry/*": ["*/src"]
     },
-    "noErrorTruncation": true
+    "pretty": true,
+    "sourceMap": true,
+    "strict": true,
+    "strictBindCallApply": false,
+    "target": "es5",
+    // TODO: Set per package
+    "types": ["node"]
   }
 }

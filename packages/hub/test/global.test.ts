@@ -33,5 +33,4 @@ describe('global', () => {
     (getCurrentHub() as any)._callExtensionMethod('testy', 1, 2, 3);
     expect(fn).toBeCalled();
   });
-  // (global as any).__SENTRY__
 });
