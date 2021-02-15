@@ -154,7 +154,9 @@ export function withSentryRouting<P extends RouteProps & Record<string, any>>(
   const componentDisplayName = Route.displayName || Route.name;
 
   const WrappedRoute: React.FC<P> = (props: P) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (activeTransaction && props && props.computedMatch && props.computedMatch.isExact) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       activeTransaction.setName(props.computedMatch.path);
     }
     return <Route {...props} />;

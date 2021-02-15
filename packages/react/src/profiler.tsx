@@ -33,6 +33,7 @@ function pushActivity(name: string, op: string): number | null {
     return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return (globalTracingIntegration as any).constructor.pushActivity(name, {
     description: `<${name}>`,
     op: `react.${op}`,
@@ -50,6 +51,7 @@ function popActivity(activity: number | null): void {
     return;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   (globalTracingIntegration as any).constructor.popActivity(activity);
 }
 
@@ -64,6 +66,7 @@ function getActivitySpan(activity: number | null): Span | undefined {
     return undefined;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return (globalTracingIntegration as any).constructor.getActivitySpan(activity) as Span | undefined;
 }
 
@@ -258,7 +261,6 @@ function useProfiler(
       }
     };
     // We only want this to run once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }
 

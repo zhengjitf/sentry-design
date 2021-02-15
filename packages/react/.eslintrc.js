@@ -1,7 +1,8 @@
 module.exports = {
-  extends: ['../../.eslintrc.js', 'plugin:react/recommended', 'plugin:react-hooks/recommended'],
+  extends: ['../../.eslintrc.js'],
+  plugins: ['react'],
   rules: {
-    'react/prop-types': 'off',
-    '@typescript-eslint/no-unsafe-member-access': 'off',
+    'react/jsx-uses-react': 'error',
+    'react/jsx-uses-vars': 'error',
   },
 };
