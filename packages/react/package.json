@@ -27,7 +27,6 @@
     "react-dom": "15.x || 16.x || 17.x"
   },
   "devDependencies": {
-    "@sentry-internal/eslint-config-sdk": "6.2.3",
     "@testing-library/react": "^10.4.9",
     "@testing-library/react-hooks": "^3.3.0",
     "@types/history-4": "npm:@types/history@4.7.7",
@@ -37,7 +36,6 @@
     "@types/react-router-3": "npm:@types/react-router@3.0.20",
     "@types/react-router-4": "npm:@types/react-router@5.0.0",
     "@types/react-router-5": "npm:@types/react-router@5.0.0",
-    "eslint": "7.6.0",
     "eslint-plugin-react": "^7.22.0",
     "history-4": "npm:history@4.6.0",
     "history-5": "npm:history@4.9.0",
