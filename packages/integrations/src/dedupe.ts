@@ -39,7 +39,6 @@ export class Dedupe implements Integration {
     });
   }
 
-  /** JSDoc */
   private _shouldDropEvent(currentEvent: Event, previousEvent?: Event): boolean {
     if (!previousEvent) {
       return false;
@@ -56,7 +55,6 @@ export class Dedupe implements Integration {
     return false;
   }
 
-  /** JSDoc */
   private _isSameMessageEvent(currentEvent: Event, previousEvent: Event): boolean {
     const currentMessage = currentEvent.message;
     const previousMessage = previousEvent.message;
@@ -86,7 +84,6 @@ export class Dedupe implements Integration {
     return true;
   }
 
-  /** JSDoc */
   private _getFramesFromEvent(event: Event): StackFrame[] | undefined {
     const exception = event.exception;
 
@@ -103,7 +100,6 @@ export class Dedupe implements Integration {
     return undefined;
   }
 
-  /** JSDoc */
   private _isSameStacktrace(currentEvent: Event, previousEvent: Event): boolean {
     let currentFrames = this._getFramesFromEvent(currentEvent);
     let previousFrames = this._getFramesFromEvent(previousEvent);
@@ -144,12 +140,10 @@ export class Dedupe implements Integration {
     return true;
   }
 
-  /** JSDoc */
   private _getExceptionFromEvent(event: Event): Exception | undefined {
     return event.exception && event.exception.values && event.exception.values[0];
   }
 
-  /** JSDoc */
   private _isSameExceptionEvent(currentEvent: Event, previousEvent: Event): boolean {
     const previousException = this._getExceptionFromEvent(previousEvent);
     const currentException = this._getExceptionFromEvent(currentEvent);
@@ -173,7 +167,6 @@ export class Dedupe implements Integration {
     return true;
   }
 
-  /** JSDoc */
   private _isSameFingerprint(currentEvent: Event, previousEvent: Event): boolean {
     let currentFingerprint = currentEvent.fingerprint;
     let previousFingerprint = previousEvent.fingerprint;

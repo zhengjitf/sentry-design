@@ -37,7 +37,6 @@ const DEFAULT_EVENT_TARGET = [
 
 type XMLHttpRequestProp = 'onload' | 'onerror' | 'onprogress' | 'onreadystatechange';
 
-/** JSDoc */
 interface TryCatchOptions {
   setTimeout: boolean;
   setInterval: boolean;
@@ -58,7 +57,6 @@ export class TryCatch implements Integration {
    */
   public name: string = TryCatch.id;
 
-  /** JSDoc */
   private readonly _options: TryCatchOptions;
 
   /**
@@ -104,7 +102,6 @@ export class TryCatch implements Integration {
     }
   }
 
-  /** JSDoc */
   private _wrapTimeFunction(original: () => void): () => number {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return function(this: any, ...args: any[]): number {
@@ -120,7 +117,6 @@ export class TryCatch implements Integration {
     };
   }
 
-  /** JSDoc */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _wrapRAF(original: any): (callback: () => void) => any {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -142,7 +138,6 @@ export class TryCatch implements Integration {
     };
   }
 
-  /** JSDoc */
   private _wrapEventTarget(target: string): void {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const global = getGlobalObject() as { [key: string]: any };
@@ -244,7 +239,6 @@ export class TryCatch implements Integration {
     });
   }
 
-  /** JSDoc */
   private _wrapXHR(originalSend: () => void): () => void {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return function(this: XMLHttpRequest, ...args: any[]): void {

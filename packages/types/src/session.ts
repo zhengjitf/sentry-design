@@ -4,13 +4,10 @@ import { User } from './user';
  * @inheritdoc
  */
 export interface Session extends SessionContext {
-  /** JSDoc */
   update(context?: SessionContext): void;
 
-  /** JSDoc */
   close(status?: SessionStatus): void;
 
-  /** JSDoc */
   toJSON(): {
     init: boolean;
     sid: string;
@@ -52,12 +49,8 @@ export interface SessionContext {
  * Session Status
  */
 export enum SessionStatus {
-  /** JSDoc */
   Ok = 'ok',
-  /** JSDoc */
   Exited = 'exited',
-  /** JSDoc */
   Crashed = 'crashed',
-  /** JSDoc */
   Abnormal = 'abnormal',
 }

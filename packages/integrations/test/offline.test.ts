@@ -161,12 +161,10 @@ let eventListeners: any[];
 let eventProcessors: EventProcessor[];
 let events: Event[];
 
-/** JSDoc */
 function addGlobalEventProcessor(callback: EventProcessor): void {
   eventProcessors.push(callback);
 }
 
-/** JSDoc */
 function getCurrentHub(): Hub {
   return {
     captureEvent(_event: Event): string {
@@ -180,7 +178,6 @@ function getCurrentHub(): Hub {
   };
 }
 
-/** JSDoc */
 function initIntegration(options: { maxStoredEvents?: number } = {}): void {
   eventListeners = [];
   eventProcessors = [];
@@ -200,7 +197,6 @@ function initIntegration(options: { maxStoredEvents?: number } = {}): void {
   integration = new Offline(options);
 }
 
-/** JSDoc */
 function prepopulateEvents(count: number = 1): void {
   for (let i = 0; i < count; i++) {
     events.push({
@@ -210,14 +206,12 @@ function prepopulateEvents(count: number = 1): void {
   }
 }
 
-/** JSDoc */
 function processEventListeners(): void {
   eventListeners.forEach(listener => {
     listener();
   });
 }
 
-/** JSDoc */
 function processEvents(): void {
   eventProcessors.forEach(processor => {
     events.forEach(event => {
@@ -226,7 +220,6 @@ function processEvents(): void {
   });
 }
 
-/** JSDoc */
 function setupOnce(): void {
   integration.setupOnce(addGlobalEventProcessor, getCurrentHub);
 }

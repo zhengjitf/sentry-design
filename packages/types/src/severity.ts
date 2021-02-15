@@ -1,19 +1,11 @@
-/** JSDoc */
 // eslint-disable-next-line import/export
 export enum Severity {
-  /** JSDoc */
   Fatal = 'fatal',
-  /** JSDoc */
   Error = 'error',
-  /** JSDoc */
   Warning = 'warning',
-  /** JSDoc */
   Log = 'log',
-  /** JSDoc */
   Info = 'info',
-  /** JSDoc */
   Debug = 'debug',
-  /** JSDoc */
   Critical = 'critical',
 }
 

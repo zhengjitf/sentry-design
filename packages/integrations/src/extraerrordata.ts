@@ -1,7 +1,6 @@
 import { Event, EventHint, EventProcessor, ExtendedError, Hub, Integration } from '@sentry/types';
 import { isError, isPlainObject, logger, normalize } from '@sentry/utils';
 
-/** JSDoc */
 interface ExtraErrorDataOptions {
   depth?: number;
 }

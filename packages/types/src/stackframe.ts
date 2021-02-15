@@ -1,4 +1,3 @@
-/** JSDoc */
 export interface StackFrame {
   filename?: string;
   function?: string;

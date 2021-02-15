@@ -11,7 +11,6 @@ import {
   safeJoin,
 } from '@sentry/utils';
 
-/** JSDoc */
 interface BreadcrumbsOptions {
   console: boolean;
   dom: boolean;
@@ -36,7 +35,6 @@ export class Breadcrumbs implements Integration {
    */
   public name: string = Breadcrumbs.id;
 
-  /** JSDoc */
   private readonly _options: BreadcrumbsOptions;
 
   /**

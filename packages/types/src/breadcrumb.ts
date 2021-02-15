@@ -1,6 +1,5 @@
 import { Severity } from './severity';
 
-/** JSDoc */
 export interface Breadcrumb {
   type?: string;
   level?: Severity;
@@ -11,7 +10,6 @@ export interface Breadcrumb {
   timestamp?: number;
 }
 
-/** JSDoc */
 export interface BreadcrumbHint {
   [key: string]: any;
 }

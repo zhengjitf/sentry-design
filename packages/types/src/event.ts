@@ -13,7 +13,6 @@ import { Stacktrace } from './stacktrace';
 import { Measurements } from './transaction';
 import { User } from './user';
 
-/** JSDoc */
 export interface Event {
   event_id?: string;
   message?: string;
@@ -46,10 +45,8 @@ export interface Event {
   debug_meta?: DebugMeta;
 }
 
-/** JSDoc */
 export type EventType = 'transaction';
 
-/** JSDoc */
 export interface EventHint {
   event_id?: string;
   captureContext?: CaptureContext;

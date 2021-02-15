@@ -8,7 +8,6 @@ interface TransactionMetadata {
   transactionSampling?: { [key: string]: string | number };
 }
 
-/** JSDoc */
 export class Transaction extends SpanClass implements TransactionInterface {
   public name: string;
 
@@ -45,9 +44,6 @@ export class Transaction extends SpanClass implements TransactionInterface {
     this.transaction = this;
   }
 
-  /**
-   * JSDoc
-   */
   public setName(name: string): void {
     this.name = name;
   }

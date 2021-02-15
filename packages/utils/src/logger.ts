@@ -7,27 +7,21 @@ const global = getGlobalObject<Window | NodeJS.Global>();
 /** Prefix for logging strings */
 const PREFIX = 'Sentry Logger ';
 
-/** JSDoc */
 class Logger {
-  /** JSDoc */
   private _enabled: boolean;
 
-  /** JSDoc */
   public constructor() {
     this._enabled = false;
   }
 
-  /** JSDoc */
   public disable(): void {
     this._enabled = false;
   }
 
-  /** JSDoc */
   public enable(): void {
     this._enabled = true;
   }
 
-  /** JSDoc */
   public log(...args: any[]): void {
     if (!this._enabled) {
       return;
@@ -37,7 +31,6 @@ class Logger {
     });
   }
 
-  /** JSDoc */
   public warn(...args: any[]): void {
     if (!this._enabled) {
       return;
@@ -47,7 +40,6 @@ class Logger {
     });
   }
 
-  /** JSDoc */
   public error(...args: any[]): void {
     if (!this._enabled) {
       return;

@@ -1,4 +1,3 @@
-/** JSDoc */
 export interface Mechanism {
   type: string;
   handled: boolean;

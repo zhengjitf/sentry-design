@@ -144,12 +144,10 @@ export function getEventDescription(event: Event): string {
   return event.event_id || '<unknown>';
 }
 
-/** JSDoc */
 interface ExtensibleConsole extends Console {
   [key: string]: any;
 }
 
-/** JSDoc */
 export function consoleSandbox(callback: () => any): any {
   const global = getGlobalObject<Window>();
   const levels = ['debug', 'info', 'warn', 'error', 'log', 'assert'];

@@ -162,7 +162,6 @@ export function init(
   }
 }
 
-/** JSDoc */
 class VueHelper {
   /**
    * Cache holding already processed component names

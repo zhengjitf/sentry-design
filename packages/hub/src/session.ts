@@ -24,7 +24,6 @@ export class Session implements SessionInterface {
     }
   }
 
-  /** JSDoc */
   // eslint-disable-next-line complexity
   update(context: SessionContext = {}): void {
     if (context.user) {
@@ -77,7 +76,6 @@ export class Session implements SessionInterface {
     }
   }
 
-  /** JSDoc */
   close(status?: Exclude<SessionStatus, SessionStatus.Ok>): void {
     if (status) {
       this.update({ status });
@@ -88,7 +86,6 @@ export class Session implements SessionInterface {
     }
   }
 
-  /** JSDoc */
   toJSON(): {
     init: boolean;
     sid: string;

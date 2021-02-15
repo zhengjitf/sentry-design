@@ -1,13 +1,11 @@
 import { Event, EventHint, EventProcessor, Hub, Integration } from '@sentry/types';
 import { consoleSandbox } from '@sentry/utils';
 
-/** JSDoc */
 interface DebugOptions {
   stringify?: boolean;
   debugger?: boolean;
 }
 
-/** JSDoc */
 export class Debug implements Integration {
   /**
    * @inheritDoc
@@ -19,7 +17,6 @@ export class Debug implements Integration {
    */
   public name: string = Debug.id;
 
-  /** JSDoc */
   private readonly _options: DebugOptions;
 
   /**

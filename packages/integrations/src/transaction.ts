@@ -44,13 +44,11 @@ export class Transaction implements Integration {
     return event;
   }
 
-  /** JSDoc */
   private _getFramesFromEvent(event: Event): StackFrame[] {
     const exception = event.exception && event.exception.values && event.exception.values[0];
     return (exception && exception.stacktrace && exception.stacktrace.frames) || [];
   }
 
-  /** JSDoc */
   private _getTransaction(frame: StackFrame): string {
     return frame.module || frame.function ? `${frame.module || '?'}/${frame.function || '?'}` : '<unknown>';
   }

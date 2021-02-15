@@ -6,7 +6,6 @@ import { getEventDescription, isMatchingPattern, logger } from '@sentry/utils';
 // this is the result of a script being pulled in from an external domain and CORS.
 const DEFAULT_IGNORE_ERRORS = [/^Script error\.?$/, /^Javascript error: Script error\.? on line 0$/];
 
-/** JSDoc */
 interface InboundFiltersOptions {
   allowUrls: Array<string | RegExp>;
   denyUrls: Array<string | RegExp>;
@@ -55,7 +54,6 @@ export class InboundFilters implements Integration {
     });
   }
 
-  /** JSDoc */
   private _shouldDropEvent(event: Event, options: Partial<InboundFiltersOptions>): boolean {
     if (this._isSentryError(event, options)) {
       logger.warn(`Event dropped due to being internal Sentry Error.\nEvent: ${getEventDescription(event)}`);
@@ -86,7 +84,6 @@ export class InboundFilters implements Integration {
     return false;
   }
 
-  /** JSDoc */
   private _isSentryError(event: Event, options: Partial<InboundFiltersOptions>): boolean {
     if (!options.ignoreInternal) {
       return false;
@@ -106,7 +103,6 @@ export class InboundFilters implements Integration {
     }
   }
 
-  /** JSDoc */
   private _isIgnoredError(event: Event, options: Partial<InboundFiltersOptions>): boolean {
     if (!options.ignoreErrors || !options.ignoreErrors.length) {
       return false;
@@ -118,7 +114,6 @@ export class InboundFilters implements Integration {
     );
   }
 
-  /** JSDoc */
   private _isDeniedUrl(event: Event, options: Partial<InboundFiltersOptions>): boolean {
     // TODO: Use Glob instead?
     if (!options.denyUrls || !options.denyUrls.length) {
@@ -128,7 +123,6 @@ export class InboundFilters implements Integration {
     return !url ? false : options.denyUrls.some(pattern => isMatchingPattern(url, pattern));
   }
 
-  /** JSDoc */
   private _isAllowedUrl(event: Event, options: Partial<InboundFiltersOptions>): boolean {
     // TODO: Use Glob instead?
     if (!options.allowUrls || !options.allowUrls.length) {
@@ -138,7 +132,6 @@ export class InboundFilters implements Integration {
     return !url ? true : options.allowUrls.some(pattern => isMatchingPattern(url, pattern));
   }
 
-  /** JSDoc */
   private _mergeOptions(clientOptions: Partial<InboundFiltersOptions> = {}): Partial<InboundFiltersOptions> {
     return {
       allowUrls: [
@@ -166,7 +159,6 @@ export class InboundFilters implements Integration {
     };
   }
 
-  /** JSDoc */
   private _getPossibleEventMessages(event: Event): string[] {
     if (event.message) {
       return [event.message];
@@ -183,7 +175,6 @@ export class InboundFilters implements Integration {
     return [];
   }
 
-  /** JSDoc */
   private _getEventFilterUrl(event: Event): string | null {
     try {
       if (event.stacktrace) {

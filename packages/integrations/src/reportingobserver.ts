@@ -2,7 +2,6 @@
 import { EventProcessor, Hub, Integration } from '@sentry/types';
 import { getGlobalObject, supportsReportingObserver } from '@sentry/utils';
 
-/** JSDoc */
 interface Report {
   [key: string]: any;
   type: ReportTypes;
@@ -10,27 +9,20 @@ interface Report {
   body?: ReportBody;
 }
 
-/** JSDoc */
 enum ReportTypes {
-  /** JSDoc */
   Crash = 'crash',
-  /** JSDoc */
   Deprecation = 'deprecation',
-  /** JSDoc */
   Intervention = 'intervention',
 }
 
-/** JSDoc */
 type ReportBody = CrashReportBody | DeprecationReportBody | InterventionReportBody;
 
-/** JSDoc */
 interface CrashReportBody {
   [key: string]: any;
   crashId: string;
   reason?: string;
 }
 
-/** JSDoc */
 interface DeprecationReportBody {
   [key: string]: any;
   id: string;
@@ -41,7 +33,6 @@ interface DeprecationReportBody {
   columnNumber?: number;
 }
 
-/** JSDoc */
 interface InterventionReportBody {
   [key: string]: any;
   id: string;

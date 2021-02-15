@@ -45,7 +45,6 @@ export class RewriteFrames implements Integration {
     });
   }
 
-  /** JSDoc */
   public process(event: Event): Event {
     if (event.exception && Array.isArray(event.exception.values)) {
       return this._processExceptionsEvent(event);
@@ -80,7 +79,6 @@ export class RewriteFrames implements Integration {
     return frame;
   };
 
-  /** JSDoc */
   private _processExceptionsEvent(event: Event): Event {
     try {
       return {
@@ -100,7 +98,6 @@ export class RewriteFrames implements Integration {
     }
   }
 
-  /** JSDoc */
   private _processStacktraceEvent(event: Event): Event {
     try {
       return {
@@ -112,7 +109,6 @@ export class RewriteFrames implements Integration {
     }
   }
 
-  /** JSDoc */
   private _processStacktrace(stacktrace?: Stacktrace): Stacktrace {
     return {
       ...stacktrace,

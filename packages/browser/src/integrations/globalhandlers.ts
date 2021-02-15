@@ -14,7 +14,6 @@ import {
 import { eventFromUnknownInput } from '../eventbuilder';
 import { shouldIgnoreOnError } from '../helpers';
 
-/** JSDoc */
 interface GlobalHandlersIntegrations {
   onerror: boolean;
   onunhandledrejection: boolean;
@@ -32,16 +31,12 @@ export class GlobalHandlers implements Integration {
    */
   public name: string = GlobalHandlers.id;
 
-  /** JSDoc */
   private readonly _options: GlobalHandlersIntegrations;
 
-  /** JSDoc */
   private _onErrorHandlerInstalled: boolean = false;
 
-  /** JSDoc */
   private _onUnhandledRejectionHandlerInstalled: boolean = false;
 
-  /** JSDoc */
   public constructor(options?: GlobalHandlersIntegrations) {
     this._options = {
       onerror: true,
@@ -66,7 +61,6 @@ export class GlobalHandlers implements Integration {
     }
   }
 
-  /** JSDoc */
   private _installGlobalOnErrorHandler(): void {
     if (this._onErrorHandlerInstalled) {
       return;
@@ -112,7 +106,6 @@ export class GlobalHandlers implements Integration {
     this._onErrorHandlerInstalled = true;
   }
 
-  /** JSDoc */
   private _installGlobalOnUnhandledRejectionHandler(): void {
     if (this._onUnhandledRejectionHandlerInstalled) {
       return;
@@ -230,7 +223,6 @@ export class GlobalHandlers implements Integration {
     };
   }
 
-  /** JSDoc */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _enhanceEventWithInitialFrame(event: Event, url: any, line: any, column: any): Event {
     event.exception = event.exception || {};

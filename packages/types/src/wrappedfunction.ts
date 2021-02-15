@@ -1,4 +1,3 @@
-/** JSDoc */
 export interface WrappedFunction extends Function {
   [key: string]: any;
   __sentry__?: boolean;

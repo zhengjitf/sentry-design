@@ -37,21 +37,18 @@ class SyncPromise<T> implements PromiseLike<T> {
     }
   }
 
-  /** JSDoc */
   public static resolve<T>(value: T | PromiseLike<T>): PromiseLike<T> {
     return new SyncPromise(resolve => {
       resolve(value);
     });
   }
 
-  /** JSDoc */
   public static reject<T = never>(reason?: any): PromiseLike<T> {
     return new SyncPromise((_, reject) => {
       reject(reason);
     });
   }
 
-  /** JSDoc */
   public static all<U = any>(collection: Array<U | PromiseLike<U>>): PromiseLike<U[]> {
     return new SyncPromise<U[]>((resolve, reject) => {
       if (!Array.isArray(collection)) {
@@ -83,7 +80,6 @@ class SyncPromise<T> implements PromiseLike<T> {
     });
   }
 
-  /** JSDoc */
   public then<TResult1 = T, TResult2 = never>(
     onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
@@ -123,14 +119,12 @@ class SyncPromise<T> implements PromiseLike<T> {
     });
   }
 
-  /** JSDoc */
   public catch<TResult = never>(
     onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null,
   ): PromiseLike<T | TResult> {
     return this.then(val => val, onrejected);
   }
 
-  /** JSDoc */
   public finally<TResult>(onfinally?: (() => void) | null): PromiseLike<TResult> {
     return new SyncPromise<TResult>((resolve, reject) => {
       let val: TResult | any;
@@ -162,22 +156,18 @@ class SyncPromise<T> implements PromiseLike<T> {
     });
   }
 
-  /** JSDoc */
   public toString(): string {
     return '[object SyncPromise]';
   }
 
-  /** JSDoc */
   private readonly _resolve = (value?: T | PromiseLike<T> | null) => {
     this._setResult(States.RESOLVED, value);
   };
 
-  /** JSDoc */
   private readonly _reject = (reason?: any) => {
     this._setResult(States.REJECTED, reason);
   };
 
-  /** JSDoc */
   private readonly _setResult = (state: States, value?: T | PromiseLike<T> | any) => {
     if (this._state !== States.PENDING) {
       return;
@@ -195,20 +185,15 @@ class SyncPromise<T> implements PromiseLike<T> {
   };
 
   // TODO: FIXME
-  /** JSDoc */
   private readonly _attachHandler = (handler: {
-    /** JSDoc */
     done: boolean;
-    /** JSDoc */
     onfulfilled?(value: T): any;
-    /** JSDoc */
     onrejected?(reason: any): any;
   }) => {
     this._handlers = this._handlers.concat(handler);
     this._executeHandlers();
   };
 
-  /** JSDoc */
   private readonly _executeHandlers = () => {
     if (this._state === States.PENDING) {
       return;

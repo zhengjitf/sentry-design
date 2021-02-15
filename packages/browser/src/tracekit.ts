@@ -53,7 +53,6 @@ const chromeEval = /\((\S*)(?::(\d+))(?::(\d+))\)/;
 // Based on our own mapping pattern - https://github.com/getsentry/sentry/blob/9f08305e09866c8bd6d0c24f5b0aabdd7dd6c59c/src/sentry/lang/javascript/errormapping.py#L83-L108
 const reactMinifiedRegexp = /Minified React error #\d+;/i;
 
-/** JSDoc */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 export function computeStackTrace(ex: any): StackTrace {
   let stack = null;
@@ -96,7 +95,6 @@ export function computeStackTrace(ex: any): StackTrace {
   };
 }
 
-/** JSDoc */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, complexity
 function computeStackTraceFromStackProp(ex: any): StackTrace | null {
   if (!ex || !ex.stack) {
@@ -181,7 +179,6 @@ function computeStackTraceFromStackProp(ex: any): StackTrace | null {
   };
 }
 
-/** JSDoc */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function computeStackTraceFromStacktraceProp(ex: any): StackTrace | null {
   if (!ex || !ex.stacktrace) {

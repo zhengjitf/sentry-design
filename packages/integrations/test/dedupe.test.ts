@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Dedupe } from '../src/dedupe';
 
-/** JSDoc */
 function clone<T>(data: T): T {
   return JSON.parse(JSON.stringify(data));
 }

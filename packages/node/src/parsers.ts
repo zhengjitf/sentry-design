@@ -17,7 +17,6 @@ export function resetFileContentCache(): void {
   FILE_CONTENT_CACHE.clear();
 }
 
-/** JSDoc */
 function getFunction(frame: stacktrace.StackFrame): string {
   try {
     return frame.functionName || `${frame.typeName}.${frame.methodName || '<anonymous>'}`;
@@ -32,7 +31,6 @@ function getFunction(frame: stacktrace.StackFrame): string {
 const mainModule: string = `${(require.main && require.main.filename && dirname(require.main.filename)) ||
   global.process.cwd()}/`;
 
-/** JSDoc */
 function getModule(filename: string, base?: string): string {
   if (!base) {
     // eslint-disable-next-line no-param-reassign

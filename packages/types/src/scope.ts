@@ -9,10 +9,8 @@ import { Span } from './span';
 import { Transaction } from './transaction';
 import { User } from './user';
 
-/** JSDocs */
 export type CaptureContext = Scope | Partial<ScopeContext> | ((scope: Scope) => Scope);
 
-/** JSDocs */
 export interface ScopeContext {
   user: User;
   level: Severity;

@@ -154,7 +154,6 @@ function jsonSize(value: any): number {
   return utf8Length(JSON.stringify(value));
 }
 
-/** JSDoc */
 export function normalizeToSize<T>(
   object: { [key: string]: any },
   // Default Node.js REPL depth

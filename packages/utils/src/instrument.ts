@@ -89,7 +89,6 @@ export function addInstrumentationHandler(handler: InstrumentHandler): void {
   instrument(handler.type);
 }
 
-/** JSDoc */
 function triggerHandlers(type: InstrumentHandlerType, data: any): void {
   if (!type || !handlers[type]) {
     return;
@@ -108,7 +107,6 @@ function triggerHandlers(type: InstrumentHandlerType, data: any): void {
   }
 }
 
-/** JSDoc */
 function instrumentConsole(): void {
   if (!('console' in global)) {
     return;
@@ -132,7 +130,6 @@ function instrumentConsole(): void {
   });
 }
 
-/** JSDoc */
 function instrumentFetch(): void {
   if (!supportsNativeFetch()) {
     return;
@@ -181,7 +178,6 @@ function instrumentFetch(): void {
 
 type XHRSendInput = null | Blob | BufferSource | FormData | URLSearchParams | string;
 
-/** JSDoc */
 interface SentryWrappedXMLHttpRequest extends XMLHttpRequest {
   [key: string]: any;
   __sentry_xhr__?: {
@@ -216,7 +212,6 @@ function getFetchUrl(fetchArgs: any[] = []): string {
 }
 /* eslint-enable @typescript-eslint/no-unsafe-member-access */
 
-/** JSDoc */
 function instrumentXHR(): void {
   if (!('XMLHttpRequest' in global)) {
     return;
@@ -312,7 +307,6 @@ function instrumentXHR(): void {
 
 let lastHref: string;
 
-/** JSDoc */
 function instrumentHistory(): void {
   if (!supportsHistory()) {
     return;
@@ -495,7 +489,6 @@ type InstrumentedElement = Element & {
   };
 };
 
-/** JSDoc */
 function instrumentDOM(): void {
   if (!('document' in global)) {
     return;
@@ -592,7 +585,6 @@ function instrumentDOM(): void {
 }
 
 let _oldOnErrorHandler: OnErrorEventHandler = null;
-/** JSDoc */
 function instrumentError(): void {
   _oldOnErrorHandler = global.onerror;
 
@@ -615,7 +607,6 @@ function instrumentError(): void {
 }
 
 let _oldOnUnhandledRejectionHandler: ((e: any) => void) | null = null;
-/** JSDoc */
 function instrumentUnhandledRejection(): void {
   _oldOnUnhandledRejectionHandler = global.onunhandledrejection;
 

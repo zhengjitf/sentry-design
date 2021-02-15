@@ -28,10 +28,8 @@ export interface Transport {
   close(timeout?: number): PromiseLike<boolean>;
 }
 
-/** JSDoc */
 export type TransportClass<T extends Transport> = new (options: TransportOptions) => T;
 
-/** JSDoc */
 export interface TransportOptions {
   /** Sentry DSN */
   dsn: DsnLike;

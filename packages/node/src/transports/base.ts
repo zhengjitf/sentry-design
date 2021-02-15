@@ -95,7 +95,6 @@ export abstract class BaseTransport implements Transport {
     };
   }
 
-  /** JSDoc */
   protected async _sendWithModule(httpModule: HTTPModule, event: Event): Promise<Response> {
     if (new Date(Date.now()) < this._disabledUntil) {
       return Promise.reject(new SentryError(`Transport locked till ${this._disabledUntil} due to too many requests.`));

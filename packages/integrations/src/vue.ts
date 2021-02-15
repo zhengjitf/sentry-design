@@ -126,7 +126,6 @@ const COMPONENT_NAME_REGEXP = /(?:^|[-_/])(\w)/g;
 const ROOT_COMPONENT_NAME = 'root';
 const ANONYMOUS_COMPONENT_NAME = 'anonymous component';
 
-/** JSDoc */
 export class Vue implements Integration {
   /**
    * @inheritDoc

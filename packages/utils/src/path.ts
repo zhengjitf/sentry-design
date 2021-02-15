@@ -1,7 +1,6 @@
 // Slightly modified (no IE8 support, ES6) and transcribed to TypeScript
 // https://raw.githubusercontent.com/calvinmetcalf/rollup-plugin-node-builtins/master/src/es6/path.js
 
-/** JSDoc */
 function normalizeArray(parts: string[], allowAboveRoot?: boolean): string[] {
   // if the path tries to go above the root, `up` ends up > 0
   let up = 0;
@@ -34,7 +33,6 @@ function normalizeArray(parts: string[], allowAboveRoot?: boolean): string[] {
 // Split a filename into [root, dir, basename, ext], unix version
 // 'root' is just a slash, or nothing.
 const splitPathRe = /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^/]+?|)(\.[^./]*|))(?:[/]*)$/;
-/** JSDoc */
 function splitPath(filename: string): string[] {
   const parts = splitPathRe.exec(filename);
   return parts ? parts.slice(1) : [];
@@ -42,7 +40,6 @@ function splitPath(filename: string): string[] {
 
 // path.resolve([from ...], to)
 // posix version
-/** JSDoc */
 export function resolve(...args: string[]): string {
   let resolvedPath = '';
   let resolvedAbsolute = false;
@@ -71,7 +68,6 @@ export function resolve(...args: string[]): string {
   return (resolvedAbsolute ? '/' : '') + resolvedPath || '.';
 }
 
-/** JSDoc */
 function trim(arr: string[]): string[] {
   let start = 0;
   for (; start < arr.length; start++) {
@@ -95,7 +91,6 @@ function trim(arr: string[]): string[] {
 
 // path.relative(from, to)
 // posix version
-/** JSDoc */
 export function relative(from: string, to: string): string {
   /* eslint-disable no-param-reassign */
   from = resolve(from).substr(1);
@@ -126,7 +121,6 @@ export function relative(from: string, to: string): string {
 
 // path.normalize(path)
 // posix version
-/** JSDoc */
 export function normalizePath(path: string): string {
   const isPathAbsolute = isAbsolute(path);
   const trailingSlash = path.substr(-1) === '/';
@@ -148,18 +142,15 @@ export function normalizePath(path: string): string {
 }
 
 // posix version
-/** JSDoc */
 export function isAbsolute(path: string): boolean {
   return path.charAt(0) === '/';
 }
 
 // posix version
-/** JSDoc */
 export function join(...args: string[]): string {
   return normalizePath(args.join('/'));
 }
 
-/** JSDoc */
 export function dirname(path: string): string {
   const result = splitPath(path);
   const root = result[0];
@@ -178,7 +169,6 @@ export function dirname(path: string): string {
   return root + dir;
 }
 
-/** JSDoc */
 export function basename(path: string, ext?: string): string {
   let f = splitPath(path)[2];
   if (ext && f.substr(ext.length * -1) === ext) {

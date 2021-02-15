@@ -1,6 +1,5 @@
 import { Stacktrace } from './stacktrace';
 
-/** JSDoc */
 export interface Thread {
   id?: number;
   name?: string;

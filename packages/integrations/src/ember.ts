@@ -1,7 +1,6 @@
 import { EventProcessor, Hub, Integration } from '@sentry/types';
 import { getGlobalObject, isInstanceOf, logger } from '@sentry/utils';
 
-/** JSDoc */
 export class Ember implements Integration {
   /**
    * @inheritDoc
