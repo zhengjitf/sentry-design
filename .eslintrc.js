@@ -8,8 +8,7 @@ module.exports = {
     ecmaVersion: 2018,
   },
   extends: ['prettier', 'eslint:recommended', 'plugin:import/errors', 'plugin:import/warnings'],
-  plugins: ['simple-import-sort'],
-  ignorePatterns: ['build/**', 'dist/**', 'esm/**', 'examples/**', 'scripts/**', 'test/manual/**'],
+  ignorePatterns: ['build/**', 'dist/**', 'esm/**', 'cjs/**', 'examples/**', 'scripts/**', 'test/manual/**'],
   rules: {
     // We want to prevent usage of unary operators outside of for loops
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
@@ -130,11 +129,6 @@ module.exports = {
 
         // Do not use deprecated methods
         'deprecation/deprecation': 'error',
-
-        // sort imports
-        'simple-import-sort/imports': 'error',
-        'sort-imports': 'off',
-        'import/order': 'off',
 
         // Disallow delete operator. We should make this operation opt in (by disabling this rule).
         '@typescript-eslint/no-dynamic-delete': 'error',
