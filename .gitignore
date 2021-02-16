@@ -10,10 +10,14 @@ yarn.lock
 build/
 packages/*/dist/
 packages/*/esm/
+packages/*/cjs/
 coverage/
 scratch/
 *.pyc
 *.tsbuildinfo
+
+# TODO: Ignore for repo, but ship with bundles
+*.d.ts
 
 # logs
 yarn-error.log

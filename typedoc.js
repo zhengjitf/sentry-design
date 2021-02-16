@@ -8,6 +8,7 @@ module.exports = {
     '**/*.js',
     '**/dist/**/*',
     '**/esm/**/*',
+    '**/cjs/**/*',
     '**/build/**/*',
     '**/packages/typescript/**/*',
     '**/packages/eslint-*/**/*',
