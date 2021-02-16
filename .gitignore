@@ -3,6 +3,9 @@ node_modules/
 packages/*/package-lock.json
 package-lock.json
 
+# TODO: Restore yarn.lock once transition to v7 is complete
+yarn.lock
+
 # build and test
 build/
 packages/*/dist/
