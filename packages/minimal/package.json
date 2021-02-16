@@ -19,10 +19,6 @@
     "@sentry/hub": "6.2.3",
     "@sentry/types": "6.2.3"
   },
-  "devDependencies": {
-    "npm-run-all": "^4.1.2",
-    "rimraf": "^2.6.3"
-  },
   "scripts": {
     "build": "run-p build:es5 build:esm",
     "build:es5": "tsc -p tsconfig.build.json",

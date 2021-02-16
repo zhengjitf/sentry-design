@@ -34,9 +34,7 @@
   },
   "devDependencies": {
     "@testing-library/react": "^10.4.9",
-    "npm-run-all": "^4.1.2",
-    "react": "^16.13.1",
-    "rimraf": "^2.6.3"
+    "react": "^16.13.1"
   },
   "scripts": {
     "build": "run-p build:es5 build:esm",
