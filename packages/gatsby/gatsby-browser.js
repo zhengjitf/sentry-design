@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 const Sentry = require('@sentry/react');
 const Tracing = require('@sentry/tracing');
 
