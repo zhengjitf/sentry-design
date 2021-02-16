@@ -19,10 +19,6 @@ module.exports = {
     QUnit: true,
   },
   overrides: [
-    {
-      files: ['addon/**'],
-      plugins: ['@sentry-internal/eslint-plugin-sdk'],
-    },
     // node files
     {
       files: [
