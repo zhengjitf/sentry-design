@@ -10,14 +10,14 @@ export class XHRTransport extends BaseTransport {
    * @inheritDoc
    */
   public sendEvent(event: Event): PromiseLike<Response> {
-    return this._sendRequest(eventToSentryRequest(event, this._api), event);
+    return this._sendRequest(eventToSentryRequest(event, this._dsn), event);
   }
 
   /**
    * @inheritDoc
    */
   public sendSession(session: Session): PromiseLike<Response> {
-    return this._sendRequest(sessionToSentryRequest(session, this._api), session);
+    return this._sendRequest(sessionToSentryRequest(session, this._dsn), session);
   }
 
   /**

@@ -24,8 +24,10 @@ export {
   configureScope,
   getHubFromCarrier,
   getCurrentHub,
+  getReportDialogEndpoint,
   Hub,
   makeMain,
+  ReportDialogOptions,
   Scope,
   startTransaction,
   SDK_VERSION,
@@ -40,7 +42,7 @@ export {
 
 export { BrowserOptions } from './backend';
 export { BrowserClient } from './client';
-export { injectReportDialog, ReportDialogOptions } from './helpers';
+export { injectReportDialog } from './helpers';
 export { eventFromException, eventFromMessage } from './eventbuilder';
 export { defaultIntegrations, forceLoad, init, lastEventId, onLoad, showReportDialog, flush, close, wrap } from './sdk';
 export { SDK_NAME } from './version';

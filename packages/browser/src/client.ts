@@ -1,9 +1,9 @@
-import { BaseClient, Scope, SDK_VERSION } from '@sentry/core';
+import { BaseClient, ReportDialogOptions, Scope, SDK_VERSION } from '@sentry/core';
 import { Event, EventHint } from '@sentry/types';
 import { getGlobalObject, logger } from '@sentry/utils';
 
 import { BrowserBackend, BrowserOptions } from './backend';
-import { injectReportDialog, ReportDialogOptions } from './helpers';
+import { injectReportDialog } from './helpers';
 import { Breadcrumbs } from './integrations';
 
 /**
@@ -53,7 +53,7 @@ export class BrowserClient extends BaseClient<BrowserBackend, BrowserOptions> {
 
     injectReportDialog({
       ...options,
-      dsn: options.dsn || this.getDsn(),
+      dsn: options.dsn || this.getDsn()?.toString(),
     });
   }
 

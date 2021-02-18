@@ -12,7 +12,6 @@ import {
 } from '@sentry/types';
 import {
   dateTimestampInSeconds,
-  Dsn,
   isPrimitive,
   isThenable,
   logger,
@@ -23,6 +22,7 @@ import {
   uuid4,
 } from '@sentry/utils';
 
+import { Dsn } from './dsn';
 import { Backend, BackendClass } from './basebackend';
 import { IntegrationIndex, setupIntegrations } from './integration';
 

@@ -1,9 +1,9 @@
-import { getCurrentHub, initAndBind, Integrations as CoreIntegrations } from '@sentry/core';
+import { getCurrentHub, initAndBind, Integrations as CoreIntegrations, ReportDialogOptions } from '@sentry/core';
 import { addInstrumentationHandler, getGlobalObject, logger, SyncPromise } from '@sentry/utils';
 
 import { BrowserOptions } from './backend';
 import { BrowserClient } from './client';
-import { ReportDialogOptions, wrap as internalWrap } from './helpers';
+import { wrap as internalWrap } from './helpers';
 import { Breadcrumbs, GlobalHandlers, LinkedErrors, TryCatch, UserAgent } from './integrations';
 
 export const defaultIntegrations = [

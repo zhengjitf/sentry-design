@@ -45,18 +45,6 @@ export function fill(source: { [key: string]: any }, name: string, replacementFa
 }
 
 /**
- * Encodes given object into url-friendly format
- *
- * @param object An object that contains serializable values
- * @returns string Encoded
- */
-export function urlEncode(object: { [key: string]: any }): string {
-  return Object.keys(object)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(object[key])}`)
-    .join('&');
-}
-
-/**
  * Transforms any object into an object literal with all its attributes
  * attached to it.
  *

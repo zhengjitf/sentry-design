@@ -1,4 +1,3 @@
-import { API } from '@sentry/core';
 import {
   Event,
   Response as SentryResponse,
@@ -8,16 +7,11 @@ import {
   TransportOptions,
 } from '@sentry/types';
 import { logger, parseRetryAfterHeader, PromiseBuffer, SentryError } from '@sentry/utils';
+import { Dsn } from '@sentry/core';
 
 /** Base Transport class implementation */
 export abstract class BaseTransport implements Transport {
-  /**
-   * @deprecated
-   */
-  public url: string;
-
-  /** Helper to get Sentry API endpoints. */
-  protected readonly _api: API;
+  protected readonly _dsn: Dsn;
 
   /** A simple buffer holding all requests. */
   protected readonly _buffer: PromiseBuffer<SentryResponse> = new PromiseBuffer(30);
@@ -26,9 +20,7 @@ export abstract class BaseTransport implements Transport {
   protected readonly _rateLimits: Record<string, Date> = {};
 
   public constructor(public options: TransportOptions) {
-    this._api = new API(options.dsn, options._metadata);
-    // eslint-disable-next-line deprecation/deprecation
-    this.url = this._api.getStoreEndpointWithUrlEncodedAuth();
+    this._dsn = new Dsn(options.dsn as string);
   }
 
   /**

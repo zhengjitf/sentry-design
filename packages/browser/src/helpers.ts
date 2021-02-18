@@ -1,5 +1,5 @@
-import { API, captureException, withScope } from '@sentry/core';
-import { DsnLike, Event as SentryEvent, Mechanism, Scope, WrappedFunction } from '@sentry/types';
+import { captureException, Dsn, getReportDialogEndpoint, ReportDialogOptions, withScope } from '@sentry/core';
+import { Event as SentryEvent, Mechanism, Scope, WrappedFunction } from '@sentry/types';
 import { addExceptionMechanism, addExceptionTypeValue, logger } from '@sentry/utils';
 
 let ignoreOnError: number = 0;
@@ -161,38 +161,10 @@ export function wrap(
 }
 
 /**
- * All properties the report dialog supports
- */
-export interface ReportDialogOptions {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-  eventId?: string;
-  dsn?: DsnLike;
-  user?: {
-    email?: string;
-    name?: string;
-  };
-  lang?: string;
-  title?: string;
-  subtitle?: string;
-  subtitle2?: string;
-  labelName?: string;
-  labelEmail?: string;
-  labelComments?: string;
-  labelClose?: string;
-  labelSubmit?: string;
-  errorGeneric?: string;
-  errorFormEntry?: string;
-  successMessage?: string;
-  /** Callback after reportDialog showed up */
-  onLoad?(): void;
-}
-
-/**
  * Injects the Report Dialog script
  * @hidden
  */
-export function injectReportDialog(options: ReportDialogOptions = {}): void {
+export function injectReportDialog(options: ReportDialogOptions & { onLoad?(): void } = {}): void {
   if (!options.eventId) {
     logger.error(`Missing eventId option in showReportDialog call`);
     return;
@@ -204,7 +176,7 @@ export function injectReportDialog(options: ReportDialogOptions = {}): void {
 
   const script = document.createElement('script');
   script.async = true;
-  script.src = new API(options.dsn).getReportDialogEndpoint(options);
+  script.src = getReportDialogEndpoint(new Dsn(options.dsn));
 
   if (options.onLoad) {
     // eslint-disable-next-line @typescript-eslint/unbound-method
