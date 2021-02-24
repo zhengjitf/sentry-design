@@ -1,12 +1,13 @@
 jest.mock('dns');
 
-import { PubSub } from '@google-cloud/pubsub';
 import * as dns from 'dns';
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as http2 from 'http2';
-import * as nock from 'nock';
 import * as path from 'path';
+
+import * as nock from 'nock';
+import { PubSub } from '@google-cloud/pubsub';
 
 import * as Sentry from '../src';
 import { GoogleCloudGrpc } from '../src/google-cloud-grpc';

@@ -1,8 +1,9 @@
+import * as http from 'http';
+
 import * as sentryCore from '@sentry/core';
 import { Hub } from '@sentry/hub';
 import * as hubModule from '@sentry/hub';
 import { addExtensionMethods, Span, TRACEPARENT_REGEXP, Transaction } from '@sentry/tracing';
-import * as http from 'http';
 import * as nock from 'nock';
 
 import { NodeClient } from '../../src/client';

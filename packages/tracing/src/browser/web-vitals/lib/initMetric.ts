@@ -15,6 +15,7 @@
  */
 
 import { Metric } from '../types';
+
 import { generateUniqueID } from './generateUniqueID';
 
 export const initMetric = (name: Metric['name'], value = -1): Metric => {

@@ -1,5 +1,6 @@
-import { getCurrentHub, Hub } from '@sentry/core';
 import * as domain from 'domain';
+
+import { getCurrentHub, Hub } from '@sentry/core';
 
 // We need this import here to patch domain on the global object
 import * as Sentry from '../src';

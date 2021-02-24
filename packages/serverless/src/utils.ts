@@ -1,6 +1,7 @@
+import * as domain from 'domain';
+
 import { Event } from '@sentry/node';
 import { addExceptionMechanism } from '@sentry/utils';
-import * as domain from 'domain';
 
 /**
  * Event processor that will override SDK details to point to the serverless SDK instead of Node,

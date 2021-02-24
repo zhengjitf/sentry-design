@@ -1,4 +1,5 @@
 import { Integrations } from '../src/index.bundle';
+
 import { testOnlyIfNodeVersionAtLeast } from './testutils';
 
 describe('Integrations export', () => {

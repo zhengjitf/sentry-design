@@ -1,6 +1,7 @@
-import { captureException, Dsn, getReportDialogEndpoint, ReportDialogOptions, withScope } from '@sentry/core';
+import { captureException, withScope } from '@sentry/core';
 import { Event as SentryEvent, Mechanism, Scope, WrappedFunction } from '@sentry/types';
 import { addExceptionMechanism, addExceptionTypeValue, logger } from '@sentry/utils';
+import { Dsn, getReportDialogEndpoint, ReportDialogOptions } from '@sentry/transport-base';
 
 let ignoreOnError: number = 0;
 

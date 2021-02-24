@@ -1,5 +1,6 @@
-import { Event } from '@sentry/types';
 import * as domain from 'domain';
+
+import { Event } from '@sentry/types';
 
 import * as Sentry from '../src';
 import { wrapCloudEventFunction, wrapEventFunction, wrapHttpFunction } from '../src/gcpfunction';

@@ -1,7 +1,9 @@
-import { Event, Options, Severity, Transport } from '@sentry/types';
+import { Transport, TransportRequest } from '@sentry/transport-base';
+import { Event, Severity } from '@sentry/types';
 import { SyncPromise } from '@sentry/utils';
 
 import { BaseBackend } from '../../src/basebackend';
+import { Options } from '../../src/options';
 
 export interface TestOptions extends Options {
   test?: boolean;
@@ -11,7 +13,7 @@ export interface TestOptions extends Options {
 
 export class TestBackend extends BaseBackend<TestOptions> {
   public static instance?: TestBackend;
-  public static sendEventCalled?: (event: Event) => void;
+  public static sendRequestCalled?: <T>(request: TransportRequest<T>) => void;
 
   public event?: Event;
 
@@ -40,14 +42,13 @@ export class TestBackend extends BaseBackend<TestOptions> {
     return SyncPromise.resolve({ message, level });
   }
 
-  public sendEvent(event: Event): void {
-    this.event = event;
+  public sendRequest<T>(request: TransportRequest<T>): void {
     if (this._options.enableSend) {
-      super.sendEvent(event);
+      super.sendRequest(request);
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    TestBackend.sendEventCalled && TestBackend.sendEventCalled(event);
+    TestBackend.sendRequestCalled && TestBackend.sendRequestCalled(request);
   }
 
   protected _setupTransport(): Transport {

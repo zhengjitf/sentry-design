@@ -8,7 +8,16 @@ module.exports = {
     ecmaVersion: 2018,
   },
   extends: ['prettier', 'eslint:recommended', 'plugin:import/errors', 'plugin:import/warnings'],
-  ignorePatterns: ['build/**', 'dist/**', 'esm/**', 'cjs/**', 'examples/**', 'scripts/**', 'test/manual/**'],
+  ignorePatterns: [
+    'coverage/**',
+    'build/**',
+    'dist/**',
+    'esm/**',
+    'cjs/**',
+    'examples/**',
+    'scripts/**',
+    'test/manual/**',
+  ],
   rules: {
     // We want to prevent usage of unary operators outside of for loops
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],

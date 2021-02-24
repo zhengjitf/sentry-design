@@ -1,6 +1,7 @@
+import { readFile } from 'fs';
+
 import { Event, Exception, ExtendedError, StackFrame } from '@sentry/types';
 import { addContextToFrame, basename, dirname, SyncPromise } from '@sentry/utils';
-import { readFile } from 'fs';
 import { LRUMap } from 'lru_map';
 
 import { NodeOptions } from './backend';

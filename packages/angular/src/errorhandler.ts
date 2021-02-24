@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandler as AngularErrorHandler, Injectable } from '@angular/core';
 import * as Sentry from '@sentry/browser';
+import { ReportDialogOptions } from '@sentry/transport-base';
 
 /**
  * Options used to configure the behavior of the Angular ErrorHandler.
@@ -8,7 +9,7 @@ import * as Sentry from '@sentry/browser';
 export interface ErrorHandlerOptions {
   logErrors?: boolean;
   showDialog?: boolean;
-  dialogOptions?: Sentry.ReportDialogOptions;
+  dialogOptions?: ReportDialogOptions;
   /**
    * Custom implementation of error extraction from the raw value captured by the Angular.
    * @param error Value captured by Angular's ErrorHandler provider

@@ -1,6 +1,7 @@
-import { BaseClient, ReportDialogOptions, Scope, SDK_VERSION } from '@sentry/core';
+import { BaseClient, Scope, SDK_VERSION } from '@sentry/core';
 import { Event, EventHint } from '@sentry/types';
 import { getGlobalObject, logger } from '@sentry/utils';
+import { ReportDialogOptions } from '@sentry/transport-base';
 
 import { BrowserBackend, BrowserOptions } from './backend';
 import { injectReportDialog } from './helpers';

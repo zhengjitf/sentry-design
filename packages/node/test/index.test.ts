@@ -1,6 +1,8 @@
 import { SDK_VERSION } from '@sentry/core';
 import * as domain from 'domain';
 
+import { TransportRequest } from '@sentry/transport-base';
+
 import {
   addBreadcrumb,
   captureEvent,
@@ -63,10 +65,12 @@ describe('SentryNode', () => {
   });
 
   describe('breadcrumbs', () => {
-    let s: jest.SpyInstance<void, Event[]>;
+    let s: jest.SpyInstance<void, TransportRequest<unknown>[]>;
 
     beforeEach(() => {
-      s = jest.spyOn(NodeBackend.prototype, 'sendEvent').mockImplementation(async () => Promise.resolve({ code: 200 }));
+      s = jest
+        .spyOn(NodeBackend.prototype, 'sendRequest')
+        .mockImplementation(async () => Promise.resolve({ code: 200 }));
     });
 
     afterEach(() => {
@@ -92,10 +96,12 @@ describe('SentryNode', () => {
   });
 
   describe('capture', () => {
-    let s: jest.SpyInstance<void, Event[]>;
+    let s: jest.SpyInstance<void, TransportRequest<unknown>[]>;
 
     beforeEach(() => {
-      s = jest.spyOn(NodeBackend.prototype, 'sendEvent').mockImplementation(async () => Promise.resolve({ code: 200 }));
+      s = jest
+        .spyOn(NodeBackend.prototype, 'sendRequest')
+        .mockImplementation(async () => Promise.resolve({ code: 200 }));
     });
 
     afterEach(() => {

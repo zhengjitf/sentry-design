@@ -5,7 +5,6 @@ export type SentryRequestType = 'event' | 'transaction' | 'session';
 export interface SentryRequest {
   body: string;
   type: SentryRequestType;
-  url: string;
 }
 
 /** Request data included in an event as sent to Sentry */

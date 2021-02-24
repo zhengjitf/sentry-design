@@ -24,7 +24,6 @@ export {
   flush,
   close,
   wrap,
-  ReportDialogOptions,
   addGlobalEventProcessor,
   addBreadcrumb,
   captureException,
@@ -42,11 +41,11 @@ export {
   setTags,
   setUser,
   startTransaction,
-  Transports,
   withScope,
   SDK_NAME,
   SDK_VERSION,
 } from '@sentry/browser';
+export { ReportDialogOptions } from '@sentry/transport-base';
 
 import { Integrations as BrowserIntegrations } from '@sentry/browser';
 import { getGlobalObject } from '@sentry/utils';

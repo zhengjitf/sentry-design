@@ -31,12 +31,12 @@ export {
   setTags,
   setUser,
   startTransaction,
-  Transports,
   withScope,
 } from '@sentry/browser';
 
 export { BrowserOptions } from '@sentry/browser';
-export { BrowserClient, ReportDialogOptions } from '@sentry/browser';
+export { BrowserClient } from '@sentry/browser';
+export { ReportDialogOptions } from '@sentry/transport-base';
 export {
   defaultIntegrations,
   forceLoad,

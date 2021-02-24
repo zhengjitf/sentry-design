@@ -1,7 +1,8 @@
-import { Event, EventHint, Options, Session, Severity, Transport } from '@sentry/types';
+import { Event, EventHint, Severity } from '@sentry/types';
 import { logger, SentryError } from '@sentry/utils';
+import { NoopTransport, Transport, TransportRequest } from '@sentry/transport-base';
 
-import { NoopTransport } from './transports/noop';
+import { Options } from './options';
 
 /**
  * Internal platform-dependent Sentry SDK Backend.
@@ -31,11 +32,7 @@ export interface Backend {
   /** Creates a {@link Event} from a plain message. */
   eventFromMessage(message: string, level?: Severity, hint?: EventHint): PromiseLike<Event>;
 
-  /** Submits the event to Sentry */
-  sendEvent(event: Event): void;
-
-  /** Submits the session to Sentry */
-  sendSession(session: Session): void;
+  sendRequest<T>(request: TransportRequest<T>): void;
 
   /**
    * Returns the transport that is used by the backend.
@@ -90,23 +87,10 @@ export abstract class BaseBackend<O extends Options> implements Backend {
   /**
    * @inheritDoc
    */
-  public sendEvent(event: Event): void {
-    this._transport.sendEvent(event).then(null, reason => {
-      logger.error(`Error while sending event: ${reason}`);
-    });
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public sendSession(session: Session): void {
-    if (!this._transport.sendSession) {
-      logger.warn("Dropping session because custom transport doesn't implement sendSession");
-      return;
-    }
-
-    this._transport.sendSession(session).then(null, reason => {
-      logger.error(`Error while sending session: ${reason}`);
+  // TODO: Do we need generic here?
+  public sendRequest<T>(request: TransportRequest<T>): void {
+    this._transport.sendRequest(request).then(null, reason => {
+      logger.error(`Failed sending request: ${reason}`);
     });
   }
 

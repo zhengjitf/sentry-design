@@ -6,6 +6,7 @@ import { browserPerformanceTimeOrigin, getGlobalObject, logger } from '@sentry/u
 import { Span } from '../span';
 import { Transaction } from '../transaction';
 import { msToSec } from '../utils';
+
 import { getCLS } from './web-vitals/getCLS';
 import { getFID } from './web-vitals/getFID';
 import { getLCP } from './web-vitals/getLCP';

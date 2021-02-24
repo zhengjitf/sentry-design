@@ -1,10 +1,11 @@
+import * as http from 'http';
+import * as net from 'net';
+
 import * as sentryCore from '@sentry/core';
 import { Hub } from '@sentry/hub';
 import * as sentryHub from '@sentry/hub';
 import { SpanStatus, Transaction } from '@sentry/tracing';
 import { Runtime } from '@sentry/types';
-import * as http from 'http';
-import * as net from 'net';
 
 import { Event, Request, User } from '../src';
 import { NodeClient } from '../src/client';

@@ -19,6 +19,8 @@
     "@sentry/core": "6.2.3",
     "@sentry/hub": "6.2.3",
     "@sentry/tracing": "6.2.3",
+    "@sentry/transport-base": "7.0.0-alpha.0",
+    "@sentry/transport-http": "7.0.0-alpha.0",
     "@sentry/types": "6.2.3",
     "@sentry/utils": "6.2.3",
     "cookie": "^0.4.1",

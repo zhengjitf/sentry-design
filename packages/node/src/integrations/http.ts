@@ -1,8 +1,9 @@
+import * as http from 'http';
+import * as https from 'https';
+
 import { getCurrentHub } from '@sentry/core';
 import { Integration, Span } from '@sentry/types';
 import { fill, logger, parseSemver } from '@sentry/utils';
-import * as http from 'http';
-import * as https from 'https';
 
 import {
   cleanSpanDescription,

@@ -1,3 +1,9 @@
+import { existsSync } from 'fs';
+import { hostname } from 'os';
+import { basename, resolve } from 'path';
+import { performance } from 'perf_hooks';
+import { types } from 'util';
+
 import {
   captureException,
   captureMessage,
@@ -15,11 +21,6 @@ import { isString, logger } from '@sentry/utils';
 // NOTE: I have no idea how to fix this right now, and don't want to waste more time, as it builds just fine — Kamil
 // eslint-disable-next-line import/no-unresolved
 import { Context, Handler } from 'aws-lambda';
-import { existsSync } from 'fs';
-import { hostname } from 'os';
-import { basename, resolve } from 'path';
-import { performance } from 'perf_hooks';
-import { types } from 'util';
 
 import { AWSServices } from './awsservices';
 import { serverlessEventProcessor } from './utils';

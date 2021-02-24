@@ -6,6 +6,7 @@ import { startIdleTransaction } from '../hubextensions';
 import { DEFAULT_IDLE_TIMEOUT, IdleTransaction } from '../idletransaction';
 import { SpanStatus } from '../spanstatus';
 import { extractTraceparentData, secToMs } from '../utils';
+
 import { registerBackgroundTabDetection } from './backgroundtab';
 import { MetricsInstrumentation } from './metrics';
 import {

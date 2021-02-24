@@ -1,6 +1,6 @@
 {
   "name": "sentry-javascript",
-  "version": "7.0.0-alpha",
+  "version": "7.0.0-alpha.0",
   "description": "Official Sentry JavaScript SDK",
   "repository": "https://github.com/getsentry/sentry-javascript",
   "author": "Sentry",

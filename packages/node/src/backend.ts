@@ -1,18 +1,18 @@
 import { BaseBackend, getCurrentHub } from '@sentry/core';
-import { Event, EventHint, Mechanism, Options, Severity, Transport, TransportOptions } from '@sentry/types';
+import { Event, EventHint, Mechanism, Options, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
-  Dsn,
   extractExceptionKeysForMessage,
   isError,
   isPlainObject,
   normalizeToSize,
   SyncPromise,
 } from '@sentry/utils';
+import { NoopTransport, Transport, TransportOptions } from '@sentry/transport-base';
+import { HTTPTransport } from '@sentry/transport-http';
 
 import { extractStackFromError, parseError, parseStack, prepareFramesForEvent } from './parsers';
-import { HTTPSTransport, HTTPTransport } from './transports';
 
 /**
  * Configuration options for the Sentry Node SDK.
@@ -127,28 +127,24 @@ export class NodeBackend extends BaseBackend<NodeOptions> {
    * @inheritDoc
    */
   protected _setupTransport(): Transport {
+    // TODO: This whole function should be unnecessary and moved to client construction
     if (!this._options.dsn) {
       // We return the noop transport here in case there is no Dsn.
-      return super._setupTransport();
+      return new NoopTransport();
     }
-
-    const dsn = new Dsn(this._options.dsn);
 
     const transportOptions: TransportOptions = {
       ...this._options.transportOptions,
       ...(this._options.httpProxy && { httpProxy: this._options.httpProxy }),
       ...(this._options.httpsProxy && { httpsProxy: this._options.httpsProxy }),
       ...(this._options.caCerts && { caCerts: this._options.caCerts }),
-      dsn: this._options.dsn,
-      _metadata: this._options._metadata,
+      dsn: this._options.transportOptions?.dsn ?? this._options.dsn,
     };
 
     if (this._options.transport) {
       return new this._options.transport(transportOptions);
     }
-    if (dsn.protocol === 'http') {
-      return new HTTPTransport(transportOptions);
-    }
-    return new HTTPSTransport(transportOptions);
+
+    return new HTTPTransport(transportOptions);
   }
 }

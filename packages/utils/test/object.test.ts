@@ -1,4 +1,4 @@
-import { dropUndefinedKeys, extractExceptionKeysForMessage, fill, normalize, urlEncode } from '../src/object';
+import { dropUndefinedKeys, extractExceptionKeysForMessage, fill, normalize } from '../src/object';
 
 describe('fill()', () => {
   test('wraps a method by calling a replacement function on it', () => {
@@ -87,20 +87,6 @@ describe('fill()', () => {
 
     // But should be accessible directly
     expect(source.foo.prototype).toBe(bar);
-  });
-});
-
-describe('urlEncode()', () => {
-  test('returns empty string for empty object input', () => {
-    expect(urlEncode({})).toEqual('');
-  });
-
-  test('returns single key/value pair joined with = sign', () => {
-    expect(urlEncode({ foo: 'bar' })).toEqual('foo=bar');
-  });
-
-  test('returns multiple key/value pairs joined together with & sign', () => {
-    expect(urlEncode({ foo: 'bar', pickle: 'rick', morty: '4 2' })).toEqual('foo=bar&pickle=rick&morty=4%202');
   });
 });
 

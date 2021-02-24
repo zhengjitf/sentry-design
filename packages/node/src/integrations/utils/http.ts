@@ -1,6 +1,7 @@
-import { getCurrentHub } from '@sentry/core';
 import * as http from 'http';
 import { URL } from 'url';
+
+import { getCurrentHub } from '@sentry/core';
 
 /**
  * Checks whether given url points to Sentry server

@@ -1,51 +1,38 @@
-import { DsnLike } from './dsn';
-import { Event } from './event';
-import { Response } from './response';
-import { SdkMetadata } from './sdkmetadata';
-import { Session } from './session';
+enum ResponseStatus {
+  Unknown = 'unknown',
+  Skipped = 'skipped',
+  Success = 'success',
+  RateLimit = 'rate_limit',
+  Invalid = 'invalid',
+  Failed = 'failed',
+}
+
+enum EventType {
+  Error = 'error',
+  Session = 'session',
+  Transaction = 'transaction',
+}
+
+type TransportRequest<T> = {
+  body: T;
+  type: EventType;
+};
+
+type TransportResponse = {
+  status: ResponseStatus;
+  reason?: string;
+};
 
 /** Transport used sending data to Sentry */
 export interface Transport {
-  /**
-   * Sends the event to the Store endpoint in Sentry.
-   *
-   * @param event Event that should be sent to Sentry.
-   */
-  sendEvent(event: Event): PromiseLike<Response>;
-
-  /**
-   * Sends the session to the Store endpoint in Sentry.
-   *
-   * @param body Session that should be sent to Sentry.
-   */
-  sendSession?(session: Session): PromiseLike<Response>;
-
-  /**
-   * Call this function to wait until all pending requests have been sent.
-   *
-   * @param timeout Number time in ms to wait until the buffer is drained.
-   */
-  close(timeout?: number): PromiseLike<boolean>;
+  sendRequest<T>(request: TransportRequest<T>): PromiseLike<TransportResponse>;
+  flush(timeout: number): PromiseLike<boolean>;
 }
 
 export type TransportClass<T extends Transport> = new (options: TransportOptions) => T;
 
-export interface TransportOptions {
-  /** Sentry DSN */
-  dsn: DsnLike;
-  /** Define custom headers */
-  headers?: { [key: string]: string };
-  /** Set a HTTP proxy that should be used for outbound requests. */
-  httpProxy?: string;
-  /** Set a HTTPS proxy that should be used for outbound requests. */
-  httpsProxy?: string;
-  /** HTTPS proxy certificates path */
-  caCerts?: string;
-  /** Fetch API init parameters */
-  fetchParameters?: { [key: string]: string };
-  /**
-   * Set of metadata about the SDK that can be internally used to enhance envelopes and events,
-   * and provide additional data about every request.
-   * */
-  _metadata?: SdkMetadata;
-}
+export type TransportOptions = {
+  dsn: string;
+  bufferSize?: number;
+  headers?: Record<string, string>;
+};

@@ -13,8 +13,10 @@ function assertTags(actual, expected) {
 let remaining = 3;
 
 class DummyTransport {
-  sendEvent(event) {
+  sendRequest() {
     --remaining;
+
+    console.log('test');
 
     if (!remaining) {
       console.error('SUCCESS: All scopes contain correct tags');

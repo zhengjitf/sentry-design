@@ -2,6 +2,7 @@ import { captureException, flush, getCurrentHub, startTransaction } from '@sentr
 import { logger } from '@sentry/utils';
 
 import { domainify, getActiveDomain, proxyFunction } from '../utils';
+
 import { configureScopeWithContext, EventFunction, EventFunctionWithCallback, WrapperOptions } from './general';
 
 export type EventFunctionWrapperOptions = WrapperOptions;

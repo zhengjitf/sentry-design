@@ -1,9 +1,11 @@
 import { BaseBackend } from '@sentry/core';
-import { Event, EventHint, Options, Severity, Transport } from '@sentry/types';
+import { Event, EventHint, Options, Severity } from '@sentry/types';
 import { supportsFetch } from '@sentry/utils';
+import { NoopTransport, Transport, TransportOptions } from '@sentry/transport-base';
+import { FetchTransport } from '@sentry/transport-fetch';
+import { XHRTransport } from '@sentry/transport-xhr';
 
 import { eventFromException, eventFromMessage } from './eventbuilder';
-import { FetchTransport, XHRTransport } from './transports';
 
 /**
  * Configuration options for the Sentry Browser SDK.
@@ -55,24 +57,22 @@ export class BrowserBackend extends BaseBackend<BrowserOptions> {
     return eventFromMessage(this._options, message, level, hint);
   }
 
-  /**
-   * @inheritDoc
-   */
   protected _setupTransport(): Transport {
+    // TODO: This whole function should be unnecessary and moved to client construction
     if (!this._options.dsn) {
       // We return the noop transport here in case there is no Dsn.
-      return super._setupTransport();
+      return new NoopTransport();
     }
 
-    const transportOptions = {
+    const transportOptions: TransportOptions = {
       ...this._options.transportOptions,
-      dsn: this._options.dsn,
-      _metadata: this._options._metadata,
+      dsn: this._options.transportOptions?.dsn ?? this._options.dsn,
     };
 
     if (this._options.transport) {
       return new this._options.transport(transportOptions);
     }
+
     if (supportsFetch()) {
       return new FetchTransport(transportOptions);
     }

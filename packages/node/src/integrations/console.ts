@@ -1,7 +1,8 @@
+import * as util from 'util';
+
 import { getCurrentHub } from '@sentry/core';
 import { Integration, Severity } from '@sentry/types';
 import { fill } from '@sentry/utils';
-import * as util from 'util';
 
 /** Console module integration */
 export class Console implements Integration {

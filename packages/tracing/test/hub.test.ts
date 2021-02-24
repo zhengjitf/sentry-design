@@ -10,6 +10,7 @@ import { BrowserTracing } from '../src/browser/browsertracing';
 import { addExtensionMethods } from '../src/hubextensions';
 import { Transaction } from '../src/transaction';
 import { extractTraceparentData, TRACEPARENT_REGEXP } from '../src/utils';
+
 import { addDOMPropertiesToGlobal, getSymbolObjectKeyByName, testOnlyIfNodeVersionAtLeast } from './testutils';
 
 addExtensionMethods();
