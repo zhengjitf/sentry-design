@@ -1,14 +1,32 @@
+import { Event, EventHint, Options, Severity } from '@sentry/types';
+
 import { initAndBind } from '../../src/sdk';
 import { BaseClient } from '../../src/baseclient';
 
-import { TestBackend, TestOptions } from './backend';
+export interface TestOptions extends Options {
+  test?: boolean;
+  mockInstallFailure?: boolean;
+  enableSend?: boolean;
+}
 
-export class TestClient extends BaseClient<TestBackend, TestOptions> {
+export class TestClient extends BaseClient<TestOptions> {
   public static instance?: TestClient;
 
   public constructor(options: TestOptions) {
-    super(TestBackend, options);
+    super(options);
     TestClient.instance = this;
+  }
+
+  protected _eventFromException(_exception: unknown, _hint?: EventHint): PromiseLike<Event> {
+    return Promise.resolve({});
+  }
+
+  protected _eventFromMessage(
+    _message: string,
+    _level: Severity = Severity.Info,
+    _hint?: EventHint,
+  ): PromiseLike<Event> {
+    return Promise.resolve({});
   }
 }
 

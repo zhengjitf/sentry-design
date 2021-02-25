@@ -1,9 +1,12 @@
-import { ExtendedError } from '@sentry/types';
+import { Event, ExtendedError } from '@sentry/types';
 import { expect } from 'chai';
 import { stub } from 'sinon';
 
-import { BrowserBackend } from '../../../src/backend';
 import { LinkedErrors } from '../../../src/integrations/linkederrors';
+
+class BrowserBackend {
+  eventFromException: (ex: unknown) => PromiseLike<Event> = () => Promise.resolve({});
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let linkedErrors: any;
@@ -62,7 +65,7 @@ describe('LinkedErrors', () => {
       one.cause = two;
 
       const originalException = one;
-      const backend = new BrowserBackend({});
+      const backend = new BrowserBackend();
       return backend.eventFromException(originalException).then(event => {
         const result = linkedErrors._handler(event, {
           originalException,
@@ -96,7 +99,7 @@ describe('LinkedErrors', () => {
       one.reason = two;
 
       const originalException = one;
-      const backend = new BrowserBackend({});
+      const backend = new BrowserBackend();
       return backend.eventFromException(originalException).then(event => {
         const result = linkedErrors._handler(event, {
           originalException,
@@ -126,7 +129,7 @@ describe('LinkedErrors', () => {
       one.cause = two;
       two.cause = three;
 
-      const backend = new BrowserBackend({});
+      const backend = new BrowserBackend();
       return backend.eventFromException(one).then(event => {
         const result = linkedErrors._handler(event, {
           originalException: one,

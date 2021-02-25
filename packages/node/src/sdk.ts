@@ -4,8 +4,7 @@ import { getCurrentHub, initAndBind, Integrations as CoreIntegrations } from '@s
 import { getMainCarrier, setHubOnCarrier } from '@sentry/hub';
 import { getGlobalObject } from '@sentry/utils';
 
-import { NodeOptions } from './backend';
-import { NodeClient } from './client';
+import { NodeClient, NodeOptions } from './client';
 import { Console, Http, LinkedErrors, OnUncaughtException, OnUnhandledRejection } from './integrations';
 
 export const defaultIntegrations = [

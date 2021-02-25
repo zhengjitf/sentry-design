@@ -19,6 +19,7 @@ export { Dsn, getReportDialogEndpoint, sessionToTransportRequest, eventToTranspo
 export {
   EventType,
   ReportDialogOptions,
+  ResponseStatus,
   TransportRequest,
   TransportResponse,
   TransportMakerResponse,

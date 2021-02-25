@@ -4,7 +4,7 @@ import { Event, Exception, ExtendedError, StackFrame } from '@sentry/types';
 import { addContextToFrame, basename, dirname, SyncPromise } from '@sentry/utils';
 import { LRUMap } from 'lru_map';
 
-import { NodeOptions } from './backend';
+import { NodeOptions } from './client';
 import * as stacktrace from './stacktrace';
 
 const DEFAULT_LINES_OF_CONTEXT: number = 7;

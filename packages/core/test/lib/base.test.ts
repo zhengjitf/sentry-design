@@ -1,9 +1,9 @@
-import { Hub, Scope } from '@sentry/hub';
+import { Hub } from '@sentry/hub';
+import { Scope } from '@sentry/scope';
 import { TransportRequest } from '@sentry/transport-base';
 import { Event, Severity, Span } from '@sentry/types';
 import { logger, SentryError, SyncPromise } from '@sentry/utils';
 
-import { TestBackend } from '../mocks/backend';
 import { TestClient } from '../mocks/client';
 import { TestIntegration } from '../mocks/integration';
 import { FakeTransport } from '../mocks/transport';
@@ -11,6 +11,11 @@ import { FakeTransport } from '../mocks/transport';
 const PUBLIC_DSN = 'https://username@domain/123';
 // eslint-disable-next-line no-var
 declare var global: any;
+
+class TestBackend {
+  public static instance?: TestBackend;
+  public event?: Event;
+}
 
 jest.mock('@sentry/utils', () => {
   const original = jest.requireActual('@sentry/utils');
@@ -77,15 +82,6 @@ describe.skip('BaseClient', () => {
     test('throws with invalid Dsn', () => {
       expect.assertions(1);
       expect(() => new TestClient({ dsn: 'abc' })).toThrow(SentryError);
-    });
-  });
-
-  describe('getOptions()', () => {
-    test('returns the options', () => {
-      expect.assertions(1);
-      const options = { dsn: PUBLIC_DSN, test: true };
-      const client = new TestClient(options);
-      expect(client.getOptions()).toEqual(options);
     });
   });
 

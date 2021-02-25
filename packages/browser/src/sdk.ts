@@ -2,8 +2,7 @@ import { getCurrentHub, initAndBind, Integrations as CoreIntegrations } from '@s
 import { addInstrumentationHandler, getGlobalObject, logger, SyncPromise } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
 
-import { BrowserOptions } from './backend';
-import { BrowserClient } from './client';
+import { BrowserClient, BrowserOptions } from './client';
 import { wrap as internalWrap } from './helpers';
 import { Breadcrumbs, GlobalHandlers, LinkedErrors, TryCatch, UserAgent } from './integrations';
 

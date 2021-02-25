@@ -1,6 +1,5 @@
 import { Client, Integration } from '@sentry/types';
 
-import { installedIntegrations } from '../../src/integration';
 import { initAndBind } from '../../src/sdk';
 import { TestClient } from '../mocks/client';
 
@@ -37,7 +36,6 @@ class MockIntegration implements Integration {
 describe('SDK', () => {
   beforeEach(() => {
     global.__SENTRY__ = {};
-    installedIntegrations.splice(0);
   });
 
   describe('initAndBind', () => {

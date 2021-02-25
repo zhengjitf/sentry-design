@@ -12,9 +12,15 @@ import {
   truncate,
   uuid4,
 } from '@sentry/utils';
-import { Dsn, eventToTransportRequest, sessionToTransportRequest } from '@sentry/transport-base';
+import {
+  Dsn,
+  eventToTransportRequest,
+  NoopTransport,
+  sessionToTransportRequest,
+  TransportRequest,
+  Transport,
+} from '@sentry/transport-base';
 
-import { Backend, BackendClass } from './basebackend';
 import { IntegrationIndex, setupIntegrations } from './integration';
 import { Options } from './options';
 
@@ -92,6 +98,25 @@ export interface ClientLike<O extends Options = Options> {
 
   /** This is an internal function to setup all integrations that should run on the client */
   setupIntegrations(): void;
+
+  // TODO: Anything below has been moved from backend to make it compile only. Rework.
+
+  /** Creates a {@link Event} from an exception. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  eventFromException(exception: any, hint?: EventHint): PromiseLike<Event>;
+
+  /** Creates a {@link Event} from a plain message. */
+  eventFromMessage(message: string, level?: Severity, hint?: EventHint): PromiseLike<Event>;
+
+  sendRequest<T>(request: TransportRequest<T>): void;
+
+  /**
+   * Returns the transport that is used by the backend.
+   * Please note that the transport gets lazy initialized so it will only be there once the first event has been sent.
+   *
+   * @returns The transport.
+   */
+  getTransport(): Transport;
 }
 
 /**
@@ -126,14 +151,7 @@ export interface ClientLike<O extends Options = Options> {
  *   // ...
  * }
  */
-export abstract class BaseClient<B extends Backend, O extends Options> implements ClientLike<O> {
-  /**
-   * The backend used to physically interact in the environment. Usually, this
-   * will correspond to the client. When composing SDKs, however, the Backend
-   * from the root SDK will be used.
-   */
-  protected readonly _backend: B;
-
+export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /** Options passed to the SDK. */
   protected readonly _options: O;
 
@@ -146,19 +164,46 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
   /** Number of call being processed */
   protected _processing: number = 0;
 
+  protected _transport: Transport;
+
   /**
    * Initializes this client instance.
    *
-   * @param backendClass A constructor function to create the backend.
    * @param options Options for the client.
    */
-  protected constructor(backendClass: BackendClass<B, O>, options: O) {
-    this._backend = new backendClass(options);
+  protected constructor(options: O) {
     this._options = options;
 
     if (options.dsn) {
       this._dsn = new Dsn(options.dsn);
     }
+
+    this._transport = this._setupTransport();
+  }
+
+  public eventFromException(_exception: any, _hint?: EventHint): PromiseLike<Event> {
+    return Promise.resolve({});
+  }
+
+  public eventFromMessage(_message: string, _level: Severity = Severity.Info, _hint?: EventHint): PromiseLike<Event> {
+    return Promise.resolve({});
+  }
+
+  /**
+   * @inheritDoc
+   */
+  // TODO: Do we need generic here?
+  public sendRequest<T>(request: TransportRequest<T>): void {
+    this._transport.sendRequest(request).then(null, reason => {
+      logger.error(`Failed sending request: ${reason}`);
+    });
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public getTransport(): Transport {
+    return this._transport;
   }
 
   /**
@@ -169,8 +214,7 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
     let eventId: string | undefined = hint && hint.event_id;
 
     this._process(
-      this._getBackend()
-        .eventFromException(exception, hint)
+      this.eventFromException(exception, hint)
         .then(event => this._captureEvent(event, hint, scope))
         .then(result => {
           eventId = result;
@@ -187,8 +231,8 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
     let eventId: string | undefined = hint && hint.event_id;
 
     const promisedEvent = isPrimitive(message)
-      ? this._getBackend().eventFromMessage(String(message), level, hint)
-      : this._getBackend().eventFromException(message, hint);
+      ? this.eventFromMessage(String(message), level, hint)
+      : this.eventFromException(message, hint);
 
     this._process(
       promisedEvent
@@ -248,8 +292,7 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
    */
   public flush(timeout?: number): PromiseLike<boolean> {
     return this._isClientProcessing(timeout).then(ready => {
-      return this._getBackend()
-        .getTransport()
+      return this.getTransport()
         .flush(timeout ?? 0)
         .then(transportFlushed => ready && transportFlushed);
     });
@@ -284,6 +327,11 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
       logger.warn(`Cannot retrieve integration ${integration.id} from the current Client`);
       return null;
     }
+  }
+
+  protected _setupTransport(): Transport {
+    // We return the noop transport here in case there is no Dsn.
+    return new NoopTransport();
   }
 
   /** Updates existing session based on the provided event */
@@ -327,7 +375,7 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
 
   /** Deliver captured session to Sentry */
   protected _sendSession(session: Session): void {
-    this._getBackend().sendRequest(sessionToTransportRequest(session));
+    this.sendRequest(sessionToTransportRequest(session));
   }
 
   /** Waits for the client to be done with processing. */
@@ -349,11 +397,6 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
         }
       }, tick);
     });
-  }
-
-  /** Returns the current backend. */
-  protected _getBackend(): B {
-    return this._backend;
   }
 
   /** Determines whether this SDK is enabled and a valid Dsn is present. */
@@ -514,7 +557,7 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
    * @param event The Sentry event to send
    */
   protected _sendEvent(event: Event): void {
-    this._getBackend().sendRequest(eventToTransportRequest(event));
+    this.sendRequest(eventToTransportRequest(event));
   }
 
   /**
@@ -638,4 +681,7 @@ export abstract class BaseClient<B extends Backend, O extends Options> implement
       },
     );
   }
+
+  protected abstract _eventFromException(exception: unknown, hint?: EventHint): PromiseLike<Event>;
+  protected abstract _eventFromMessage(message: string, level: Severity, hint?: EventHint): PromiseLike<Event>;
 }

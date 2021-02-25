@@ -1,8 +1,11 @@
 import { ExtendedError } from '@sentry/types';
 
 import { Event } from '../../src';
-import { NodeBackend } from '../../src/backend';
 import { LinkedErrors } from '../../src/integrations/linkederrors';
+
+class NodeBackend {
+  eventFromException: (ex: unknown) => PromiseLike<Event> = () => Promise.resolve({});
+}
 
 let linkedErrors: any;
 
@@ -28,7 +31,7 @@ describe('LinkedErrors', () => {
       expect.assertions(2);
       const spy = jest.spyOn(linkedErrors, '_walkErrorTree');
       const one = new Error('originalException');
-      const backend = new NodeBackend({});
+      const backend = new NodeBackend();
       let event: Event | undefined;
       return backend
         .eventFromException(one)
@@ -51,7 +54,7 @@ describe('LinkedErrors', () => {
           }),
       );
       const one = new Error('originalException');
-      const backend = new NodeBackend({});
+      const backend = new NodeBackend();
       return backend.eventFromException(one).then(event =>
         linkedErrors
           ._handler(event, {
@@ -71,7 +74,7 @@ describe('LinkedErrors', () => {
       one.cause = two;
       two.cause = three;
 
-      const backend = new NodeBackend({});
+      const backend = new NodeBackend();
       return backend.eventFromException(one).then(event =>
         linkedErrors
           ._handler(event, {
@@ -104,7 +107,7 @@ describe('LinkedErrors', () => {
       one.reason = two;
       two.reason = three;
 
-      const backend = new NodeBackend({});
+      const backend = new NodeBackend();
       return backend.eventFromException(one).then(event =>
         linkedErrors
           ._handler(event, {
@@ -137,7 +140,7 @@ describe('LinkedErrors', () => {
       one.cause = two;
       two.cause = three;
 
-      const backend = new NodeBackend({});
+      const backend = new NodeBackend();
       return backend.eventFromException(one).then(event =>
         linkedErrors
           ._handler(event, {

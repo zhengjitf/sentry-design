@@ -1,7 +1,7 @@
 import { SDK_VERSION } from '@sentry/core';
 import * as domain from 'domain';
 
-import { TransportRequest } from '@sentry/transport-base';
+import { ResponseStatus, TransportRequest, TransportResponse } from '@sentry/transport-base';
 
 import {
   addBreadcrumb,
@@ -15,7 +15,10 @@ import {
   NodeClient,
   Scope,
 } from '../src';
-import { NodeBackend } from '../src/backend';
+
+class NodeBackend {
+  sendRequest?: () => PromiseLike<TransportResponse>;
+}
 
 const dsn = 'https://53039209a22b4ec1bcc296a3c9fdecd6@sentry.io/4291';
 
@@ -70,7 +73,7 @@ describe('SentryNode', () => {
     beforeEach(() => {
       s = jest
         .spyOn(NodeBackend.prototype, 'sendRequest')
-        .mockImplementation(async () => Promise.resolve({ code: 200 }));
+        .mockImplementation(async () => Promise.resolve({ code: ResponseStatus.Success }));
     });
 
     afterEach(() => {
@@ -101,7 +104,7 @@ describe('SentryNode', () => {
     beforeEach(() => {
       s = jest
         .spyOn(NodeBackend.prototype, 'sendRequest')
-        .mockImplementation(async () => Promise.resolve({ code: 200 }));
+        .mockImplementation(async () => Promise.resolve({ code: ResponseStatus.Success }));
     });
 
     afterEach(() => {

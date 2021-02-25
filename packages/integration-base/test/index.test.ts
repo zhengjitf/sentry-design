@@ -1,6 +1,6 @@
 import { Integration } from '@sentry/types';
 
-import { getIntegrationsToSetup } from '../../src/integration';
+import { getIntegrationsToSetup } from '../src/index';
 
 class MockIntegration implements Integration {
   public name: string;
