@@ -85,7 +85,9 @@ export class Hub implements HubInterface {
   public bindClient(client?: Client): void {
     const top = this.getStackTop();
     top.client = client;
+    // @ts-ignore TODO: integrations wont be instantiated by the hub anymore, left here so we compile
     if (client && client.setupIntegrations) {
+      // @ts-ignore TODO: integrations wont be instantiated by the hub anymore, left here so we compile
       client.setupIntegrations();
     }
   }

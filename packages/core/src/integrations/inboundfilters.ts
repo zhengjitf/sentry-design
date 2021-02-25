@@ -11,11 +11,6 @@ interface InboundFiltersOptions {
   denyUrls: Array<string | RegExp>;
   ignoreErrors: Array<string | RegExp>;
   ignoreInternal: boolean;
-
-  /** @deprecated use {@link InboundFiltersOptions.allowUrls} instead. */
-  whitelistUrls: Array<string | RegExp>;
-  /** @deprecated use {@link InboundFiltersOptions.denyUrls} instead. */
-  blacklistUrls: Array<string | RegExp>;
 }
 
 /** Inbound filters configurable by the user */
@@ -134,22 +129,8 @@ export class InboundFilters implements Integration {
 
   private _mergeOptions(clientOptions: Partial<InboundFiltersOptions> = {}): Partial<InboundFiltersOptions> {
     return {
-      allowUrls: [
-        // eslint-disable-next-line deprecation/deprecation
-        ...(this._options.whitelistUrls || []),
-        ...(this._options.allowUrls || []),
-        // eslint-disable-next-line deprecation/deprecation
-        ...(clientOptions.whitelistUrls || []),
-        ...(clientOptions.allowUrls || []),
-      ],
-      denyUrls: [
-        // eslint-disable-next-line deprecation/deprecation
-        ...(this._options.blacklistUrls || []),
-        ...(this._options.denyUrls || []),
-        // eslint-disable-next-line deprecation/deprecation
-        ...(clientOptions.blacklistUrls || []),
-        ...(clientOptions.denyUrls || []),
-      ],
+      allowUrls: [...(this._options.allowUrls || []), ...(clientOptions.allowUrls || [])],
+      denyUrls: [...(this._options.denyUrls || []), ...(clientOptions.denyUrls || [])],
       ignoreErrors: [
         ...(this._options.ignoreErrors || []),
         ...(clientOptions.ignoreErrors || []),

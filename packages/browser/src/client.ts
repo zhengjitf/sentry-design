@@ -1,12 +1,11 @@
-import { BaseClient, Scope, SDK_VERSION } from '@sentry/core';
+import { BaseClient, SDK_VERSION } from '@sentry/core';
 import { Event, EventHint, Options, Severity } from '@sentry/types';
 import { getGlobalObject, logger, supportsFetch } from '@sentry/utils';
-import { NoopTransport, ReportDialogOptions, Transport, TransportOptions } from '@sentry/transport-base';
+import { ReportDialogOptions } from '@sentry/transport-base';
 import { FetchTransport } from '@sentry/transport-fetch';
 import { XHRTransport } from '@sentry/transport-xhr';
 
 import { injectReportDialog } from './helpers';
-import { Breadcrumbs } from './integrations';
 import { eventFromException, eventFromMessage } from './eventbuilder';
 
 /**
@@ -27,12 +26,6 @@ export interface BrowserOptions extends Options {
    * By default, all errors will be sent.
    */
   denyUrls?: Array<string | RegExp>;
-
-  /** @deprecated use {@link Options.allowUrls} instead. */
-  whitelistUrls?: Array<string | RegExp>;
-
-  /** @deprecated use {@link Options.denyUrls} instead. */
-  blacklistUrls?: Array<string | RegExp>;
 
   /**
    * A flag enabling Sessions Tracking feature.
@@ -65,21 +58,9 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
       ],
       version: SDK_VERSION,
     };
+    options.transport = options.transport ?? (supportsFetch() ? FetchTransport : XHRTransport);
 
     super(options);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public eventFromException(exception: unknown, hint?: EventHint): PromiseLike<Event> {
-    return eventFromException(this._options, exception, hint);
-  }
-  /**
-   * @inheritDoc
-   */
-  public eventFromMessage(message: string, level: Severity = Severity.Info, hint?: EventHint): PromiseLike<Event> {
-    return eventFromMessage(this._options, message, level, hint);
   }
 
   /**
@@ -108,41 +89,22 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
   /**
    * @inheritDoc
    */
-  protected _prepareEvent(event: Event, scope?: Scope, hint?: EventHint): PromiseLike<Event | null> {
-    event.platform = event.platform || 'javascript';
-    return super._prepareEvent(event, scope, hint);
+  protected _eventFromException(exception: unknown, hint?: EventHint): PromiseLike<Event> {
+    return eventFromException(this._options, exception, hint);
   }
-
   /**
    * @inheritDoc
    */
-  protected _sendEvent(event: Event): void {
-    const integration = this.getIntegration(Breadcrumbs);
-    if (integration) {
-      integration.addSentryBreadcrumb(event);
-    }
-    super._sendEvent(event);
+  protected _eventFromMessage(message: string, level: Severity = Severity.Info, hint?: EventHint): PromiseLike<Event> {
+    return eventFromMessage(this._options, message, level, hint);
   }
 
-  protected _setupTransport(): Transport {
-    // TODO: This whole function should be unnecessary and moved to client construction
-    if (!this._options.dsn) {
-      // We return the noop transport here in case there is no Dsn.
-      return new NoopTransport();
-    }
-
-    const transportOptions: TransportOptions = {
-      ...this._options.transportOptions,
-      dsn: this._options.transportOptions?.dsn ?? this._options.dsn,
-    };
-
-    if (this._options.transport) {
-      return new this._options.transport(transportOptions);
-    }
-
-    if (supportsFetch()) {
-      return new FetchTransport(transportOptions);
-    }
-    return new XHRTransport(transportOptions);
-  }
+  // TODO: Restore this functionality somewhere else, it definitely shouldn't be here.
+  // protected _sendEvent(event: Event): void {
+  //   const integration = this.getIntegration(Breadcrumbs);
+  //   if (integration) {
+  //     integration.addSentryBreadcrumb(event);
+  //   }
+  //   super._sendEvent(event);
+  // }
 }

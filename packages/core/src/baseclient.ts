@@ -95,28 +95,6 @@ export interface ClientLike<O extends Options = Options> {
 
   /** Returns an array of installed integrations on the client. */
   getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null;
-
-  /** This is an internal function to setup all integrations that should run on the client */
-  setupIntegrations(): void;
-
-  // TODO: Anything below has been moved from backend to make it compile only. Rework.
-
-  /** Creates a {@link Event} from an exception. */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  eventFromException(exception: any, hint?: EventHint): PromiseLike<Event>;
-
-  /** Creates a {@link Event} from a plain message. */
-  eventFromMessage(message: string, level?: Severity, hint?: EventHint): PromiseLike<Event>;
-
-  sendRequest<T>(request: TransportRequest<T>): void;
-
-  /**
-   * Returns the transport that is used by the backend.
-   * Please note that the transport gets lazy initialized so it will only be there once the first event has been sent.
-   *
-   * @returns The transport.
-   */
-  getTransport(): Transport;
 }
 
 /**
@@ -181,31 +159,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     this._transport = this._setupTransport();
   }
 
-  public eventFromException(_exception: any, _hint?: EventHint): PromiseLike<Event> {
-    return Promise.resolve({});
-  }
-
-  public eventFromMessage(_message: string, _level: Severity = Severity.Info, _hint?: EventHint): PromiseLike<Event> {
-    return Promise.resolve({});
-  }
-
-  /**
-   * @inheritDoc
-   */
-  // TODO: Do we need generic here?
-  public sendRequest<T>(request: TransportRequest<T>): void {
-    this._transport.sendRequest(request).then(null, reason => {
-      logger.error(`Failed sending request: ${reason}`);
-    });
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public getTransport(): Transport {
-    return this._transport;
-  }
-
   /**
    * @inheritDoc
    */
@@ -214,7 +167,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     let eventId: string | undefined = hint && hint.event_id;
 
     this._process(
-      this.eventFromException(exception, hint)
+      this._eventFromException(exception, hint)
         .then(event => this._captureEvent(event, hint, scope))
         .then(result => {
           eventId = result;
@@ -227,12 +180,17 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /**
    * @inheritDoc
    */
-  public captureMessage(message: string, level?: Severity, hint?: EventHint, scope?: Scope): string | undefined {
+  public captureMessage(
+    message: string,
+    level: Severity = Severity.Info,
+    hint?: EventHint,
+    scope?: Scope,
+  ): string | undefined {
     let eventId: string | undefined = hint && hint.event_id;
 
     const promisedEvent = isPrimitive(message)
-      ? this.eventFromMessage(String(message), level, hint)
-      : this.eventFromException(message, hint);
+      ? this._eventFromMessage(String(message), level, hint)
+      : this._eventFromException(message, hint);
 
     this._process(
       promisedEvent
@@ -292,9 +250,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    */
   public flush(timeout?: number): PromiseLike<boolean> {
     return this._isClientProcessing(timeout).then(ready => {
-      return this.getTransport()
-        .flush(timeout ?? 0)
-        .then(transportFlushed => ready && transportFlushed);
+      return this._transport.flush(timeout ?? 0).then(transportFlushed => ready && transportFlushed);
     });
   }
 
@@ -309,15 +265,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   }
 
   /**
-   * Sets up the integrations
-   */
-  public setupIntegrations(): void {
-    if (this._isEnabled()) {
-      this._integrations = setupIntegrations(this._options);
-    }
-  }
-
-  /**
    * @inheritDoc
    */
   public getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null {
@@ -329,9 +276,38 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     }
   }
 
+  /**
+   * Sets up the integrations
+   */
+  protected _setupIntegrations(): void {
+    if (this._isEnabled()) {
+      this._integrations = setupIntegrations(this._options);
+    }
+  }
+
   protected _setupTransport(): Transport {
-    // We return the noop transport here in case there is no Dsn.
-    return new NoopTransport();
+    // TODO: This whole function should be unnecessary and moved to client construction
+    if (!this._options.dsn || !this._options.transport) {
+      return new NoopTransport();
+    }
+
+    return new this._options.transport({
+      dsn: this._options.dsn,
+      ...this._options.transportOptions,
+      // TODO: Deprecate these options and move to `transportOptions`
+      // ...(this._options.httpProxy && { httpProxy: this._options.httpProxy }),
+      // ...(this._options.httpsProxy && { httpsProxy: this._options.httpsProxy }),
+      // ...(this._options.caCerts && { caCerts: this._options.caCerts }),
+    });
+  }
+  /**
+   * @inheritDoc
+   */
+  // TODO: Do we need generic here?
+  protected _sendRequest<T>(request: TransportRequest<T>): void {
+    this._transport.sendRequest(request).then(null, reason => {
+      logger.error(`Failed sending request: ${reason}`);
+    });
   }
 
   /** Updates existing session based on the provided event */
@@ -375,7 +351,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
   /** Deliver captured session to Sentry */
   protected _sendSession(session: Session): void {
-    this.sendRequest(sessionToTransportRequest(session));
+    this._sendRequest(sessionToTransportRequest(session));
   }
 
   /** Waits for the client to be done with processing. */
@@ -557,7 +533,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param event The Sentry event to send
    */
   protected _sendEvent(event: Event): void {
-    this.sendRequest(eventToTransportRequest(event));
+    this._sendRequest(eventToTransportRequest(event));
   }
 
   /**
