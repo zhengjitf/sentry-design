@@ -238,8 +238,7 @@ export class Hub implements HubInterface {
     if (!scope || !client) return;
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    const { beforeBreadcrumb = null, maxBreadcrumbs = DEFAULT_BREADCRUMBS } =
-      (client.getOptions && client.getOptions()) || {};
+    const { beforeBreadcrumb = null, maxBreadcrumbs = DEFAULT_BREADCRUMBS } = client?.options ?? {};
 
     if (maxBreadcrumbs <= 0) return;
 
@@ -391,7 +390,7 @@ export class Hub implements HubInterface {
    */
   public startSession(context?: SessionContext): Session {
     const { scope, client } = this.getStackTop();
-    const { release, environment } = (client && client.getOptions()) || {};
+    const { release, environment } = client?.options ?? {};
     const session = new Session({
       release,
       environment,

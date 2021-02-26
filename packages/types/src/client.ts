@@ -16,6 +16,8 @@ import { Severity } from './severity';
  *
  */
 export interface Client<O extends Options = Options> {
+  options: O;
+
   /**
    * Captures an exception event and sends it to Sentry.
    *
@@ -55,9 +57,6 @@ export interface Client<O extends Options = Options> {
 
   /** Returns the current Dsn. */
   getDsn(): Dsn | undefined;
-
-  /** Returns the current options. */
-  getOptions(): O;
 
   /**
    * A promise that resolves when all current events have been sent.

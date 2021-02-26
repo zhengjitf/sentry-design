@@ -39,7 +39,7 @@ export class InboundFilters implements Integration {
       const self = hub.getIntegration(InboundFilters);
       if (self) {
         const client = hub.getClient();
-        const clientOptions = client ? client.getOptions() : {};
+        const clientOptions = client?.options ?? {};
         const options = self._mergeOptions(clientOptions);
         if (self._shouldDropEvent(event, options)) {
           return null;

@@ -484,10 +484,7 @@ export function logAndExitProcess(error: Error): void {
     return;
   }
 
-  const options = client.getOptions();
-  const timeout =
-    (options && options.shutdownTimeout && options.shutdownTimeout > 0 && options.shutdownTimeout) ||
-    DEFAULT_SHUTDOWN_TIMEOUT;
+  const timeout = client?.options?.shutdownTimeout ?? DEFAULT_SHUTDOWN_TIMEOUT;
   forget(
     client.close(timeout).then((result: boolean) => {
       if (!result) {

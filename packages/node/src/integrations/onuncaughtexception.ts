@@ -61,9 +61,9 @@ export class OnUncaughtException implements Integration {
       if (this._options.onFatalError) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         onFatalError = this._options.onFatalError;
-      } else if (client && client.getOptions().onFatalError) {
+      } else if (client?.options?.onFatalError) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        onFatalError = client.getOptions().onFatalError as onFatalErrorHandlerType;
+        onFatalError = client.options.onFatalError as onFatalErrorHandlerType;
       }
 
       if (!caughtFirstError) {

@@ -83,7 +83,7 @@ export class GlobalHandlers implements Integration {
           ? this._eventFromIncompleteOnError(data.msg, data.url, data.line, data.column)
           : this._enhanceEventWithInitialFrame(
               eventFromUnknownInput(error, undefined, {
-                attachStacktrace: client && client.getOptions().attachStacktrace,
+                attachStacktrace: client?.options?.attachStacktrace,
                 rejection: false,
               }),
               data.url,
@@ -147,7 +147,7 @@ export class GlobalHandlers implements Integration {
         const event = isPrimitive(error)
           ? this._eventFromRejectionWithPrimitive(error)
           : eventFromUnknownInput(error, undefined, {
-              attachStacktrace: client && client.getOptions().attachStacktrace,
+              attachStacktrace: client?.options?.attachStacktrace,
               rejection: true,
             });
 

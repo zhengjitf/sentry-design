@@ -34,6 +34,8 @@ import { Options } from './options';
  *
  */
 export interface ClientLike<O extends Options = Options> {
+  options: O;
+
   /**
    * Captures an exception event and sends it to Sentry.
    *
@@ -73,9 +75,6 @@ export interface ClientLike<O extends Options = Options> {
 
   /** Returns the current Dsn. */
   getDsn(): Dsn | undefined;
-
-  /** Returns the current options. */
-  getOptions(): O;
 
   /**
    * A promise that resolves when all current events have been sent.
@@ -131,7 +130,7 @@ export interface ClientLike<O extends Options = Options> {
  */
 export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /** Options passed to the SDK. */
-  protected readonly _options: O;
+  public readonly options: O;
 
   /** The client Dsn, if specified in options. Without this Dsn, the SDK will be disabled. */
   protected readonly _dsn?: Dsn;
@@ -150,7 +149,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param options Options for the client.
    */
   protected constructor(options: O) {
-    this._options = options;
+    this.options = options;
 
     if (options.dsn) {
       this._dsn = new Dsn(options.dsn);
@@ -241,13 +240,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /**
    * @inheritDoc
    */
-  public getOptions(): O {
-    return this._options;
-  }
-
-  /**
-   * @inheritDoc
-   */
   public flush(timeout?: number): PromiseLike<boolean> {
     return this._isClientProcessing(timeout).then(ready => {
       return this._transport.flush(timeout ?? 0).then(transportFlushed => ready && transportFlushed);
@@ -259,7 +251,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    */
   public close(timeout?: number): PromiseLike<boolean> {
     return this.flush(timeout).then(result => {
-      this.getOptions().enabled = false;
+      this.options.enabled = false;
       return result;
     });
   }
@@ -276,28 +268,19 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     }
   }
 
-  /**
-   * Sets up the integrations
-   */
-  protected _setupIntegrations(): void {
-    if (this._isEnabled()) {
-      this._integrations = setupIntegrations(this._options);
-    }
-  }
-
   protected _setupTransport(): Transport {
     // TODO: This whole function should be unnecessary and moved to client construction
-    if (!this._options.dsn || !this._options.transport) {
+    if (!this.options.dsn || !this.options.transport) {
       return new NoopTransport();
     }
 
-    return new this._options.transport({
-      dsn: this._options.dsn,
-      ...this._options.transportOptions,
+    return new this.options.transport({
+      dsn: this.options.dsn,
+      ...this.options.transportOptions,
       // TODO: Deprecate these options and move to `transportOptions`
-      // ...(this._options.httpProxy && { httpProxy: this._options.httpProxy }),
-      // ...(this._options.httpsProxy && { httpsProxy: this._options.httpsProxy }),
-      // ...(this._options.caCerts && { caCerts: this._options.caCerts }),
+      // ...(this.options.httpProxy && { httpProxy: this.options.httpProxy }),
+      // ...(this.options.httpsProxy && { httpsProxy: this.options.httpsProxy }),
+      // ...(this.options.caCerts && { caCerts: this.options.caCerts }),
     });
   }
   /**
@@ -377,7 +360,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
   /** Determines whether this SDK is enabled and a valid Dsn is present. */
   protected _isEnabled(): boolean {
-    return this.getOptions().enabled !== false && this._dsn !== undefined;
+    return this.options.enabled !== false && this._dsn !== undefined;
   }
 
   /**
@@ -395,7 +378,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @returns A new event with more information.
    */
   protected _prepareEvent(event: Event, scope?: Scope, hint?: EventHint): PromiseLike<Event | null> {
-    const { normalizeDepth = 3 } = this.getOptions();
+    const { normalizeDepth = 3 } = this.options;
     const prepared: Event = {
       ...event,
       event_id: event.event_id || (hint && hint.event_id ? hint.event_id : uuid4()),
@@ -486,7 +469,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param event event instance to be enhanced
    */
   protected _applyClientOptions(event: Event): void {
-    const options = this.getOptions();
+    const options = this.options;
     const { environment, release, dist, maxValueLength = 250 } = options;
 
     if (!('environment' in event)) {
@@ -569,7 +552,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    */
   protected _processEvent(event: Event, hint?: EventHint, scope?: Scope): PromiseLike<Event> {
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    const { beforeSend, sampleRate } = this.getOptions();
+    const { beforeSend, sampleRate } = this.options;
 
     if (!this._isEnabled()) {
       return SyncPromise.reject(new SentryError('SDK not enabled, will not send event.'));
