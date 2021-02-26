@@ -4,6 +4,7 @@ import {
   ClientLike,
   Event,
   EventHint,
+  EventProcessor,
   Integration,
   IntegrationClass,
   OptionsV7,
@@ -77,6 +78,8 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
   protected _processing: number = 0;
 
   protected _transport: Transport;
+
+  protected _eventProcessors: EventProcessor[] = [];
 
   /**
    * Initializes this client instance.
@@ -164,6 +167,11 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
       // After sending, we set init false to inidcate it's not the first occurence
       session.update({ init: false });
     }
+  }
+
+  // TODO: Run these during event processing
+  public addEventProcessor(callback: EventProcessor): void {
+    this._eventProcessors.push(callback);
   }
 
   /**

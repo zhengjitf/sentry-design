@@ -1,13 +1,13 @@
-import { getCurrentHub, initAndBind, Integrations as CoreIntegrations } from '@sentry/core';
+import { getCurrentHub, initAndBind } from '@sentry/core';
 import { addInstrumentationHandler, getGlobalObject, logger, SyncPromise } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
+import { InboundFilters } from '@sentry/integration-inboundfilters';
 
 import { BrowserClient, BrowserOptions } from './client';
 import { wrap as internalWrap } from './helpers';
 import { Breadcrumbs, GlobalHandlers, LinkedErrors, TryCatch, UserAgent } from './integrations';
 
 export const defaultIntegrations = [
-  new CoreIntegrations.InboundFilters(),
   new TryCatch(),
   new Breadcrumbs(),
   new GlobalHandlers(),
@@ -73,6 +73,9 @@ export const defaultIntegrations = [
  * @see {@link BrowserOptions} for documentation on configuration options.
  */
 export function init(options: BrowserOptions = {}): void {
+  // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
+  options.fancyIntegrations = [new InboundFilters()];
+
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;
   }

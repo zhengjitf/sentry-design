@@ -1,3 +1,4 @@
+import { ClientLike } from './client';
 import { EventProcessor } from './eventprocessor';
 import { Hub } from './hub';
 
@@ -23,4 +24,9 @@ export interface Integration {
    * This takes no options on purpose, options should be passed in the constructor
    */
   setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void;
+}
+
+/** Integration interface */
+export interface IntegrationV7 {
+  install(client: ClientLike): void;
 }

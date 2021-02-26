@@ -1,5 +1,6 @@
 import { Dsn } from './dsn';
 import { Event, EventHint } from './event';
+import { EventProcessor } from './eventprocessor';
 import { Integration, IntegrationClass } from './integration';
 import { Options, OptionsV7 } from './options';
 import { Scope } from './scope';
@@ -54,6 +55,8 @@ export interface ClientLike<O extends OptionsV7 = OptionsV7> {
    * @param session Session to be delivered
    */
   captureSession?(session: Session): void;
+
+  addEventProcessor(callback: EventProcessor): void;
 
   /** Returns the current Dsn. */
   getDsn(): Dsn | undefined;

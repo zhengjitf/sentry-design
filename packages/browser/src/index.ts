@@ -1,6 +1,5 @@
 export * from './exports';
 
-import { Integrations as CoreIntegrations } from '@sentry/core';
 import { getGlobalObject } from '@sentry/utils';
 
 import * as BrowserIntegrations from './integrations';
@@ -15,7 +14,6 @@ if (_window.Sentry && _window.Sentry.Integrations) {
 
 const INTEGRATIONS = {
   ...windowIntegrations,
-  ...CoreIntegrations,
   ...BrowserIntegrations,
 };
 

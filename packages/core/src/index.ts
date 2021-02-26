@@ -17,7 +17,3 @@ export { addGlobalEventProcessor, getCurrentHub, getHubFromCarrier, Hub, makeMai
 export { BaseClient } from './baseclient';
 export { initAndBind, ClientClass } from './sdk';
 export { SDK_VERSION } from './version';
-
-import * as Integrations from './integrations';
-
-export { Integrations };

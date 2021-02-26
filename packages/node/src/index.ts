@@ -44,14 +44,12 @@ export { SDK_NAME } from './version';
 
 import * as domain from 'domain';
 
-import { Integrations as CoreIntegrations } from '@sentry/core';
 import { getMainCarrier } from '@sentry/hub';
 
 import * as Handlers from './handlers';
 import * as NodeIntegrations from './integrations';
 
 const INTEGRATIONS = {
-  ...CoreIntegrations,
   ...NodeIntegrations,
 };
 

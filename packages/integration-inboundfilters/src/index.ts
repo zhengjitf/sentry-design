@@ -1,5 +1,4 @@
-import { addGlobalEventProcessor, getCurrentHub } from '@sentry/hub';
-import { Event, Integration } from '@sentry/types';
+import { ClientLike, Event, IntegrationV7 } from '@sentry/types';
 import { getEventDescription, isMatchingPattern, logger } from '@sentry/utils';
 
 // "Script error." is hard coded into browsers for errors that it can't read.
@@ -14,7 +13,7 @@ interface InboundFiltersOptions {
 }
 
 /** Inbound filters configurable by the user */
-export class InboundFilters implements Integration {
+export class InboundFilters implements IntegrationV7 {
   /**
    * @inheritDoc
    */
@@ -30,20 +29,12 @@ export class InboundFilters implements Integration {
   /**
    * @inheritDoc
    */
-  public setupOnce(): void {
-    addGlobalEventProcessor((event: Event) => {
-      const hub = getCurrentHub();
-      if (!hub) {
-        return event;
-      }
-      const self = hub.getIntegration(InboundFilters);
-      if (self) {
-        const client = hub.getClient();
-        const clientOptions = client?.options ?? {};
-        const options = self._mergeOptions(clientOptions);
-        if (self._shouldDropEvent(event, options)) {
-          return null;
-        }
+  public install(client: ClientLike): void {
+    client.addEventProcessor((event: Event) => {
+      const clientOptions = client?.options ?? {};
+      const options = this._mergeOptions(clientOptions);
+      if (this._shouldDropEvent(event, options)) {
+        return null;
       }
       return event;
     });
@@ -54,12 +45,14 @@ export class InboundFilters implements Integration {
       logger.warn(`Event dropped due to being internal Sentry Error.\nEvent: ${getEventDescription(event)}`);
       return true;
     }
+
     if (this._isIgnoredError(event, options)) {
       logger.warn(
         `Event dropped due to being matched by \`ignoreErrors\` option.\nEvent: ${getEventDescription(event)}`,
       );
       return true;
     }
+
     if (this._isDeniedUrl(event, options)) {
       logger.warn(
         `Event dropped due to being matched by \`denyUrls\` option.\nEvent: ${getEventDescription(
@@ -68,6 +61,7 @@ export class InboundFilters implements Integration {
       );
       return true;
     }
+
     if (!this._isAllowedUrl(event, options)) {
       logger.warn(
         `Event dropped due to not being matched by \`allowUrls\` option.\nEvent: ${getEventDescription(
@@ -76,6 +70,7 @@ export class InboundFilters implements Integration {
       );
       return true;
     }
+
     return false;
   }
 
@@ -136,6 +131,7 @@ export class InboundFilters implements Integration {
         ...(clientOptions.ignoreErrors || []),
         ...DEFAULT_IGNORE_ERRORS,
       ],
+      // TODO: Do we ever used it? Like ever? - https://github.com/getsentry/sentry-javascript/search?q=ignoreInternal
       ignoreInternal: typeof this._options.ignoreInternal !== 'undefined' ? this._options.ignoreInternal : true,
     };
   }

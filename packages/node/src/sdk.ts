@@ -1,15 +1,14 @@
 import * as domain from 'domain';
 
-import { getCurrentHub, initAndBind, Integrations as CoreIntegrations } from '@sentry/core';
+import { getCurrentHub, initAndBind } from '@sentry/core';
 import { getMainCarrier, setHubOnCarrier } from '@sentry/hub';
 import { getGlobalObject } from '@sentry/utils';
+import { InboundFilters } from '@sentry/integration-inboundfilters';
 
 import { NodeClient, NodeOptions } from './client';
 import { Console, Http, LinkedErrors, OnUncaughtException, OnUnhandledRejection } from './integrations';
 
 export const defaultIntegrations = [
-  // Common
-  new CoreIntegrations.InboundFilters(),
   // Native Wrappers
   new Console(),
   new Http(),
@@ -76,6 +75,9 @@ export const defaultIntegrations = [
  * @see {@link NodeOptions} for documentation on configuration options.
  */
 export function init(options: NodeOptions = {}): void {
+  // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
+  options.fancyIntegrations = [new InboundFilters()];
+
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;
   }

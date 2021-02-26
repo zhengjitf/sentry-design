@@ -9,7 +9,7 @@ export { EventProcessor } from './eventprocessor';
 export { Exception } from './exception';
 export { Extra, Extras } from './extra';
 export { Hub } from './hub';
-export { Integration, IntegrationClass } from './integration';
+export { Integration, IntegrationClass, IntegrationV7 } from './integration';
 export { LogLevel } from './loglevel';
 export { Mechanism } from './mechanism';
 export { ExtractedNodeRequestData, Primitive, WorkerLocation } from './misc';

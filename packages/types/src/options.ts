@@ -2,7 +2,7 @@
 
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { Event, EventHint } from './event';
-import { Integration } from './integration';
+import { Integration, IntegrationV7 } from './integration';
 import { LogLevel } from './loglevel';
 import { SdkMetadata } from './sdkmetadata';
 import { SamplingContext } from './transaction';
@@ -34,6 +34,9 @@ export interface Options {
    * TODO: We should consider changing this to `boolean | Integration[]`
    */
   defaultIntegrations?: false | Integration[];
+
+  // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
+  fancyIntegrations?: IntegrationV7[];
 
   /**
    * List of integrations that should be installed after SDK was initialized.
@@ -201,6 +204,9 @@ export interface OptionsV7 {
    * TODO: We should consider changing this to `boolean | Integration[]`
    */
   defaultIntegrations?: false | Integration[];
+
+  // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
+  fancyIntegrations?: IntegrationV7[];
 
   /**
    * List of integrations that should be installed after SDK was initialized.

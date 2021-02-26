@@ -1,4 +1,4 @@
-import { InboundFilters } from '../../../src/integrations/inboundfilters';
+import { InboundFilters } from '../src/index';
 
 let inboundFilters: any;
 
