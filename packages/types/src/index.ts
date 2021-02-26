@@ -1,5 +1,5 @@
 export { Breadcrumb, BreadcrumbHint } from './breadcrumb';
-export { Client } from './client';
+export { Client, ClientLike } from './client';
 export { Context, Contexts } from './context';
 export { Dsn, DsnComponents, DsnLike, DsnProtocol } from './dsn';
 export { DebugImage, DebugImageType, DebugMeta } from './debugMeta';
@@ -13,7 +13,7 @@ export { Integration, IntegrationClass } from './integration';
 export { LogLevel } from './loglevel';
 export { Mechanism } from './mechanism';
 export { ExtractedNodeRequestData, Primitive, WorkerLocation } from './misc';
-export { Options } from './options';
+export { Options, OptionsV7 } from './options';
 export { Package } from './package';
 export { Request, SentryRequest, SentryRequestType } from './request';
 export { Response } from './response';

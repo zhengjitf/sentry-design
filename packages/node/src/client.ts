@@ -64,13 +64,13 @@ export class NodeClient extends BaseClient<NodeOptions> {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   protected _eventFromException(exception: any, hint?: EventHint): PromiseLike<Event> {
-    return eventFromException(this._options, exception, hint);
+    return eventFromException(this.options, exception, hint);
   }
 
   /**
    * @inheritDoc
    */
   protected _eventFromMessage(message: string, level: Severity = Severity.Info, hint?: EventHint): PromiseLike<Event> {
-    return eventFromMessage(this._options, message, level, hint);
+    return eventFromMessage(this.options, message, level, hint);
   }
 }

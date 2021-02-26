@@ -90,13 +90,13 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
    * @inheritDoc
    */
   protected _eventFromException(exception: unknown, hint?: EventHint): PromiseLike<Event> {
-    return eventFromException(this._options, exception, hint);
+    return eventFromException(this.options, exception, hint);
   }
   /**
    * @inheritDoc
    */
   protected _eventFromMessage(message: string, level: Severity = Severity.Info, hint?: EventHint): PromiseLike<Event> {
-    return eventFromMessage(this._options, message, level, hint);
+    return eventFromMessage(this.options, message, level, hint);
   }
 
   // TODO: Restore this functionality somewhere else, it definitely shouldn't be here.
