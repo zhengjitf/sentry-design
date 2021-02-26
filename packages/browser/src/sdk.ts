@@ -8,7 +8,6 @@ import { Breadcrumbs, GlobalHandlers, LinkedErrors, TryCatch, UserAgent } from '
 
 export const defaultIntegrations = [
   new CoreIntegrations.InboundFilters(),
-  new CoreIntegrations.FunctionToString(),
   new TryCatch(),
   new Breadcrumbs(),
   new GlobalHandlers(),

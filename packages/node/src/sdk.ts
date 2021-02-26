@@ -10,7 +10,6 @@ import { Console, Http, LinkedErrors, OnUncaughtException, OnUnhandledRejection 
 export const defaultIntegrations = [
   // Common
   new CoreIntegrations.InboundFilters(),
-  new CoreIntegrations.FunctionToString(),
   // Native Wrappers
   new Console(),
   new Http(),
