@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { getCurrentHub } from '@sentry/core';
-import { Event, Integration, Primitive, Severity } from '@sentry/types';
+import { ClientLike, Event, IntegrationV7, Primitive, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addInstrumentationHandler,
@@ -14,13 +13,13 @@ import {
 import { eventFromUnknownInput } from '../eventbuilder';
 import { shouldIgnoreOnError } from '../helpers';
 
-interface GlobalHandlersIntegrations {
+type GlobalHandlersIntegrations = {
   onerror: boolean;
   onunhandledrejection: boolean;
-}
+};
 
 /** Global handlers */
-export class GlobalHandlers implements Integration {
+export class GlobalHandlers implements IntegrationV7 {
   /**
    * @inheritDoc
    */
@@ -33,9 +32,7 @@ export class GlobalHandlers implements Integration {
 
   private readonly _options: GlobalHandlersIntegrations;
 
-  private _onErrorHandlerInstalled: boolean = false;
-
-  private _onUnhandledRejectionHandlerInstalled: boolean = false;
+  private _client!: ClientLike;
 
   public constructor(options?: GlobalHandlersIntegrations) {
     this._options = {
@@ -47,7 +44,9 @@ export class GlobalHandlers implements Integration {
   /**
    * @inheritDoc
    */
-  public setupOnce(): void {
+  public install(client: ClientLike): void {
+    this._client = client;
+
     Error.stackTraceLimit = 50;
 
     if (this._options.onerror) {
@@ -62,33 +61,22 @@ export class GlobalHandlers implements Integration {
   }
 
   private _installGlobalOnErrorHandler(): void {
-    if (this._onErrorHandlerInstalled) {
-      return;
-    }
-
     addInstrumentationHandler({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      callback: (data: { msg: any; url: any; line: any; column: any; error: any }) => {
-        const error = data.error;
-        const currentHub = getCurrentHub();
-        const hasIntegration = currentHub.getIntegration(GlobalHandlers);
-        const isFailedOwnDelivery = error && error.__sentry_own_request__ === true;
-
-        if (!hasIntegration || shouldIgnoreOnError() || isFailedOwnDelivery) {
+      callback: ({ msg, url, line, column, error }) => {
+        if (shouldIgnoreOnError() || error?.__sentry_own_request__) {
           return;
         }
 
-        const client = currentHub.getClient();
         const event = isPrimitive(error)
-          ? this._eventFromIncompleteOnError(data.msg, data.url, data.line, data.column)
+          ? this._eventFromIncompleteOnError(msg, url, line, column)
           : this._enhanceEventWithInitialFrame(
               eventFromUnknownInput(error, undefined, {
-                attachStacktrace: client?.options?.attachStacktrace,
+                attachStacktrace: this._client.options?.attachStacktrace,
                 rejection: false,
               }),
-              data.url,
-              data.line,
-              data.column,
+              url,
+              line,
+              column,
             );
 
         addExceptionMechanism(event, {
@@ -96,21 +84,15 @@ export class GlobalHandlers implements Integration {
           type: 'onerror',
         });
 
-        currentHub.captureEvent(event, {
+        this._client.captureEvent(event, {
           originalException: error,
         });
       },
       type: 'error',
     });
-
-    this._onErrorHandlerInstalled = true;
   }
 
   private _installGlobalOnUnhandledRejectionHandler(): void {
-    if (this._onUnhandledRejectionHandlerInstalled) {
-      return;
-    }
-
     addInstrumentationHandler({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       callback: (e: any) => {
@@ -135,19 +117,14 @@ export class GlobalHandlers implements Integration {
           // no-empty
         }
 
-        const currentHub = getCurrentHub();
-        const hasIntegration = currentHub.getIntegration(GlobalHandlers);
-        const isFailedOwnDelivery = error && error.__sentry_own_request__ === true;
-
-        if (!hasIntegration || shouldIgnoreOnError() || isFailedOwnDelivery) {
-          return true;
+        if (shouldIgnoreOnError() || error?.__sentry_own_request__) {
+          return;
         }
 
-        const client = currentHub.getClient();
         const event = isPrimitive(error)
           ? this._eventFromRejectionWithPrimitive(error)
           : eventFromUnknownInput(error, undefined, {
-              attachStacktrace: client?.options?.attachStacktrace,
+              attachStacktrace: this._client.options?.attachStacktrace,
               rejection: true,
             });
 
@@ -158,7 +135,7 @@ export class GlobalHandlers implements Integration {
           type: 'onunhandledrejection',
         });
 
-        currentHub.captureEvent(event, {
+        this._client.captureEvent(event, {
           originalException: error,
         });
 
@@ -166,8 +143,6 @@ export class GlobalHandlers implements Integration {
       },
       type: 'unhandledrejection',
     });
-
-    this._onUnhandledRejectionHandlerInstalled = true;
   }
 
   /**

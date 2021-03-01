@@ -7,13 +7,7 @@ import { BrowserClient, BrowserOptions } from './client';
 import { wrap as internalWrap } from './helpers';
 import { Breadcrumbs, GlobalHandlers, LinkedErrors, TryCatch, UserAgent } from './integrations';
 
-export const defaultIntegrations = [
-  new TryCatch(),
-  new Breadcrumbs(),
-  new GlobalHandlers(),
-  new LinkedErrors(),
-  new UserAgent(),
-];
+export const defaultIntegrations = [new TryCatch(), new Breadcrumbs(), new LinkedErrors(), new UserAgent()];
 
 /**
  * The Sentry Browser SDK Client.
@@ -74,7 +68,7 @@ export const defaultIntegrations = [
  */
 export function init(options: BrowserOptions = {}): void {
   // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
-  options.fancyIntegrations = [new InboundFilters()];
+  options.fancyIntegrations = [new InboundFilters(), new GlobalHandlers()];
 
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;
