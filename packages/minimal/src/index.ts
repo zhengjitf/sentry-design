@@ -1,4 +1,5 @@
-import { getCurrentHub, Hub, Scope } from '@sentry/hub';
+import { getCurrentHub, Hub } from '@sentry/hub';
+import { Scope } from '@sentry/scope';
 import {
   Breadcrumb,
   CaptureContext,

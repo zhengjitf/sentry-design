@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@sentry/hub": "6.2.3",
+    "@sentry/scope": "7.0.0-alpha.0",
     "@sentry/types": "6.2.3"
   },
   "scripts": {

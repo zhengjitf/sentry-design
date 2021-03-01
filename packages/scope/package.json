@@ -1,24 +1,20 @@
 {
-  "name": "@sentry/hub",
-  "version": "6.2.3",
-  "description": "Sentry hub which handles global state managment.",
+  "name": "@sentry/scope",
+  "version": "7.0.0-alpha.0",
+  "description": "Sentry package responsible for scope management",
   "repository": "git://github.com/getsentry/sentry-javascript.git",
-  "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/hub",
+  "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/scope",
   "author": "Sentry",
   "license": "BSD-3-Clause",
-  "engines": {
-    "node": ">=6"
+  "publishConfig": {
+    "access": "public"
   },
   "main": "dist/index.js",
   "module": "esm/index.js",
   "types": "dist/index.d.ts",
-  "publishConfig": {
-    "access": "public"
-  },
   "dependencies": {
-    "@sentry/scope": "7.0.0-alpha.0",
-    "@sentry/types": "6.2.3",
-    "@sentry/utils": "6.2.3"
+    "@sentry/types": "6.1.0",
+    "@sentry/utils": "6.1.0"
   },
   "scripts": {
     "build": "run-p build:es5 build:esm",

@@ -1,7 +1,7 @@
 import { Client } from '@sentry/types';
+import { Scope } from '@sentry/scope';
 
 import { Hub } from './hub';
-import { Scope } from './scope';
 
 /**
  * A layer in the process stack.

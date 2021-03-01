@@ -21,6 +21,9 @@ import { dateTimestampInSeconds, getGlobalObject, isPlainObject, isThenable, Syn
 
 import { Session } from './session';
 
+// TODO: Session shouldnt live here, but it's easier to refactor with it being here for now.
+export { Session };
+
 /**
  * Holds additional event information. {@link Scope.applyToEvent} will be
  * called by the client before an event will be sent.

@@ -22,10 +22,9 @@ import {
   User,
 } from '@sentry/types';
 import { consoleSandbox, dateTimestampInSeconds, getGlobalObject, isNodeEnv, logger, uuid4 } from '@sentry/utils';
+import { Scope, Session } from '@sentry/scope';
 
 import { Carrier, DomainAsCarrier, Layer } from './interfaces';
-import { Scope } from './scope';
-import { Session } from './session';
 
 /**
  * API compatibility version of this hub.

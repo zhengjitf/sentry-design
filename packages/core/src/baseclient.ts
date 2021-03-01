@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Scope, Session } from '@sentry/hub';
+import { Scope, Session } from '@sentry/scope';
 import {
   ClientLike,
   Event,

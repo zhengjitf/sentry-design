@@ -21,6 +21,7 @@
     "@sentry/transport-base": "7.0.0-alpha.0",
     "@sentry/transport-fetch": "7.0.0-alpha.0",
     "@sentry/transport-xhr": "7.0.0-alpha.0",
+    "@sentry/scope": "7.0.0-alpha.0",
     "@sentry/types": "6.2.3",
     "@sentry/utils": "6.2.3"
   },

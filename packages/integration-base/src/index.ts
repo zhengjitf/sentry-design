@@ -1,4 +1,5 @@
-import { addGlobalEventProcessor, getCurrentHub } from '@sentry/hub';
+import { getCurrentHub } from '@sentry/hub';
+import { addGlobalEventProcessor } from '@sentry/scope';
 import { Integration, OptionsV7 } from '@sentry/types';
 import { logger } from '@sentry/utils';
 
