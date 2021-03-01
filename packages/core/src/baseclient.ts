@@ -29,6 +29,7 @@ import {
   TransportRequest,
   Transport,
 } from '@sentry/transport-base';
+import { IntegrationIndex, setupIntegrations } from '@sentry/integration-base';
 
 /**
  * Base implementation for all JavaScript SDK clients.
@@ -90,6 +91,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     }
 
     this._transport = this._setupTransport();
+    this._integrations = setupIntegrations(options);
   }
 
   /**

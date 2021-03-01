@@ -1,8 +1,6 @@
 import { addGlobalEventProcessor, getCurrentHub } from '@sentry/hub';
-import { Integration } from '@sentry/types';
+import { Integration, OptionsV7 } from '@sentry/types';
 import { logger } from '@sentry/utils';
-
-import { Options } from './options';
 
 export const installedIntegrations: string[] = [];
 
@@ -12,7 +10,7 @@ export interface IntegrationIndex {
 }
 
 /** Gets integration to install */
-export function getIntegrationsToSetup(options: Options): Integration[] {
+export function getIntegrationsToSetup(options: OptionsV7): Integration[] {
   const defaultIntegrations = (options.defaultIntegrations && [...options.defaultIntegrations]) || [];
   const userIntegrations = options.integrations;
   let integrations: Integration[] = [];
@@ -55,27 +53,22 @@ export function getIntegrationsToSetup(options: Options): Integration[] {
   return integrations;
 }
 
-/** Setup given integration */
-export function setupIntegration(integration: Integration): void {
-  if (installedIntegrations.indexOf(integration.name) !== -1) {
-    return;
-  }
-  integration.setupOnce(addGlobalEventProcessor, getCurrentHub);
-  installedIntegrations.push(integration.name);
-  logger.log(`Integration installed: ${integration.name}`);
-}
-
 /**
  * Given a list of integration instances this installs them all. When `withDefaults` is set to `true` then all default
  * integrations are added unless they were already provided before.
  * @param integrations array of integration instances
  * @param withDefault should enable default integrations
  */
-export function setupIntegrations<O extends Options>(options: O): IntegrationIndex {
+export function setupIntegrations<O extends OptionsV7>(options: O): IntegrationIndex {
   const integrations: IntegrationIndex = {};
   getIntegrationsToSetup(options).forEach(integration => {
     integrations[integration.name] = integration;
-    setupIntegration(integration);
+    if (installedIntegrations.indexOf(integration.name) !== -1) {
+      return;
+    }
+    integration.setupOnce(addGlobalEventProcessor, getCurrentHub);
+    installedIntegrations.push(integration.name);
+    logger.log(`Integration installed: ${integration.name}`);
   });
   return integrations;
 }
