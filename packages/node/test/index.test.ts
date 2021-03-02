@@ -1,6 +1,6 @@
-import { SDK_VERSION } from '@sentry/core';
 import * as domain from 'domain';
 
+import { SDK_VERSION } from '@sentry/core';
 import { ResponseStatus, TransportRequest, TransportResponse } from '@sentry/transport-base';
 
 import {
