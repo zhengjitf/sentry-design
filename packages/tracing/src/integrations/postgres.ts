@@ -1,5 +1,5 @@
-import { Hub } from '@sentry/hub';
-import { EventProcessor, Integration } from '@sentry/types';
+import { getSpan } from '@sentry/scope';
+import { Integration } from '@sentry/types';
 import { dynamicRequire, fill, logger } from '@sentry/utils';
 
 interface PgClient {
@@ -23,7 +23,7 @@ export class Postgres implements Integration {
   /**
    * @inheritDoc
    */
-  public setupOnce(_: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
+  public setupOnce(): void {
     let client: PgClient;
 
     try {
@@ -42,8 +42,7 @@ export class Postgres implements Integration {
      */
     fill(client.prototype, 'query', function(orig: () => void | Promise<unknown>) {
       return function(this: unknown, config: unknown, values: unknown, callback: unknown) {
-        const scope = getCurrentHub().getScope();
-        const parentSpan = scope?.getSpan();
+        const parentSpan = getSpan();
         const span = parentSpan?.startChild({
           description: typeof config === 'string' ? config : (config as { text: string }).text,
           op: `db`,

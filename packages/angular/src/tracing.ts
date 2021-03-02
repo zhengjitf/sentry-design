@@ -1,6 +1,6 @@
 import { AfterViewInit, Directive, Injectable, Input, OnInit } from '@angular/core';
 import { Event, NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { getCurrentHub } from '@sentry/browser';
+import { getTransaction } from '@sentry/scope';
 import { Span, Transaction, TransactionContext } from '@sentry/types';
 import { logger, stripUrlQueryAndFragment, timestampWithMs } from '@sentry/utils';
 import { Observable } from 'rxjs';
@@ -31,22 +31,6 @@ export function routingInstrumentation(
 }
 
 /**
- * Grabs active transaction off scope
- */
-export function getActiveTransaction(): Transaction | undefined {
-  const currentHub = getCurrentHub();
-
-  if (currentHub) {
-    const scope = currentHub.getScope();
-    if (scope) {
-      return scope.getTransaction();
-    }
-  }
-
-  return undefined;
-}
-
-/**
  * Angular's Service responsible for hooking into Angular Router and tracking current navigation process.
  * Creates a new transaction for every route change and measures a duration of routing process.
  */
@@ -62,7 +46,7 @@ export class TraceService {
 
       const navigationEvent = event as NavigationStart;
       const strippedUrl = stripUrlQueryAndFragment(navigationEvent.url);
-      let activeTransaction = getActiveTransaction();
+      let activeTransaction = getTransaction();
 
       if (!activeTransaction && stashedStartTransactionOnLocationChange) {
         activeTransaction = stashedStartTransaction({
@@ -121,7 +105,7 @@ export class TraceDirective implements OnInit, AfterViewInit {
    * @inheritdoc
    */
   public ngOnInit(): void {
-    const activeTransaction = getActiveTransaction();
+    const activeTransaction = getTransaction();
     if (activeTransaction) {
       this._tracingSpan = activeTransaction.startChild({
         description: `<${this.componentName}>`,
@@ -153,7 +137,7 @@ export function TraceClassDecorator(): ClassDecorator {
     const originalOnInit = target.prototype.ngOnInit;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     target.prototype.ngOnInit = function(...args: any[]): ReturnType<typeof originalOnInit> {
-      const activeTransaction = getActiveTransaction();
+      const activeTransaction = getTransaction();
       if (activeTransaction) {
         tracingSpan = activeTransaction.startChild({
           description: `<${target.name}>`,
@@ -189,7 +173,7 @@ export function TraceMethodDecorator(): MethodDecorator {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = function(...args: any[]): ReturnType<typeof originalMethod> {
       const now = timestampWithMs();
-      const activeTransaction = getActiveTransaction();
+      const activeTransaction = getTransaction();
       if (activeTransaction) {
         activeTransaction.startChild({
           description: `<${target.constructor.name}>`,

@@ -1,8 +1,9 @@
 import { getCurrentHub } from '@sentry/hub';
+import { getTransaction } from '@sentry/scope';
 import { addInstrumentationHandler, isInstanceOf, isMatchingPattern } from '@sentry/utils';
 
 import { Span } from '../span';
-import { getActiveTransaction, hasTracingEnabled } from '../utils';
+import { hasTracingEnabled } from '../utils';
 
 export const DEFAULT_TRACING_ORIGINS = ['localhost', /^\//];
 
@@ -169,7 +170,7 @@ export function fetchCallback(
     return;
   }
 
-  const activeTransaction = getActiveTransaction();
+  const activeTransaction = getTransaction();
   if (activeTransaction) {
     const span = activeTransaction.startChild({
       data: {
@@ -241,7 +242,7 @@ export function xhrCallback(
   }
 
   // if not, create a new span to track it
-  const activeTransaction = getActiveTransaction();
+  const activeTransaction = getTransaction();
   if (activeTransaction) {
     const span = activeTransaction.startChild({
       data: {

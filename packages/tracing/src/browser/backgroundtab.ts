@@ -1,8 +1,8 @@
+import { getTransaction } from '@sentry/scope';
 import { getGlobalObject, logger } from '@sentry/utils';
 
 import { IdleTransaction } from '../idletransaction';
 import { SpanStatus } from '../spanstatus';
-import { getActiveTransaction } from '../utils';
 
 const global = getGlobalObject<Window>();
 
@@ -13,7 +13,7 @@ const global = getGlobalObject<Window>();
 export function registerBackgroundTabDetection(): void {
   if (global && global.document) {
     global.document.addEventListener('visibilitychange', () => {
-      const activeTransaction = getActiveTransaction() as IdleTransaction;
+      const activeTransaction = getTransaction() as IdleTransaction;
       if (global.document.hidden && activeTransaction) {
         logger.log(
           `[Tracing] Transaction: ${SpanStatus.Cancelled} -> since tab moved to the background, op: ${activeTransaction.op}`,

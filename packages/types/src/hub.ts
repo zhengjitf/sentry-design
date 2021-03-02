@@ -1,15 +1,12 @@
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { Client } from './client';
 import { Event, EventHint } from './event';
-import { Extra, Extras } from './extra';
 import { Integration, IntegrationClass } from './integration';
-import { Primitive } from './misc';
 import { Scope } from './scope';
 import { Session, SessionContext } from './session';
 import { Severity } from './severity';
 import { Span, SpanContext } from './span';
 import { CustomSamplingContext, Transaction, TransactionContext } from './transaction';
-import { User } from './user';
 
 /**
  * Internal class used to make sure we always have the latest internal functions
@@ -115,50 +112,6 @@ export interface Hub {
    * @param hint May contain additional information about the original breadcrumb.
    */
   addBreadcrumb(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): void;
-
-  /**
-   * Updates user context information for future events.
-   *
-   * @param user User context object to be set in the current context. Pass `null` to unset the user.
-   */
-  setUser(user: User | null): void;
-
-  /**
-   * Set an object that will be merged sent as tags data with the event.
-   *
-   * @param tags Tags context object to merge into current context.
-   */
-  setTags(tags: { [key: string]: Primitive }): void;
-
-  /**
-   * Set key:value that will be sent as tags data with the event.
-   *
-   * Can also be used to unset a tag, by passing `undefined`.
-   *
-   * @param key String key of tag
-   * @param value Value of tag
-   */
-  setTag(key: string, value: Primitive): void;
-
-  /**
-   * Set key:value that will be sent as extra data with the event.
-   * @param key String of extra
-   * @param extra Any kind of data. This data will be normalized.
-   */
-  setExtra(key: string, extra: Extra): void;
-
-  /**
-   * Set an object that will be merged sent as extra data with the event.
-   * @param extras Extras object to merge into current context.
-   */
-  setExtras(extras: Extras): void;
-
-  /**
-   * Sets context data with the given name.
-   * @param name of the context
-   * @param context Any kind of data. This data will be normalized.
-   */
-  setContext(name: string, context: { [key: string]: any } | null): void;
 
   /**
    * Callback to set context information onto the scope.

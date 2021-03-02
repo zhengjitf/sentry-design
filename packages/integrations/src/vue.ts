@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EventProcessor, Hub, Integration, IntegrationClass, Scope, Span, Transaction } from '@sentry/types';
+import { getTransaction } from '@sentry/scope';
+import { EventProcessor, Hub, Integration, IntegrationClass, Span } from '@sentry/types';
 import { basename, getGlobalObject, logger, timestampWithMs } from '@sentry/utils';
 
 /**
@@ -272,7 +273,7 @@ export class Vue implements Integration {
             }
             // Use functionality from @sentry/tracing
           } else {
-            const activeTransaction = getActiveTransaction(getCurrentHub());
+            const activeTransaction = getTransaction();
             if (activeTransaction) {
               this._rootSpan = activeTransaction.startChild({
                 description: 'Application Render',
@@ -432,20 +433,4 @@ export class Vue implements Integration {
       }
     };
   }
-}
-
-interface HubType extends Hub {
-  getScope?(): Scope | undefined;
-}
-
-/** Grabs active transaction off scope */
-export function getActiveTransaction<T extends Transaction>(hub: HubType): T | undefined {
-  if (hub && hub.getScope) {
-    const scope = hub.getScope() as Scope;
-    if (scope) {
-      return scope.getTransaction() as T | undefined;
-    }
-  }
-
-  return undefined;
 }

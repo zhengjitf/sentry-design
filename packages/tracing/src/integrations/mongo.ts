@@ -1,5 +1,5 @@
-import { Hub } from '@sentry/hub';
-import { EventProcessor, Integration, SpanContext } from '@sentry/types';
+import { getSpan } from '@sentry/scope';
+import { Integration, SpanContext } from '@sentry/types';
 import { dynamicRequire, fill, isThenable, logger } from '@sentry/utils';
 
 // This allows us to use the same array for both defaults options and the type itself.
@@ -118,7 +118,7 @@ export class Mongo implements Integration {
   /**
    * @inheritDoc
    */
-  public setupOnce(_: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
+  public setupOnce(): void {
     let collection: MongoCollection;
     const moduleName = this._useMongoose ? 'mongoose' : 'mongodb';
     try {
@@ -129,20 +129,20 @@ export class Mongo implements Integration {
       return;
     }
 
-    this._instrumentOperations(collection, this._operations, getCurrentHub);
+    this._instrumentOperations(collection, this._operations);
   }
 
   /**
    * Patches original collection methods
    */
-  private _instrumentOperations(collection: MongoCollection, operations: Operation[], getCurrentHub: () => Hub): void {
-    operations.forEach((operation: Operation) => this._patchOperation(collection, operation, getCurrentHub));
+  private _instrumentOperations(collection: MongoCollection, operations: Operation[]): void {
+    operations.forEach((operation: Operation) => this._patchOperation(collection, operation));
   }
 
   /**
    * Patches original collection to utilize our tracing functionality
    */
-  private _patchOperation(collection: MongoCollection, operation: Operation, getCurrentHub: () => Hub): void {
+  private _patchOperation(collection: MongoCollection, operation: Operation): void {
     if (!(operation in collection.prototype)) return;
 
     const getSpanContext = this._getSpanContextFromOperationArguments.bind(this);
@@ -150,8 +150,7 @@ export class Mongo implements Integration {
     fill(collection.prototype, operation, function(orig: () => void | Promise<unknown>) {
       return function(this: unknown, ...args: unknown[]) {
         const lastArg = args[args.length - 1];
-        const scope = getCurrentHub().getScope();
-        const parentSpan = scope?.getSpan();
+        const parentSpan = getSpan();
 
         // Check if the operation was passed a callback. (mapReduce requires a different check, as
         // its (non-callback) arguments can also be functions.)

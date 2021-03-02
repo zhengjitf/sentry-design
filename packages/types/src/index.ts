@@ -1,4 +1,5 @@
 export { Breadcrumb, BreadcrumbHint } from './breadcrumb';
+export { CarrierV7 } from './carrier';
 export { Client, ClientLike } from './client';
 export { Context, Contexts } from './context';
 export { Dsn, DsnComponents, DsnLike, DsnProtocol } from './dsn';
@@ -18,7 +19,7 @@ export { Package } from './package';
 export { Request, SentryRequest, SentryRequestType } from './request';
 export { Response } from './response';
 export { Runtime } from './runtime';
-export { CaptureContext, Scope, ScopeContext } from './scope';
+export { CaptureContext, Scope, ScopeLike, ScopeContext } from './scope';
 export { SdkInfo } from './sdkinfo';
 export { SdkMetadata } from './sdkmetadata';
 export { Session, SessionContext, SessionStatus } from './session';

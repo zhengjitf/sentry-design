@@ -16,18 +16,12 @@
     "access": "public"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@sentry/hub": "6.2.3",
     "@sentry/minimal": "6.2.3",
-    "@sentry/types": "6.2.3",
-    "@sentry/utils": "6.2.3"
-=======
-    "@sentry/hub": "6.2.3",
-    "@sentry/minimal": "6.2.3",
+    "@sentry/scope": "7.0.0-alpha.0",
     "@sentry/transport-base": "7.0.0-alpha.0",
     "@sentry/types": "6.2.3",
     "@sentry/utils": "6.2.3"
->>>>>>> fe8941a6 ([v7] Use new transports in all packages)
   },
   "devDependencies": {
     "@sentry/browser": "6.1.0",

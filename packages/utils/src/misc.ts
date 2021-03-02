@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
-import { Event, Integration, StackFrame, WrappedFunction } from '@sentry/types';
+import { CarrierV7, Event, Integration, StackFrame, WrappedFunction } from '@sentry/types';
 
 import { isNodeEnv } from './node';
 import { snipLine } from './string';
@@ -15,6 +15,9 @@ interface SentryGlobal {
   SENTRY_RELEASE?: {
     id?: string;
   };
+  // TODO: Should we include version number here? It'll help us with scenarios where someone has multiple instances
+  // of Sentry, but using different verisons, eg V5+V7.
+  __SENTRY_V7__: CarrierV7;
   __SENTRY__: {
     globalEventProcessors: any;
     hub: any;

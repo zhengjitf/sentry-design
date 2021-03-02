@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 
-import { getCurrentHub } from '@sentry/node';
-import { Integration, Span, Transaction } from '@sentry/types';
+import { Integration, Span } from '@sentry/types';
 import { fill } from '@sentry/utils';
+import { getTransaction } from '@sentry/scope';
 
 interface GrpcFunction extends CallableFunction {
   (...args: unknown[]): EventEmitter;
@@ -105,12 +105,8 @@ function fillGrpcFunction(stub: Stub, serviceIdentifier: string, methodName: str
       if (typeof ret?.on !== 'function') {
         return ret;
       }
-      let transaction: Transaction | undefined;
+      const transaction = getTransaction();
       let span: Span | undefined;
-      const scope = getCurrentHub().getScope();
-      if (scope) {
-        transaction = scope.getTransaction();
-      }
       if (transaction) {
         span = transaction.startChild({
           description: `${callType} ${methodName}`,

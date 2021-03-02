@@ -4,10 +4,10 @@ import { run } from '@ember/runloop';
 import * as Sentry from '@sentry/browser';
 import { Span, Transaction, Integration } from '@sentry/types';
 import { EmberRunQueues } from '@ember/runloop/-private/types';
-import { getActiveTransaction } from '..';
 import { timestampWithMs } from '@sentry/utils';
 import { macroCondition, isTesting, getOwnConfig } from '@embroider/macros';
 import { EmberSentryConfig, OwnConfig } from '../types';
+import { getTransaction } from '@sentry/scope';
 
 function getSentryConfig() {
   return getOwnConfig<OwnConfig>().sentryConfig;
@@ -142,7 +142,7 @@ function _instrumentEmberRunloop(config: EmberSentryConfig) {
     if (previousInstance) {
       return;
     }
-    const activeTransaction = getActiveTransaction();
+    const activeTransaction = getTransaction();
     if (!activeTransaction) {
       return;
     }
@@ -173,7 +173,7 @@ function _instrumentEmberRunloop(config: EmberSentryConfig) {
 
           // Setup for next queue
 
-          const stillActiveTransaction = getActiveTransaction();
+          const stillActiveTransaction = getTransaction();
           if (!stillActiveTransaction) {
             return;
           }
@@ -232,7 +232,7 @@ function processComponentRenderAfter(
   const componentRenderDuration = now - begin.now;
 
   if (componentRenderDuration * 1000 >= minComponentDuration) {
-    const activeTransaction = getActiveTransaction();
+    const activeTransaction = getTransaction();
 
     activeTransaction?.startChild({
       op,
@@ -312,7 +312,7 @@ function _instrumentInitialLoad(config: EmberSentryConfig) {
   const startTimestamp = (measure.startTime + performance.timeOrigin) / 1000;
   const endTimestamp = startTimestamp + measure.duration / 1000;
 
-  const transaction = getActiveTransaction();
+  const transaction = getTransaction();
   const span = transaction?.startChild({
     op: 'ember.initial-load',
     startTimestamp,

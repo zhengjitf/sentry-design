@@ -18,6 +18,7 @@
   "dependencies": {
     "@sentry/minimal": "6.2.3",
     "@sentry/node": "6.2.3",
+    "@sentry/scope": "7.0.0-alpha.0",
     "@sentry/tracing": "6.2.3",
     "@sentry/types": "6.2.3",
     "@sentry/utils": "6.2.3",

@@ -6,12 +6,9 @@ import {
   CustomSamplingContext,
   Event,
   EventHint,
-  Extra,
-  Extras,
   Hub as HubInterface,
   Integration,
   IntegrationClass,
-  Primitive,
   SessionContext,
   SessionStatus,
   Severity,
@@ -19,7 +16,6 @@ import {
   SpanContext,
   Transaction,
   TransactionContext,
-  User,
 } from '@sentry/types';
 import { consoleSandbox, dateTimestampInSeconds, getGlobalObject, isNodeEnv, logger, uuid4 } from '@sentry/utils';
 import { Scope, Session } from '@sentry/scope';
@@ -250,55 +246,6 @@ export class Hub implements HubInterface {
     if (finalBreadcrumb === null) return;
 
     scope.addBreadcrumb(finalBreadcrumb, Math.min(maxBreadcrumbs, MAX_BREADCRUMBS));
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public setUser(user: User | null): void {
-    const scope = this.getScope();
-    if (scope) scope.setUser(user);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public setTags(tags: { [key: string]: Primitive }): void {
-    const scope = this.getScope();
-    if (scope) scope.setTags(tags);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public setExtras(extras: Extras): void {
-    const scope = this.getScope();
-    if (scope) scope.setExtras(extras);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public setTag(key: string, value: Primitive): void {
-    const scope = this.getScope();
-    if (scope) scope.setTag(key, value);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public setExtra(key: string, extra: Extra): void {
-    const scope = this.getScope();
-    if (scope) scope.setExtra(key, extra);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public setContext(name: string, context: { [key: string]: any } | null): void {
-    const scope = this.getScope();
-    if (scope) scope.setContext(name, context);
   }
 
   /**

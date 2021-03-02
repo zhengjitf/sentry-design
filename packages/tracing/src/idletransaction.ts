@@ -1,4 +1,5 @@
 import { Hub } from '@sentry/hub';
+import { getTransaction, setSpan } from '@sentry/scope';
 import { TransactionContext } from '@sentry/types';
 import { logger, timestampWithMs } from '@sentry/utils';
 
@@ -76,7 +77,7 @@ export class IdleTransaction extends Transaction {
 
   public constructor(
     transactionContext: TransactionContext,
-    private readonly _idleHub?: Hub,
+    _idleHub?: Hub,
     // The time to wait in ms until the idle transaction will be finished. Default: 1000
     private readonly _idleTimeout: number = DEFAULT_IDLE_TIMEOUT,
     // If an idle transaction should be put itself on and off the scope automatically.
@@ -86,7 +87,7 @@ export class IdleTransaction extends Transaction {
 
     if (_idleHub && _onScope) {
       // There should only be one active transaction on the scope
-      clearActiveTransaction(_idleHub);
+      clearActiveTransaction();
 
       // We set the transaction here on the scope so error events pick up the trace
       // context and attach it to the error.
@@ -143,7 +144,7 @@ export class IdleTransaction extends Transaction {
 
     // this._onScope is true if the transaction was previously on the scope.
     if (this._onScope) {
-      clearActiveTransaction(this._idleHub);
+      clearActiveTransaction();
     }
 
     return super.finish(endTimestamp);
@@ -273,14 +274,9 @@ export class IdleTransaction extends Transaction {
 /**
  * Reset active transaction on scope
  */
-function clearActiveTransaction(hub?: Hub): void {
-  if (hub) {
-    const scope = hub.getScope();
-    if (scope) {
-      const transaction = scope.getTransaction();
-      if (transaction) {
-        scope.setSpan(undefined);
-      }
-    }
+function clearActiveTransaction(): void {
+  const transaction = getTransaction();
+  if (transaction) {
+    setSpan(undefined);
   }
 }

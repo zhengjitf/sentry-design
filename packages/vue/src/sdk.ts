@@ -1,6 +1,7 @@
 /* eslint-disable max-lines, @typescript-eslint/no-explicit-any */
 import { BrowserOptions, getCurrentHub, init as browserInit, SDK_VERSION } from '@sentry/browser';
-import { Span, Transaction } from '@sentry/types';
+import { getTransaction } from '@sentry/scope';
+import { Span } from '@sentry/types';
 import { basename, getGlobalObject, logger, timestampWithMs } from '@sentry/utils';
 
 export interface VueOptions extends BrowserOptions {
@@ -258,7 +259,7 @@ class VueHelper {
         vm.$once(`hook:${hook}`, () => {
           // Create an activity on the first event call. There'll be no second call, as rootSpan will be in place,
           // thus new event handler won't be attached.
-          const activeTransaction = getActiveTransaction();
+          const activeTransaction = getTransaction();
           if (activeTransaction) {
             this._rootSpan = activeTransaction.startChild({
               description: 'Application Render',
@@ -275,7 +276,7 @@ class VueHelper {
         ? this._options.tracingOptions.trackComponents.indexOf(name) > -1
         : this._options.tracingOptions.trackComponents;
 
-      const childOf = this._rootSpan || getActiveTransaction();
+      const childOf = this._rootSpan || getTransaction();
 
       if (!childOf || !shouldTrack) {
         return;
@@ -402,11 +403,4 @@ class VueHelper {
       }
     };
   }
-}
-
-/** Grabs active transaction off scope, if any */
-export function getActiveTransaction(): Transaction | undefined {
-  return getCurrentHub()
-    .getScope()
-    ?.getTransaction();
 }

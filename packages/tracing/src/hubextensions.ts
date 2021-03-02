@@ -1,4 +1,5 @@
 import { getMainCarrier, Hub } from '@sentry/hub';
+import { getSpan } from '@sentry/scope';
 import {
   CustomSamplingContext,
   Options,
@@ -15,14 +16,11 @@ import { hasTracingEnabled } from './utils';
 
 /** Returns all trace headers that are currently on the top scope. */
 function traceHeaders(this: Hub): { [key: string]: string } {
-  const scope = this.getScope();
-  if (scope) {
-    const span = scope.getSpan();
-    if (span) {
-      return {
-        'sentry-trace': span.toTraceparent(),
-      };
-    }
+  const span = getSpan();
+  if (span) {
+    return {
+      'sentry-trace': span.toTraceparent(),
+    };
   }
   return {};
 }

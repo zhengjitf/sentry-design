@@ -1,5 +1,6 @@
 import { Breadcrumb } from './breadcrumb';
 import { Context, Contexts } from './context';
+import { Event, EventHint } from './event';
 import { EventProcessor } from './eventprocessor';
 import { Extra, Extras } from './extra';
 import { Primitive } from './misc';
@@ -20,11 +21,15 @@ export interface ScopeContext {
   fingerprint: string[];
 }
 
+export type ScopeLike = Scope;
+
 /**
  * Holds additional event information. {@link Scope.applyToEvent} will be
  * called by the client before an event will be sent.
  */
 export interface Scope {
+  applyToEvent(event: Event, hint?: EventHint): PromiseLike<Event | null>;
+
   /** Add new event processor that will be called after {@link applyToEvent}. */
   addEventProcessor(callback: EventProcessor): this;
 
@@ -136,6 +141,7 @@ export interface Scope {
    * @param breadcrumbs Breadcrumb
    * @param maxBreadcrumbs number of max breadcrumbs to merged into event.
    */
+  // TODO: maxBreadcrumbs should be set in the Scope constructor
   addBreadcrumb(breadcrumb: Breadcrumb, maxBreadcrumbs?: number): this;
 
   /**

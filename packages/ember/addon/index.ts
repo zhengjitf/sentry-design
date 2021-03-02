@@ -6,6 +6,7 @@ import { assert, warn } from '@ember/debug';
 import Ember from 'ember';
 import { timestampWithMs } from '@sentry/utils';
 import { OwnConfig } from './types';
+import { getTransaction } from '@sentry/scope';
 
 declare module '@ember/debug' {
   export function assert(desc: string, test: unknown): void;
@@ -49,18 +50,12 @@ export function InitSentryForEmber(_runtimeConfig: BrowserOptions | undefined) {
   }
 }
 
-export const getActiveTransaction = () => {
-  return Sentry.getCurrentHub()
-    ?.getScope()
-    ?.getTransaction();
-};
-
 export const instrumentRoutePerformance = (BaseRoute: any) => {
   const instrumentFunction = async (op: string, description: string, fn: Function, args: any) => {
     const startTimestamp = timestampWithMs();
     const result = await fn(...args);
 
-    const currentTransaction = getActiveTransaction();
+    const currentTransaction = getTransaction();
     if (!currentTransaction) {
       return result;
     }
