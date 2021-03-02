@@ -1,4 +1,5 @@
-import { captureException, withScope } from '@sentry/core';
+import { captureException } from '@sentry/core';
+import { withScope } from '@sentry/minimal';
 import { Event as SentryEvent, Mechanism, Scope, WrappedFunction } from '@sentry/types';
 import { addExceptionMechanism, addExceptionTypeValue, logger } from '@sentry/utils';
 import { Dsn, getReportDialogEndpoint, ReportDialogOptions } from '@sentry/transport-base';

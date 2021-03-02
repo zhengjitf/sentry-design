@@ -1,4 +1,7 @@
-import { captureException, Scope, showReportDialog, withScope } from '@sentry/browser';
+import { showReportDialog } from '@sentry/browser';
+import { withScope } from '@sentry/minimal';
+import { captureException } from '@sentry/core';
+import { Scope } from '@sentry/scope';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import * as React from 'react';
@@ -67,7 +70,15 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       if (beforeCapture) {
         beforeCapture(scope, error, componentStack);
       }
-      const eventId = captureException(error, { contexts: { react: { componentStack } } });
+      // TODO: Use correct eventID - workaround for differente captureException apis
+      let eventId: string = '';
+      withScope(scope => {
+        scope.setContext('react', { componentStack });
+        const id = captureException(error);
+        if (id) {
+          eventId = id;
+        }
+      });
       if (onError) {
         onError(error, componentStack, eventId);
       }

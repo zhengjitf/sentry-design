@@ -1,7 +1,7 @@
 import * as domain from 'domain';
 
-import { getCurrentHub, initAndBind } from '@sentry/core';
-import { getMainCarrier, setHubOnCarrier } from '@sentry/hub';
+import { initAndBind } from '@sentry/core';
+import { getCurrentHub, getMainCarrier, setHubOnCarrier } from '@sentry/hub';
 import { getGlobalObject } from '@sentry/utils';
 import { InboundFilters } from '@sentry/integration-inboundfilters';
 
@@ -115,41 +115,4 @@ export function init(options: NodeOptions = {}): void {
   }
 
   initAndBind(NodeClient, options);
-}
-
-/**
- * This is the getter for lastEventId.
- *
- * @returns The last event id of a captured event.
- */
-export function lastEventId(): string | undefined {
-  return getCurrentHub().lastEventId();
-}
-
-/**
- * A promise that resolves when all current events have been sent.
- * If you provide a timeout and the queue takes longer to drain the promise returns false.
- *
- * @param timeout Maximum time in ms the client should wait.
- */
-export async function flush(timeout?: number): Promise<boolean> {
-  const client = getCurrentHub().getClient<NodeClient>();
-  if (client) {
-    return client.flush(timeout);
-  }
-  return Promise.reject(false);
-}
-
-/**
- * A promise that resolves when all current events have been sent.
- * If you provide a timeout and the queue takes longer to drain the promise returns false.
- *
- * @param timeout Maximum time in ms the client should wait.
- */
-export async function close(timeout?: number): Promise<boolean> {
-  const client = getCurrentHub().getClient<NodeClient>();
-  if (client) {
-    return client.close(timeout);
-  }
-  return Promise.reject(false);
 }

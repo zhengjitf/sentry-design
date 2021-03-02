@@ -1,6 +1,6 @@
 import * as domain from 'domain';
 
-import { Event } from '@sentry/node';
+import { Event } from '@sentry/types';
 import { addExceptionMechanism } from '@sentry/utils';
 
 /**

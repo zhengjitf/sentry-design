@@ -81,6 +81,9 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
 
   protected _eventProcessors: EventProcessor[] = [];
 
+  /** Contains the last event id of a captured event.  */
+  private _lastEventId?: string;
+
   /**
    * Initializes this client instance.
    *
@@ -179,6 +182,10 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    */
   public getDsn(): Dsn | undefined {
     return this._dsn;
+  }
+
+  public lastEventId(): string | undefined {
+    return this._lastEventId;
   }
 
   /**

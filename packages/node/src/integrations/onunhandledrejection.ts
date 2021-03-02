@@ -1,4 +1,5 @@
-import { getCurrentHub, Scope } from '@sentry/core';
+import { Scope } from '@sentry/scope';
+import { getCurrentHub } from '@sentry/hub';
 import { Integration } from '@sentry/types';
 import { consoleSandbox } from '@sentry/utils';
 

@@ -1,4 +1,4 @@
-import { getCurrentHub } from '@sentry/core';
+import { getCurrentHub } from '@sentry/hub';
 import { addGlobalEventProcessor } from '@sentry/scope';
 import { Event, EventHint, Exception, ExtendedError, Integration } from '@sentry/types';
 import { isInstanceOf } from '@sentry/utils';

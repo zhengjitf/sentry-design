@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { CarrierV7, EventProcessor, ScopeLike } from '@sentry/types';
-import { getGlobalObject } from '@sentry/utils';
+import { getGlobalObject, logger } from '@sentry/utils';
 
 import { Scope } from './scope';
 
@@ -35,6 +35,7 @@ function getMainCarrier(): CarrierV7 {
 export function getCurrentScope(): ScopeLike {
   const carrier = getMainCarrier();
   if (!carrier.scope) {
+    logger.warn('No scope available on the carrier. Creating a new one.');
     carrier.scope = new Scope();
   }
   return carrier.scope;

@@ -61,6 +61,8 @@ export interface ClientLike<O extends OptionsV7 = OptionsV7> {
   /** Returns the current Dsn. */
   getDsn(): Dsn | undefined;
 
+  lastEventId(): string | undefined;
+
   /**
    * A promise that resolves when all current events have been sent.
    * If you provide a timeout and the queue takes longer to drain the promise returns false.

@@ -1,5 +1,6 @@
-import { getCurrentHub, initAndBind } from '@sentry/core';
-import { addInstrumentationHandler, getGlobalObject, logger, SyncPromise } from '@sentry/utils';
+import { initAndBind } from '@sentry/core';
+import { getCurrentHub } from '@sentry/hub';
+import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import { InboundFilters } from '@sentry/integration-inboundfilters';
 
@@ -107,15 +108,6 @@ export function showReportDialog(options: ReportDialogOptions = {}): void {
 }
 
 /**
- * This is the getter for lastEventId.
- *
- * @returns The last event id of a captured event.
- */
-export function lastEventId(): string | undefined {
-  return getCurrentHub().lastEventId();
-}
-
-/**
  * This function is here to be API compatible with the loader.
  * @hidden
  */
@@ -129,34 +121,6 @@ export function forceLoad(): void {
  */
 export function onLoad(callback: () => void): void {
   callback();
-}
-
-/**
- * A promise that resolves when all current events have been sent.
- * If you provide a timeout and the queue takes longer to drain the promise returns false.
- *
- * @param timeout Maximum time in ms the client should wait.
- */
-export function flush(timeout?: number): PromiseLike<boolean> {
-  const client = getCurrentHub().getClient<BrowserClient>();
-  if (client) {
-    return client.flush(timeout);
-  }
-  return SyncPromise.reject(false);
-}
-
-/**
- * A promise that resolves when all current events have been sent.
- * If you provide a timeout and the queue takes longer to drain the promise returns false.
- *
- * @param timeout Maximum time in ms the client should wait.
- */
-export function close(timeout?: number): PromiseLike<boolean> {
-  const client = getCurrentHub().getClient<BrowserClient>();
-  if (client) {
-    return client.close(timeout);
-  }
-  return SyncPromise.reject(false);
 }
 
 /**

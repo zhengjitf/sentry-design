@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { getCurrentHub } from '@sentry/core';
+import { getCurrentHub } from '@sentry/hub';
 import { Integration, Severity } from '@sentry/types';
 import { fill } from '@sentry/utils';
 

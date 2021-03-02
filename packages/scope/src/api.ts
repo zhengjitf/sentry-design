@@ -19,6 +19,8 @@ import {
 import { getCurrentScope } from './carrier';
 import { Session } from './session';
 
+// TODO: Use `ReturnType<ClientLike['captureException']>` instead?
+
 // TODO: Clone should actually return _a clone_, not be a static method
 // export function clone(scope?: ScopeLike): ScopeLike {
 //   return getCurrentScope().clone(scope)

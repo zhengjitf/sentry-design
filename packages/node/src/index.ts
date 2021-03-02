@@ -1,52 +1,24 @@
 export {
-  Breadcrumb,
-  BreadcrumbHint,
-  Request,
-  SdkInfo,
-  Event,
-  EventHint,
-  Exception,
-  Response,
-  Severity,
-  StackFrame,
-  Stacktrace,
-  Status,
-  Thread,
-  User,
-} from '@sentry/types';
-
-export {
   addGlobalEventProcessor,
   addBreadcrumb,
-  captureException,
-  captureEvent,
-  captureMessage,
-  configureScope,
-  getHubFromCarrier,
-  getCurrentHub,
-  Hub,
-  makeMain,
   Scope,
-  startTransaction,
-  SDK_VERSION,
   setContext,
   setExtra,
   setExtras,
   setTag,
   setTags,
   setUser,
-  withScope,
-} from '@sentry/core';
+} from '@sentry/scope';
+export { getHubFromCarrier, getCurrentHub, Hub, makeMain } from '@sentry/hub';
+export { configureScope, startTransaction, withScope } from '@sentry/minimal';
+export { captureException, captureEvent, captureMessage, close, flush, lastEventId, SDK_VERSION } from '@sentry/core';
 
 export { NodeClient, NodeOptions } from './client';
-export { defaultIntegrations, init, lastEventId, flush, close } from './sdk';
+export { defaultIntegrations, init } from './sdk';
 export { SDK_NAME } from './version';
 
+// TODO: Can be written as `export * as Handlers from './handlers'` but ESLint doesnt understand it for some reason. Investigate.
 import * as Handlers from './handlers';
-import * as NodeIntegrations from './integrations';
+import * as Integrations from './integrations';
 
-const INTEGRATIONS = {
-  ...NodeIntegrations,
-};
-
-export { INTEGRATIONS as Integrations, Handlers };
+export { Handlers, Integrations };

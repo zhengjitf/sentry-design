@@ -5,14 +5,15 @@ import * as http from 'http';
 import * as os from 'os';
 import * as url from 'url';
 
-import { captureException, getCurrentHub, startTransaction, withScope } from '@sentry/core';
+import { captureException, flush } from '@sentry/core';
+import { getCurrentHub } from '@sentry/hub';
+import { startTransaction, withScope } from '@sentry/minimal';
 import { extractTraceparentData, Span } from '@sentry/tracing';
 import { Event, ExtractedNodeRequestData, Transaction } from '@sentry/types';
 import { forget, isPlainObject, isString, logger, normalize, stripUrlQueryAndFragment } from '@sentry/utils';
 import * as cookie from 'cookie';
 
 import { NodeClient } from './client';
-import { flush } from './sdk';
 
 const DEFAULT_SHUTDOWN_TIMEOUT = 2000;
 
@@ -385,7 +386,7 @@ export function requestHandler(
           .then(() => {
             _end.call(this, chunk, encoding, cb);
           })
-          .then(null, e => {
+          .then(null, (e: unknown) => {
             logger.error(e);
           });
       };

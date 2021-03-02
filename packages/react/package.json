@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "@sentry/browser": "6.2.3",
+    "@sentry/core": "6.2.3",
     "@sentry/minimal": "6.2.3",
+    "@sentry/scope": "6.2.3",
     "@sentry/transport-base": "7.0.0-alpha.0",
     "@sentry/types": "6.2.3",
     "@sentry/utils": "6.2.3",
