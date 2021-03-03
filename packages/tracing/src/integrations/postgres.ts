@@ -1,4 +1,4 @@
-import { getSpan } from '@sentry/scope';
+import { getSpan } from '@sentry/minimal';
 import { Integration } from '@sentry/types';
 import { dynamicRequire, fill, logger } from '@sentry/utils';
 

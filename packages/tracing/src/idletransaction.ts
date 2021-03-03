@@ -1,5 +1,5 @@
 import { Hub } from '@sentry/hub';
-import { getTransaction, setSpan } from '@sentry/scope';
+import { getTransaction, setSpan } from '@sentry/minimal';
 import { TransactionContext } from '@sentry/types';
 import { logger, timestampWithMs } from '@sentry/utils';
 

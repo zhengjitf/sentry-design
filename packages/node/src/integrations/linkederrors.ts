@@ -1,5 +1,5 @@
 import { getCurrentHub } from '@sentry/hub';
-import { addGlobalEventProcessor } from '@sentry/scope';
+import { addGlobalEventProcessor } from '@sentry/minimal';
 import { Event, EventHint, Exception, ExtendedError, Integration } from '@sentry/types';
 import { isInstanceOf, SyncPromise } from '@sentry/utils';
 

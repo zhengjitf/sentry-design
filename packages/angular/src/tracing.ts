@@ -1,6 +1,6 @@
 import { AfterViewInit, Directive, Injectable, Input, OnInit } from '@angular/core';
 import { Event, NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 import { Span, Transaction, TransactionContext } from '@sentry/types';
 import { logger, stripUrlQueryAndFragment, timestampWithMs } from '@sentry/utils';
 import { Observable } from 'rxjs';

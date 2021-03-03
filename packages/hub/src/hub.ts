@@ -92,7 +92,7 @@ export class Hub implements HubInterface {
    */
   public pushScope(): Scope {
     // We want to clone the content of prev scope
-    const scope = Scope.clone(this.getScope());
+    const scope = this.getScope()?.clone() || new Scope();
     this.getStack().push({
       client: this.getClient(),
       scope,
@@ -466,7 +466,10 @@ function getHubFromActiveDomain(registry: Carrier): Hub {
     // If there's no hub on current domain, or it's an old API, assign a new one
     if (!hasHubOnCarrier(activeDomain) || getHubFromCarrier(activeDomain).isOlderThan(API_VERSION)) {
       const registryHubTopStack = getHubFromCarrier(registry).getStackTop();
-      setHubOnCarrier(activeDomain, new Hub(registryHubTopStack.client, Scope.clone(registryHubTopStack.scope)));
+      setHubOnCarrier(
+        activeDomain,
+        new Hub(registryHubTopStack.client, registryHubTopStack.scope?.clone() || new Scope()),
+      );
     }
 
     // Return hub that lives on a domain

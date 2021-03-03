@@ -1,5 +1,5 @@
 import { getCurrentHub } from '@sentry/hub';
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 import { addInstrumentationHandler, isInstanceOf, isMatchingPattern } from '@sentry/utils';
 
 import { Span } from '../span';

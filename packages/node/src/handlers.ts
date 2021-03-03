@@ -5,9 +5,8 @@ import * as http from 'http';
 import * as os from 'os';
 import * as url from 'url';
 
-import { captureException, flush } from '@sentry/core';
 import { getCurrentHub } from '@sentry/hub';
-import { startTransaction, withScope } from '@sentry/minimal';
+import { captureException, flush, startTransaction, withScope } from '@sentry/minimal';
 import { extractTraceparentData, Span } from '@sentry/tracing';
 import { Event, ExtractedNodeRequestData, Transaction } from '@sentry/types';
 import { forget, isPlainObject, isString, logger, normalize, stripUrlQueryAndFragment } from '@sentry/utils';

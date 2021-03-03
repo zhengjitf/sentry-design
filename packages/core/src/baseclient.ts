@@ -343,7 +343,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     // This allows us to prevent unnecessary copying of data if `captureContext` is not provided.
     let finalScope = scope;
     if (hint && hint.captureContext) {
-      finalScope = Scope.clone(finalScope).update(hint.captureContext);
+      finalScope = (finalScope?.clone() || new Scope()).update(hint.captureContext);
     }
 
     // We prepare the result here with a resolved Event.

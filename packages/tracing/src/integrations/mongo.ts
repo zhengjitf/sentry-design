@@ -1,4 +1,4 @@
-import { getSpan } from '@sentry/scope';
+import { getSpan } from '@sentry/minimal';
 import { Integration, SpanContext } from '@sentry/types';
 import { dynamicRequire, fill, isThenable, logger } from '@sentry/utils';
 

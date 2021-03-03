@@ -1,8 +1,6 @@
 /* eslint-disable max-lines */
-import { CarrierV7, EventProcessor, ScopeLike } from '@sentry/types';
+import { CarrierV7, ClientLike, EventProcessor, ScopeLike } from '@sentry/types';
 import { getGlobalObject, logger } from '@sentry/utils';
-
-import { Scope } from './scope';
 
 // TODO: Global event processors should be removed in favor of client/scope processors - need to remove all `addGloblaEventProcessors` from integrations first.
 /**
@@ -25,18 +23,27 @@ export function addGlobalEventProcessor(callback: EventProcessor): void {
   getGlobalEventProcessors().push(callback);
 }
 
-// TODO: It shouldnt live on the scope, and we need to get rid of current implementation from Hub
+// TODO: We need to get rid of current implementation from Hub
 function getMainCarrier(): CarrierV7 {
   const global = getGlobalObject();
   global.__SENTRY_V7__ = global.__SENTRY_V7__ || {};
   return global.__SENTRY_V7__;
 }
 
-export function getCurrentScope(): ScopeLike {
+export function getCurrentClient(): ClientLike | undefined {
+  const carrier = getMainCarrier();
+  if (!carrier.client) {
+    logger.warn('No client available on the carrier.');
+    return;
+  }
+  return carrier.client;
+}
+
+export function getCurrentScope(): ScopeLike | undefined {
   const carrier = getMainCarrier();
   if (!carrier.scope) {
-    logger.warn('No scope available on the carrier. Creating a new one.');
-    carrier.scope = new Scope();
+    logger.warn('No scope available on the carrier.');
+    return;
   }
   return carrier.scope;
 }

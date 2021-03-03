@@ -1,7 +1,6 @@
 import { showReportDialog } from '@sentry/browser';
-import { withScope } from '@sentry/minimal';
-import { captureException } from '@sentry/core';
-import { Scope } from '@sentry/scope';
+import { captureException, withScope } from '@sentry/minimal';
+import { Scope } from '@sentry/types';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import * as React from 'react';

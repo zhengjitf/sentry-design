@@ -1,4 +1,4 @@
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 import { Integration, Span } from '@sentry/types';
 import { fill } from '@sentry/utils';
 // 'aws-sdk/global' import is expected to be type-only so it's erased in the final .js file.

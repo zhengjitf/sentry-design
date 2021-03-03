@@ -42,7 +42,8 @@ export class ExtraErrorData implements Integration {
     if (!hint || !hint.originalException || !isError(hint.originalException)) {
       return event;
     }
-    const name = (hint.originalException as ExtendedError).name || hint.originalException.constructor.name;
+    const name =
+      (hint.originalException as ExtendedError).name || (hint.originalException as ExtendedError).constructor.name;
 
     const errorData = this._extractErrorData(hint.originalException as ExtendedError);
 

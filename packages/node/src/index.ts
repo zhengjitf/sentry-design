@@ -1,17 +1,25 @@
+export { Scope } from '@sentry/scope';
+export { getHubFromCarrier, getCurrentHub, Hub, makeMain } from '@sentry/hub';
 export {
   addGlobalEventProcessor,
   addBreadcrumb,
-  Scope,
+  configureScope,
+  startTransaction,
+  withScope,
   setContext,
   setExtra,
   setExtras,
   setTag,
   setTags,
   setUser,
-} from '@sentry/scope';
-export { getHubFromCarrier, getCurrentHub, Hub, makeMain } from '@sentry/hub';
-export { configureScope, startTransaction, withScope } from '@sentry/minimal';
-export { captureException, captureEvent, captureMessage, close, flush, lastEventId, SDK_VERSION } from '@sentry/core';
+  captureException,
+  captureEvent,
+  captureMessage,
+  close,
+  flush,
+  lastEventId,
+} from '@sentry/minimal';
+export { SDK_VERSION } from '@sentry/core';
 
 export { NodeClient, NodeOptions } from './client';
 export { defaultIntegrations, init } from './sdk';

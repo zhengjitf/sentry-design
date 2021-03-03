@@ -51,6 +51,6 @@ export interface EventHint {
   event_id?: string;
   captureContext?: CaptureContext;
   syntheticException?: Error | null;
-  originalException?: Error | string | null;
+  originalException?: unknown;
   data?: any;
 }

@@ -136,6 +136,9 @@ export interface Scope {
   /** Clears the current scope and resets its properties. */
   clear(): this;
 
+  /** Clones the current scope and its properties. */
+  clone(): Scope;
+
   /**
    * Sets the breadcrumbs in the scope
    * @param breadcrumbs Breadcrumb

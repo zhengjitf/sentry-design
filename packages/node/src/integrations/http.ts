@@ -1,7 +1,7 @@
 import * as http from 'http';
 import * as https from 'https';
 
-import { getSpan } from '@sentry/scope';
+import { getSpan } from '@sentry/minimal';
 import { getCurrentHub } from '@sentry/hub';
 import { Integration, Span } from '@sentry/types';
 import { fill, logger, parseSemver } from '@sentry/utils';

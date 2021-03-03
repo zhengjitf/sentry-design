@@ -18,8 +18,8 @@ import {
   User,
 } from '@sentry/types';
 import { dateTimestampInSeconds, isPlainObject, isThenable, SyncPromise } from '@sentry/utils';
+import { getGlobalEventProcessors } from '@sentry/minimal';
 
-import { getGlobalEventProcessors } from './carrier';
 import { Session } from './session';
 
 /**
@@ -72,21 +72,19 @@ export class Scope implements ScopeLike {
    * Inherit values from the parent scope.
    * @param scope to clone.
    */
-  public static clone(scope?: Scope): Scope {
+  public clone(): Scope {
     const newScope = new Scope();
-    if (scope) {
-      newScope._breadcrumbs = [...scope._breadcrumbs];
-      newScope._tags = { ...scope._tags };
-      newScope._extra = { ...scope._extra };
-      newScope._contexts = { ...scope._contexts };
-      newScope._user = scope._user;
-      newScope._level = scope._level;
-      newScope._span = scope._span;
-      newScope._session = scope._session;
-      newScope._transactionName = scope._transactionName;
-      newScope._fingerprint = scope._fingerprint;
-      newScope._eventProcessors = [...scope._eventProcessors];
-    }
+    newScope._breadcrumbs = [...this._breadcrumbs];
+    newScope._tags = { ...this._tags };
+    newScope._extra = { ...this._extra };
+    newScope._contexts = { ...this._contexts };
+    newScope._user = this._user;
+    newScope._level = this._level;
+    newScope._span = this._span;
+    newScope._session = this._session;
+    newScope._transactionName = this._transactionName;
+    newScope._fingerprint = this._fingerprint;
+    newScope._eventProcessors = [...this._eventProcessors];
     return newScope;
   }
 

@@ -1,4 +1,4 @@
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 import { addInstrumentationHandler, logger } from '@sentry/utils';
 
 import { SpanStatus } from './spanstatus';

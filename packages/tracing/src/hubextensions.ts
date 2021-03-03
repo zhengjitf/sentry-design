@@ -1,5 +1,5 @@
 import { getMainCarrier, Hub } from '@sentry/hub';
-import { getSpan } from '@sentry/scope';
+import { getSpan } from '@sentry/minimal';
 import {
   CustomSamplingContext,
   Options,

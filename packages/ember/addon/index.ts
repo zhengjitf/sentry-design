@@ -6,7 +6,7 @@ import { assert, warn } from '@ember/debug';
 import Ember from 'ember';
 import { timestampWithMs } from '@sentry/utils';
 import { OwnConfig } from './types';
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 
 declare module '@ember/debug' {
   export function assert(desc: string, test: unknown): void;

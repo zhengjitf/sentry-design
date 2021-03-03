@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 
 import { Integration, Span } from '@sentry/types';
 import { fill } from '@sentry/utils';
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 
 interface GrpcFunction extends CallableFunction {
   (...args: unknown[]): EventEmitter;

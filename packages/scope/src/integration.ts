@@ -1,6 +1,5 @@
 import { ClientLike, IntegrationV7 } from '@sentry/types';
-
-import { getCurrentScope } from './carrier';
+import { getCurrentScope } from '@sentry/minimal';
 
 export class ScopeIntegration implements IntegrationV7 {
   /**
@@ -18,8 +17,7 @@ export class ScopeIntegration implements IntegrationV7 {
    */
   public install(client: ClientLike): void {
     client.addEventProcessor(event => {
-      const scope = getCurrentScope();
-      return scope.applyToEvent(event);
+      return getCurrentScope()?.applyToEvent(event) || event;
     });
   }
 }

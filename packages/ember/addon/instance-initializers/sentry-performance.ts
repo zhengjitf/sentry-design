@@ -7,7 +7,7 @@ import { EmberRunQueues } from '@ember/runloop/-private/types';
 import { timestampWithMs } from '@sentry/utils';
 import { macroCondition, isTesting, getOwnConfig } from '@embroider/macros';
 import { EmberSentryConfig, OwnConfig } from '../types';
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 
 function getSentryConfig() {
   return getOwnConfig<OwnConfig>().sentryConfig;

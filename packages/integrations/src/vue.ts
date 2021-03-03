@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 import { EventProcessor, Hub, Integration, IntegrationClass, Span } from '@sentry/types';
 import { basename, getGlobalObject, logger, timestampWithMs } from '@sentry/utils';
 

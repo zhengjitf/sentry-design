@@ -1,4 +1,4 @@
-import { getTransaction } from '@sentry/scope';
+import { getTransaction } from '@sentry/minimal';
 import { getGlobalObject, logger } from '@sentry/utils';
 
 import { IdleTransaction } from '../idletransaction';
