@@ -13,7 +13,7 @@ export { Hub } from './hub';
 export { Integration, IntegrationClass, IntegrationV7 } from './integration';
 export { LogLevel } from './loglevel';
 export { Mechanism } from './mechanism';
-export { ExtractedNodeRequestData, Primitive, WorkerLocation } from './misc';
+export { ExtractedNodeRequestData, Primitive, SentryGlobal, WorkerLocation } from './misc';
 export { Options, OptionsV7 } from './options';
 export { Package } from './package';
 export { Request, SentryRequest, SentryRequestType } from './request';

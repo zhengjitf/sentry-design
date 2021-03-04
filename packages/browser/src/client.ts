@@ -1,9 +1,10 @@
 import { BaseClient, SDK_VERSION } from '@sentry/core';
-import { Event, EventHint, Options, Severity } from '@sentry/types';
+import { Event, EventHint, Options, ScopeLike, Severity } from '@sentry/types';
 import { getGlobalObject, logger, supportsFetch } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import { FetchTransport } from '@sentry/transport-fetch';
 import { XHRTransport } from '@sentry/transport-xhr';
+import { getCarrier } from '@sentry/minimal';
 
 import { injectReportDialog } from './helpers';
 import { eventFromException, eventFromMessage } from './eventbuilder';
@@ -61,6 +62,10 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
     options.transport = options.transport ?? (supportsFetch() ? FetchTransport : XHRTransport);
 
     super(options);
+  }
+
+  public getScope(): ScopeLike | undefined {
+    return this._scope || getCarrier().scope;
   }
 
   /**

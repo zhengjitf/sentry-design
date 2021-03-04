@@ -17,100 +17,146 @@ import {
   User,
 } from '@sentry/types';
 
-import { getCurrentScope } from './carrier';
+import { getCurrentClient } from './carrier';
 
 // TODO: Use `ReturnType<ClientLike['captureException']>` instead?
 
 // TODO: Used in Electron and RN
 // export function addScopeListener(callback: (scope: ScopeLike) => void): void {
-//   return getCurrentScope().addScopeListener(callback)
+//   return getCurrentClient()?.getScope().addScopeListener(callback)
 // }
 
 export function clone(): ScopeLike | undefined {
-  return getCurrentScope()?.clone();
+  return getCurrentClient()
+    ?.getScope()
+    ?.clone();
 }
 
 // TODO: Should we return void?
 export function addEventProcessor(callback: EventProcessor): ScopeLike | undefined {
-  return getCurrentScope()?.addEventProcessor(callback);
+  return getCurrentClient()
+    ?.getScope()
+    ?.addEventProcessor(callback);
 }
 
 export function setUser(user: User | null): ScopeLike | undefined {
-  return getCurrentScope()?.setUser(user);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setUser(user);
 }
 
 export function getUser(): User | undefined {
-  return getCurrentScope()?.getUser();
+  return getCurrentClient()
+    ?.getScope()
+    ?.getUser();
 }
 
 export function setTags(tags: { [key: string]: Primitive }): ScopeLike | undefined {
-  return getCurrentScope()?.setTags(tags);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setTags(tags);
 }
 
 export function setTag(key: string, value: Primitive): ScopeLike | undefined {
-  return getCurrentScope()?.setTag(key, value);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setTag(key, value);
 }
 
 export function setExtras(extras: Extras): ScopeLike | undefined {
-  return getCurrentScope()?.setExtras(extras);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setExtras(extras);
 }
 
 export function setExtra(key: string, value: Extra): ScopeLike | undefined {
-  return getCurrentScope()?.setExtra(key, value);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setExtra(key, value);
 }
 
 export function setFingerprint(fingerprint: string[]): ScopeLike | undefined {
-  return getCurrentScope()?.setFingerprint(fingerprint);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setFingerprint(fingerprint);
 }
 
 export function setLevel(level: Severity): ScopeLike | undefined {
-  return getCurrentScope()?.setLevel(level);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setLevel(level);
 }
 
 export function setTransactionName(name?: string): ScopeLike | undefined {
-  return getCurrentScope()?.setTransactionName(name);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setTransactionName(name);
 }
 
 export function setContext(key: string, value: Context | null): ScopeLike | undefined {
-  return getCurrentScope()?.setContext(key, value);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setContext(key, value);
 }
 
 export function setSpan(span?: Span): ScopeLike | undefined {
-  return getCurrentScope()?.setSpan(span);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setSpan(span);
 }
 
 export function getSpan(): Span | undefined {
-  return getCurrentScope()?.getSpan();
+  return getCurrentClient()
+    ?.getScope()
+    ?.getSpan();
 }
 
 export function getTransaction(): Transaction | undefined {
-  return getCurrentScope()?.getTransaction();
+  return getCurrentClient()
+    ?.getScope()
+    ?.getTransaction();
 }
 
 export function setSession(session?: Session): ScopeLike | undefined {
-  return getCurrentScope()?.setSession(session);
+  return getCurrentClient()
+    ?.getScope()
+    ?.setSession(session);
 }
 
 export function getSession(): SessionContext | undefined {
-  return getCurrentScope()?.getSession();
+  return getCurrentClient()
+    ?.getScope()
+    ?.getSession();
 }
 
 export function update(captureContext?: CaptureContext): ScopeLike | undefined {
-  return getCurrentScope()?.update(captureContext);
+  return getCurrentClient()
+    ?.getScope()
+    ?.update(captureContext);
 }
 
 export function clear(): ScopeLike | undefined {
-  return getCurrentScope()?.clear();
+  return getCurrentClient()
+    ?.getScope()
+    ?.clear();
 }
 
 export function addBreadcrumb(breadcrumb: Breadcrumb): ScopeLike | undefined {
-  return getCurrentScope()?.addBreadcrumb(breadcrumb);
+  return getCurrentClient()
+    ?.getScope()
+    ?.addBreadcrumb(breadcrumb);
 }
 
 export function clearBreadcrumbs(): ScopeLike | undefined {
-  return getCurrentScope()?.clearBreadcrumbs();
+  return getCurrentClient()
+    ?.getScope()
+    ?.clearBreadcrumbs();
 }
 
 export function applyToEvent(event: Event, hint?: EventHint): PromiseLike<Event | null> {
-  return getCurrentScope()?.applyToEvent(event, hint) || Promise.resolve(event);
+  return (
+    getCurrentClient()
+      ?.getScope()
+      ?.applyToEvent(event, hint) || Promise.resolve(event)
+  );
 }

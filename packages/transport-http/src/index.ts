@@ -54,6 +54,7 @@ export class HTTPTransport extends BaseTransport implements Transport {
           // }),
         };
 
+        // TODO: Add gzip compresison
         const req = httpModule.request(requestOptions, (res: http.IncomingMessage) => {
           res.setEncoding('utf8');
 

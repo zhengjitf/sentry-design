@@ -8,6 +8,7 @@ import {
   Integration,
   IntegrationClass,
   OptionsV7,
+  ScopeLike,
   SessionStatus,
   Severity,
 } from '@sentry/types';
@@ -64,6 +65,7 @@ import { IntegrationIndex, setupIntegrations } from '@sentry/integration-base';
  *   // ...
  * }
  */
+// TODO: Allow for passing scope during construction for explicit `this._scope`
 export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
   /** Options passed to the SDK. */
   public readonly options: O;
@@ -79,10 +81,11 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
 
   protected _transport: Transport;
 
-  protected _eventProcessors: EventProcessor[] = [];
+  protected _lastEventId?: string;
 
-  /** Contains the last event id of a captured event.  */
-  private _lastEventId?: string;
+  protected _scope?: ScopeLike;
+
+  protected _eventProcessors: EventProcessor[] = [];
 
   /**
    * Initializes this client instance.
@@ -98,6 +101,34 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
 
     this._transport = this._setupTransport();
     this._integrations = setupIntegrations(options);
+  }
+
+  public lastEventId(): string | undefined {
+    return this._lastEventId;
+  }
+
+  public getScope(): ScopeLike | undefined {
+    return this._scope;
+  }
+
+  // TODO: Run these during event processing
+  public addEventProcessor(callback: EventProcessor): void {
+    this._eventProcessors.push(callback);
+  }
+
+  // TODO: To be removed? Can be obtained from options
+  public getDsn(): Dsn | undefined {
+    return this._dsn;
+  }
+
+  // TODO: To be removed
+  public getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null {
+    try {
+      return (this._integrations[integration.id] as T) || null;
+    } catch (_oO) {
+      logger.warn(`Cannot retrieve integration ${integration.id} from the current Client`);
+      return null;
+    }
   }
 
   /**
@@ -172,22 +203,6 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     }
   }
 
-  // TODO: Run these during event processing
-  public addEventProcessor(callback: EventProcessor): void {
-    this._eventProcessors.push(callback);
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public getDsn(): Dsn | undefined {
-    return this._dsn;
-  }
-
-  public lastEventId(): string | undefined {
-    return this._lastEventId;
-  }
-
   /**
    * @inheritDoc
    */
@@ -207,18 +222,6 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     });
   }
 
-  /**
-   * @inheritDoc
-   */
-  public getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null {
-    try {
-      return (this._integrations[integration.id] as T) || null;
-    } catch (_oO) {
-      logger.warn(`Cannot retrieve integration ${integration.id} from the current Client`);
-      return null;
-    }
-  }
-
   protected _setupTransport(): Transport {
     // TODO: This whole function should be unnecessary and moved to client construction
     if (!this.options.dsn || !this.options.transport) {
@@ -234,6 +237,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
       // ...(this.options.caCerts && { caCerts: this.options.caCerts }),
     });
   }
+
   /**
    * @inheritDoc
    */

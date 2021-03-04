@@ -1,3 +1,26 @@
+import { CarrierV7 } from './carrier';
+import { Integration } from './integration';
+
+export interface SentryGlobal {
+  console: Console;
+  Sentry?: {
+    Integrations?: Integration[];
+  };
+  SENTRY_ENVIRONMENT?: string;
+  SENTRY_DSN?: string;
+  SENTRY_RELEASE?: {
+    id?: string;
+  };
+  // TODO: Should we include version number here? It'll help us with scenarios where someone has multiple instances
+  // of Sentry, but using different verisons, eg V5+V7.
+  __SENTRY_V7__: CarrierV7;
+  __SENTRY__: {
+    globalEventProcessors: any;
+    hub: any;
+    logger: any;
+  };
+}
+
 /**
  * Data extracted from an incoming request to a node server
  */

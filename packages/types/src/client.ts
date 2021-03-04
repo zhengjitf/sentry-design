@@ -3,7 +3,7 @@ import { Event, EventHint } from './event';
 import { EventProcessor } from './eventprocessor';
 import { Integration, IntegrationClass } from './integration';
 import { OptionsV7 } from './options';
-import { Scope } from './scope';
+import { Scope, ScopeLike } from './scope';
 import { Session } from './session';
 import { Severity } from './severity';
 
@@ -18,6 +18,20 @@ import { Severity } from './severity';
  */
 export interface ClientLike<O extends OptionsV7 = OptionsV7> {
   options: O;
+
+  lastEventId(): string | undefined;
+
+  getScope(): ScopeLike | undefined;
+
+  addEventProcessor(callback: EventProcessor): void;
+
+  // TODO: To be removed? Can be obtained from options
+  /** Returns the current Dsn. */
+  getDsn(): Dsn | undefined;
+
+  // TODO: To be removed
+  /** Returns an array of installed integrations on the client. */
+  getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null;
 
   /**
    * Captures an exception event and sends it to Sentry.
@@ -56,21 +70,6 @@ export interface ClientLike<O extends OptionsV7 = OptionsV7> {
    */
   captureSession?(session: Session): void;
 
-  addEventProcessor(callback: EventProcessor): void;
-
-  /** Returns the current Dsn. */
-  getDsn(): Dsn | undefined;
-
-  lastEventId(): string | undefined;
-
-  /**
-   * A promise that resolves when all current events have been sent.
-   * If you provide a timeout and the queue takes longer to drain the promise returns false.
-   *
-   * @param timeout Maximum time in ms the client should wait.
-   */
-  close(timeout?: number): PromiseLike<boolean>;
-
   /**
    * A promise that resolves when all current events have been sent.
    * If you provide a timeout and the queue takes longer to drain the promise returns false.
@@ -79,6 +78,11 @@ export interface ClientLike<O extends OptionsV7 = OptionsV7> {
    */
   flush(timeout?: number): PromiseLike<boolean>;
 
-  /** Returns an array of installed integrations on the client. */
-  getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null;
+  /**
+   * A promise that resolves when all current events have been sent.
+   * If you provide a timeout and the queue takes longer to drain the promise returns false.
+   *
+   * @param timeout Maximum time in ms the client should wait.
+   */
+  close(timeout?: number): PromiseLike<boolean>;
 }

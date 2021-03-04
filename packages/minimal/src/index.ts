@@ -3,7 +3,13 @@ import { CustomSamplingContext, ScopeLike, Transaction, TransactionContext } fro
 
 import { getCurrentScope } from './carrier';
 
-export { addGlobalEventProcessor, getCurrentClient, getCurrentScope, getGlobalEventProcessors } from './carrier';
+export {
+  addGlobalEventProcessor,
+  getCarrier,
+  getCurrentClient,
+  getCurrentScope,
+  getGlobalEventProcessors,
+} from './carrier';
 export { captureException, captureMessage, captureEvent, close, flush, lastEventId } from './client';
 export {
   addBreadcrumb,

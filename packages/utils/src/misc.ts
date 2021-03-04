@@ -1,29 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
-import { CarrierV7, Event, Integration, StackFrame, WrappedFunction } from '@sentry/types';
+import { Event, SentryGlobal, StackFrame, WrappedFunction } from '@sentry/types';
 
 import { isNodeEnv } from './node';
 import { snipLine } from './string';
-
-/** Internal */
-interface SentryGlobal {
-  console: Console;
-  Sentry?: {
-    Integrations?: Integration[];
-  };
-  SENTRY_ENVIRONMENT?: string;
-  SENTRY_DSN?: string;
-  SENTRY_RELEASE?: {
-    id?: string;
-  };
-  // TODO: Should we include version number here? It'll help us with scenarios where someone has multiple instances
-  // of Sentry, but using different verisons, eg V5+V7.
-  __SENTRY_V7__: CarrierV7;
-  __SENTRY__: {
-    globalEventProcessors: any;
-    hub: any;
-    logger: any;
-  };
-}
 
 const fallbackGlobalObject = {};
 
