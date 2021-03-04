@@ -1,5 +1,5 @@
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
-import { Client } from './client';
+import { ClientLike } from './client';
 import { Event, EventHint } from './event';
 import { Integration, IntegrationClass } from './integration';
 import { Scope } from './scope';
@@ -27,7 +27,7 @@ export interface Hub {
    * This binds the given client to the current scope.
    * @param client An SDK client (client) instance.
    */
-  bindClient(client?: Client): void;
+  bindClient(client?: ClientLike): void;
 
   /**
    * Create a new scope to store context information.
@@ -66,7 +66,7 @@ export interface Hub {
   withScope(callback: (scope: Scope) => void): void;
 
   /** Returns the client of the top stack. */
-  getClient(): Client | undefined;
+  getClient(): ClientLike | undefined;
 
   /**
    * Captures an exception event and sends it to Sentry.

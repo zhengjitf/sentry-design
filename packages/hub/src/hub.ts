@@ -2,7 +2,7 @@
 import {
   Breadcrumb,
   BreadcrumbHint,
-  Client,
+  ClientLike,
   CustomSamplingContext,
   Event,
   EventHint,
@@ -62,7 +62,7 @@ export class Hub implements HubInterface {
    * @param scope bound to the hub.
    * @param version number, higher number means higher priority.
    */
-  public constructor(client?: Client, scope: Scope = new Scope(), private readonly _version: number = API_VERSION) {
+  public constructor(client?: ClientLike, scope: Scope = new Scope(), private readonly _version: number = API_VERSION) {
     this.getStackTop().scope = scope;
     this.bindClient(client);
   }
@@ -77,7 +77,7 @@ export class Hub implements HubInterface {
   /**
    * @inheritDoc
    */
-  public bindClient(client?: Client): void {
+  public bindClient(client?: ClientLike): void {
     const top = this.getStackTop();
     top.client = client;
     // @ts-ignore TODO: integrations wont be instantiated by the hub anymore, left here so we compile
@@ -123,7 +123,7 @@ export class Hub implements HubInterface {
   /**
    * @inheritDoc
    */
-  public getClient<C extends Client>(): C | undefined {
+  public getClient<C extends ClientLike>(): C | undefined {
     return this.getStackTop().client as C;
   }
 
@@ -381,7 +381,7 @@ export class Hub implements HubInterface {
    * @param args Arguments to pass to the client function.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _invokeClient<M extends keyof Client>(method: M, ...args: any[]): void {
+  private _invokeClient<M extends keyof ClientLike>(method: M, ...args: any[]): void {
     const { scope, client } = this.getStackTop();
     if (client && client[method]) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any

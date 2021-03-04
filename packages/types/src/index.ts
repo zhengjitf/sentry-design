@@ -1,6 +1,6 @@
 export { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 export { CarrierV7 } from './carrier';
-export { Client, ClientLike } from './client';
+export { ClientLike } from './client';
 export { Context, Contexts } from './context';
 export { Dsn, DsnComponents, DsnLike, DsnProtocol } from './dsn';
 export { DebugImage, DebugImageType, DebugMeta } from './debugMeta';

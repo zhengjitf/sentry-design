@@ -1,4 +1,4 @@
-import { Client } from '@sentry/types';
+import { ClientLike } from '@sentry/types';
 import { Scope } from '@sentry/scope';
 
 import { Hub } from './hub';
@@ -8,7 +8,7 @@ import { Hub } from './hub';
  * @hidden
  */
 export interface Layer {
-  client?: Client;
+  client?: ClientLike;
   scope?: Scope;
 }
 
