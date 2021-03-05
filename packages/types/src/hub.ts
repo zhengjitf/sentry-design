@@ -1,4 +1,3 @@
-import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { ClientLike } from './client';
 import { Event, EventHint } from './event';
 import { Integration, IntegrationClass } from './integration';
@@ -101,17 +100,6 @@ export interface Hub {
    * @returns The last event id of a captured event.
    */
   lastEventId(): string | undefined;
-
-  /**
-   * Records a new breadcrumb which will be attached to future events.
-   *
-   * Breadcrumbs will be added to subsequent events to provide more context on
-   * user's actions prior to an error or crash.
-   *
-   * @param breadcrumb The breadcrumb to record.
-   * @param hint May contain additional information about the original breadcrumb.
-   */
-  addBreadcrumb(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): void;
 
   /**
    * Callback to set context information onto the scope.

@@ -1,4 +1,4 @@
-import { Breadcrumb } from './breadcrumb';
+import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { Context, Contexts } from './context';
 import { Event, EventHint } from './event';
 import { EventProcessor } from './eventprocessor';
@@ -139,13 +139,7 @@ export interface Scope {
   /** Clones the current scope and its properties. */
   clone(): Scope;
 
-  /**
-   * Sets the breadcrumbs in the scope
-   * @param breadcrumbs Breadcrumb
-   * @param maxBreadcrumbs number of max breadcrumbs to merged into event.
-   */
-  // TODO: maxBreadcrumbs should be set in the Scope constructor
-  addBreadcrumb(breadcrumb: Breadcrumb, maxBreadcrumbs?: number): this;
+  addBreadcrumb(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): this;
 
   /**
    * Clears all currently set Breadcrumbs.

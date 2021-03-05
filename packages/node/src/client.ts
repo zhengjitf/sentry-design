@@ -1,7 +1,7 @@
 import * as domain from 'domain';
 
 import { BaseClient, SDK_VERSION } from '@sentry/core';
-import { Event, EventHint, Options, ScopeLike, Severity } from '@sentry/types';
+import { Event, EventHint, Options, ScopeLike, SentryGlobal, Severity } from '@sentry/types';
 import { HTTPTransport } from '@sentry/transport-http';
 import { getCarrier } from '@sentry/minimal';
 
@@ -67,7 +67,7 @@ export class NodeClient extends BaseClient<NodeOptions> {
       return this._scope;
     }
 
-    const activeDomain = ((domain as unknown) as { active: unknown }).active;
+    const activeDomain = ((domain as unknown) as { active: SentryGlobal }).active;
     if (activeDomain) {
       const domainScope = getCarrier(activeDomain).scope;
       if (domainScope) {

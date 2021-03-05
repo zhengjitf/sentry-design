@@ -16,11 +16,29 @@ import {
   Span,
   Transaction,
   User,
+  BreadcrumbHint,
 } from '@sentry/types';
 import { dateTimestampInSeconds, isPlainObject, isThenable, SyncPromise } from '@sentry/utils';
 import { getGlobalEventProcessors } from '@sentry/minimal';
 
 import { Session } from './session';
+
+/**
+ * Default maximum number of breadcrumbs added to an event. Can be overwritten
+ * with {@link Options.maxBreadcrumbs}.
+ */
+const DEFAULT_BREADCRUMBS = 100;
+
+/**
+ * Absolute maximum number of breadcrumbs added to an event. The
+ * `maxBreadcrumbs` option cannot be higher than this value.
+ */
+const MAX_BREADCRUMBS = 100;
+
+type ScopeOptions = {
+  maxBreadcrumbs?: number;
+  beforeBreadcrumb?(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): Breadcrumb | null;
+};
 
 /**
  * Holds additional event information. {@link Scope.applyToEvent} will be
@@ -67,6 +85,14 @@ export class Scope implements ScopeLike {
 
   /** Session */
   public _session?: Session;
+
+  private _maxBreadcrumbs: number;
+  private _beforeBreadcrumb: (breadcrumb: Breadcrumb, hint?: BreadcrumbHint) => Breadcrumb | null;
+
+  public constructor({ maxBreadcrumbs, beforeBreadcrumb }: ScopeOptions = {}) {
+    this._maxBreadcrumbs = maxBreadcrumbs ?? DEFAULT_BREADCRUMBS;
+    this._beforeBreadcrumb = beforeBreadcrumb ?? (breadcrumb => breadcrumb);
+  }
 
   /**
    * Inherit values from the parent scope.
@@ -339,17 +365,20 @@ export class Scope implements ScopeLike {
   /**
    * @inheritDoc
    */
-  public addBreadcrumb(breadcrumb: Breadcrumb, maxBreadcrumbs?: number): this {
-    const mergedBreadcrumb = {
+  public addBreadcrumb(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): this {
+    let preparedBreadcrumb: Breadcrumb | null = {
       timestamp: dateTimestampInSeconds(),
       ...breadcrumb,
     };
 
-    this._breadcrumbs =
-      maxBreadcrumbs !== undefined && maxBreadcrumbs >= 0
-        ? [...this._breadcrumbs, mergedBreadcrumb].slice(-maxBreadcrumbs)
-        : [...this._breadcrumbs, mergedBreadcrumb];
-    this._notifyScopeListeners();
+    preparedBreadcrumb = this._beforeBreadcrumb(preparedBreadcrumb, hint);
+
+    if (preparedBreadcrumb !== null) {
+      const maxBreadcrumbs = Math.min(this._maxBreadcrumbs, MAX_BREADCRUMBS);
+      this._breadcrumbs = [...this._breadcrumbs, preparedBreadcrumb].slice(-maxBreadcrumbs);
+      this._notifyScopeListeners();
+    }
+
     return this;
   }
 

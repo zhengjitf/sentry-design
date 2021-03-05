@@ -141,10 +141,10 @@ export function clear(): ScopeLike | undefined {
     ?.clear();
 }
 
-export function addBreadcrumb(breadcrumb: Breadcrumb): ScopeLike | undefined {
+export function addBreadcrumb(breadcrumb: Breadcrumb, hint?: Breadcrumb): ScopeLike | undefined {
   return getCurrentClient()
     ?.getScope()
-    ?.addBreadcrumb(breadcrumb);
+    ?.addBreadcrumb(breadcrumb, hint);
 }
 
 export function clearBreadcrumbs(): ScopeLike | undefined {

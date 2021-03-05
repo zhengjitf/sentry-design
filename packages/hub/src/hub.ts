@@ -1,7 +1,5 @@
 /* eslint-disable max-lines */
 import {
-  Breadcrumb,
-  BreadcrumbHint,
   ClientLike,
   CustomSamplingContext,
   Event,
@@ -17,7 +15,7 @@ import {
   Transaction,
   TransactionContext,
 } from '@sentry/types';
-import { consoleSandbox, dateTimestampInSeconds, getGlobalObject, isNodeEnv, logger, uuid4 } from '@sentry/utils';
+import { getGlobalObject, isNodeEnv, logger, uuid4 } from '@sentry/utils';
 import { Scope, Session } from '@sentry/scope';
 
 import { Carrier, Layer } from './interfaces';
@@ -31,18 +29,6 @@ import { Carrier, Layer } from './interfaces';
  * @hidden
  */
 export const API_VERSION = 3;
-
-/**
- * Default maximum number of breadcrumbs added to an event. Can be overwritten
- * with {@link Options.maxBreadcrumbs}.
- */
-const DEFAULT_BREADCRUMBS = 100;
-
-/**
- * Absolute maximum number of breadcrumbs added to an event. The
- * `maxBreadcrumbs` option cannot be higher than this value.
- */
-const MAX_BREADCRUMBS = 100;
 
 /**
  * @inheritDoc
@@ -222,30 +208,6 @@ export class Hub implements HubInterface {
    */
   public lastEventId(): string | undefined {
     return this._lastEventId;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public addBreadcrumb(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): void {
-    const { scope, client } = this.getStackTop();
-
-    if (!scope || !client) return;
-
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    const { beforeBreadcrumb = null, maxBreadcrumbs = DEFAULT_BREADCRUMBS } = client?.options ?? {};
-
-    if (maxBreadcrumbs <= 0) return;
-
-    const timestamp = dateTimestampInSeconds();
-    const mergedBreadcrumb = { timestamp, ...breadcrumb };
-    const finalBreadcrumb = beforeBreadcrumb
-      ? (consoleSandbox(() => beforeBreadcrumb(mergedBreadcrumb, hint)) as Breadcrumb | null)
-      : mergedBreadcrumb;
-
-    if (finalBreadcrumb === null) return;
-
-    scope.addBreadcrumb(finalBreadcrumb, Math.min(maxBreadcrumbs, MAX_BREADCRUMBS));
   }
 
   /**
