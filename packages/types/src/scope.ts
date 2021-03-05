@@ -10,18 +10,16 @@ import { Span } from './span';
 import { Transaction } from './transaction';
 import { User } from './user';
 
-export type CaptureContext = Scope | Partial<ScopeContext> | ((scope: Scope) => Scope);
+export type ScopeLike = Scope & ScopeContext;
 
-export interface ScopeContext {
-  user: User;
-  level: Severity;
-  extra: Extras;
-  contexts: Contexts;
-  tags: { [key: string]: Primitive };
-  fingerprint: string[];
-}
-
-export type ScopeLike = Scope;
+export type ScopeContext = {
+  user?: User;
+  level?: Severity;
+  extra?: Extras;
+  contexts?: Contexts;
+  tags?: { [key: string]: Primitive };
+  fingerprint?: string[];
+};
 
 /**
  * Holds additional event information. {@link Scope.applyToEvent} will be
@@ -131,7 +129,7 @@ export interface Scope {
    * - callback function that'll receive the current scope as an argument and allow for modifications
    * @param captureContext scope modifier to be used
    */
-  update(captureContext?: CaptureContext): this;
+  update(captureContext?: ScopeContext): this;
 
   /** Clears the current scope and resets its properties. */
   clear(): this;

@@ -45,46 +45,44 @@ type ScopeOptions = {
  * called by the client before an event will be sent.
  */
 export class Scope implements ScopeLike {
-  // TODO: Make them private/protected
-
-  /** Flag if notifiying is happening. */
-  public _notifyingListeners: boolean = false;
-
-  /** Callback for client to receive scope changes. */
-  public _scopeListeners: Array<(scope: Scope) => void> = [];
-
-  /** Callback list that will be called after {@link applyToEvent}. */
-  public _eventProcessors: EventProcessor[] = [];
-
   /** Array of breadcrumbs. */
-  public _breadcrumbs: Breadcrumb[] = [];
+  public breadcrumbs: Breadcrumb[] = [];
 
   /** User */
-  public _user: User = {};
+  public user: User = {};
 
   /** Tags */
-  public _tags: { [key: string]: Primitive } = {};
+  public tags: { [key: string]: Primitive } = {};
 
   /** Extra */
-  public _extra: Extras = {};
+  public extra: Extras = {};
 
   /** Contexts */
-  public _contexts: Contexts = {};
+  public contexts: Contexts = {};
 
   /** Fingerprint */
-  public _fingerprint?: string[];
+  public fingerprint?: string[];
 
   /** Severity */
-  public _level?: Severity;
+  public level?: Severity;
 
   /** Transaction Name */
-  public _transactionName?: string;
+  public transactionName?: string;
 
   /** Span */
-  public _span?: Span;
+  public span?: Span;
 
   /** Session */
-  public _session?: Session;
+  public session?: Session;
+
+  /** Flag if notifiying is happening. */
+  private _notifyingListeners: boolean = false;
+
+  /** Callback for client to receive scope changes. */
+  private _scopeListeners: Array<(scope: Scope) => void> = [];
+
+  /** Callback list that will be called after {@link applyToEvent}. */
+  private _eventProcessors: EventProcessor[] = [];
 
   private _maxBreadcrumbs: number;
   private _beforeBreadcrumb: (breadcrumb: Breadcrumb, hint?: BreadcrumbHint) => Breadcrumb | null;
@@ -100,16 +98,16 @@ export class Scope implements ScopeLike {
    */
   public clone(): Scope {
     const newScope = new Scope();
-    newScope._breadcrumbs = [...this._breadcrumbs];
-    newScope._tags = { ...this._tags };
-    newScope._extra = { ...this._extra };
-    newScope._contexts = { ...this._contexts };
-    newScope._user = this._user;
-    newScope._level = this._level;
-    newScope._span = this._span;
-    newScope._session = this._session;
-    newScope._transactionName = this._transactionName;
-    newScope._fingerprint = this._fingerprint;
+    newScope.breadcrumbs = [...this.breadcrumbs];
+    newScope.tags = { ...this.tags };
+    newScope.extra = { ...this.extra };
+    newScope.contexts = { ...this.contexts };
+    newScope.user = this.user;
+    newScope.level = this.level;
+    newScope.span = this.span;
+    newScope.session = this.session;
+    newScope.transactionName = this.transactionName;
+    newScope.fingerprint = this.fingerprint;
     newScope._eventProcessors = [...this._eventProcessors];
     return newScope;
   }
@@ -134,9 +132,9 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public setUser(user: User | null): this {
-    this._user = user || {};
-    if (this._session) {
-      this._session.update({ user });
+    this.user = user || {};
+    if (this.session) {
+      this.session.update({ user });
     }
     this._notifyScopeListeners();
     return this;
@@ -146,15 +144,15 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public getUser(): User | undefined {
-    return this._user;
+    return this.user;
   }
 
   /**
    * @inheritDoc
    */
   public setTags(tags: { [key: string]: Primitive }): this {
-    this._tags = {
-      ...this._tags,
+    this.tags = {
+      ...this.tags,
       ...tags,
     };
     this._notifyScopeListeners();
@@ -165,7 +163,7 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public setTag(key: string, value: Primitive): this {
-    this._tags = { ...this._tags, [key]: value };
+    this.tags = { ...this.tags, [key]: value };
     this._notifyScopeListeners();
     return this;
   }
@@ -174,8 +172,8 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public setExtras(extras: Extras): this {
-    this._extra = {
-      ...this._extra,
+    this.extra = {
+      ...this.extra,
       ...extras,
     };
     this._notifyScopeListeners();
@@ -186,7 +184,7 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public setExtra(key: string, extra: Extra): this {
-    this._extra = { ...this._extra, [key]: extra };
+    this.extra = { ...this.extra, [key]: extra };
     this._notifyScopeListeners();
     return this;
   }
@@ -195,7 +193,7 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public setFingerprint(fingerprint: string[]): this {
-    this._fingerprint = fingerprint;
+    this.fingerprint = fingerprint;
     this._notifyScopeListeners();
     return this;
   }
@@ -204,7 +202,7 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public setLevel(level: Severity): this {
-    this._level = level;
+    this.level = level;
     this._notifyScopeListeners();
     return this;
   }
@@ -213,7 +211,7 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public setTransactionName(name?: string): this {
-    this._transactionName = name;
+    this.transactionName = name;
     this._notifyScopeListeners();
     return this;
   }
@@ -232,9 +230,9 @@ export class Scope implements ScopeLike {
   public setContext(key: string, context: Context | null): this {
     if (context === null) {
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete this._contexts[key];
+      delete this.contexts[key];
     } else {
-      this._contexts = { ...this._contexts, [key]: context };
+      this.contexts = { ...this.contexts, [key]: context };
     }
 
     this._notifyScopeListeners();
@@ -245,7 +243,7 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public setSpan(span?: Span): this {
-    this._span = span;
+    this.span = span;
     this._notifyScopeListeners();
     return this;
   }
@@ -254,7 +252,7 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public getSpan(): Span | undefined {
-    return this._span;
+    return this.span;
   }
 
   /**
@@ -283,9 +281,9 @@ export class Scope implements ScopeLike {
    */
   public setSession(session?: Session): this {
     if (!session) {
-      delete this._session;
+      delete this.session;
     } else {
-      this._session = session;
+      this.session = session;
     }
     this._notifyScopeListeners();
     return this;
@@ -295,13 +293,13 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public getSession(): Session | undefined {
-    return this._session;
+    return this.session;
   }
 
   /**
    * @inheritDoc
    */
-  public update(captureContext?: CaptureContext): this {
+  public update(captureContext?: ScopeContext): this {
     if (!captureContext) {
       return this;
     }
@@ -312,32 +310,32 @@ export class Scope implements ScopeLike {
     }
 
     if (captureContext instanceof Scope) {
-      this._tags = { ...this._tags, ...captureContext._tags };
-      this._extra = { ...this._extra, ...captureContext._extra };
-      this._contexts = { ...this._contexts, ...captureContext._contexts };
-      if (captureContext._user && Object.keys(captureContext._user).length) {
-        this._user = captureContext._user;
+      this.tags = { ...this.tags, ...captureContext.tags };
+      this.extra = { ...this.extra, ...captureContext.extra };
+      this.contexts = { ...this.contexts, ...captureContext.contexts };
+      if (captureContext.user && Object.keys(captureContext.user).length) {
+        this.user = captureContext.user;
       }
-      if (captureContext._level) {
-        this._level = captureContext._level;
+      if (captureContext.level) {
+        this.level = captureContext.level;
       }
-      if (captureContext._fingerprint) {
-        this._fingerprint = captureContext._fingerprint;
+      if (captureContext.fingerprint) {
+        this.fingerprint = captureContext.fingerprint;
       }
     } else if (isPlainObject(captureContext)) {
       // eslint-disable-next-line no-param-reassign
       captureContext = captureContext as ScopeContext;
-      this._tags = { ...this._tags, ...captureContext.tags };
-      this._extra = { ...this._extra, ...captureContext.extra };
-      this._contexts = { ...this._contexts, ...captureContext.contexts };
+      this.tags = { ...this.tags, ...captureContext.tags };
+      this.extra = { ...this.extra, ...captureContext.extra };
+      this.contexts = { ...this.contexts, ...captureContext.contexts };
       if (captureContext.user) {
-        this._user = captureContext.user;
+        this.user = captureContext.user;
       }
       if (captureContext.level) {
-        this._level = captureContext.level;
+        this.level = captureContext.level;
       }
       if (captureContext.fingerprint) {
-        this._fingerprint = captureContext.fingerprint;
+        this.fingerprint = captureContext.fingerprint;
       }
     }
 
@@ -348,16 +346,16 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public clear(): this {
-    this._breadcrumbs = [];
-    this._tags = {};
-    this._extra = {};
-    this._user = {};
-    this._contexts = {};
-    this._level = undefined;
-    this._transactionName = undefined;
-    this._fingerprint = undefined;
-    this._span = undefined;
-    this._session = undefined;
+    this.breadcrumbs = [];
+    this.tags = {};
+    this.extra = {};
+    this.user = {};
+    this.contexts = {};
+    this.level = undefined;
+    this.transactionName = undefined;
+    this.fingerprint = undefined;
+    this.span = undefined;
+    this.session = undefined;
     this._notifyScopeListeners();
     return this;
   }
@@ -375,7 +373,7 @@ export class Scope implements ScopeLike {
 
     if (preparedBreadcrumb !== null) {
       const maxBreadcrumbs = Math.min(this._maxBreadcrumbs, MAX_BREADCRUMBS);
-      this._breadcrumbs = [...this._breadcrumbs, preparedBreadcrumb].slice(-maxBreadcrumbs);
+      this.breadcrumbs = [...this.breadcrumbs, preparedBreadcrumb].slice(-maxBreadcrumbs);
       this._notifyScopeListeners();
     }
 
@@ -386,7 +384,7 @@ export class Scope implements ScopeLike {
    * @inheritDoc
    */
   public clearBreadcrumbs(): this {
-    this._breadcrumbs = [];
+    this.breadcrumbs = [];
     this._notifyScopeListeners();
     return this;
   }
@@ -400,30 +398,30 @@ export class Scope implements ScopeLike {
    * @hidden
    */
   public applyToEvent(event: Event, hint?: EventHint): PromiseLike<Event | null> {
-    if (this._extra && Object.keys(this._extra).length) {
-      event.extra = { ...this._extra, ...event.extra };
+    if (this.extra && Object.keys(this.extra).length) {
+      event.extra = { ...this.extra, ...event.extra };
     }
-    if (this._tags && Object.keys(this._tags).length) {
-      event.tags = { ...this._tags, ...event.tags };
+    if (this.tags && Object.keys(this.tags).length) {
+      event.tags = { ...this.tags, ...event.tags };
     }
-    if (this._user && Object.keys(this._user).length) {
-      event.user = { ...this._user, ...event.user };
+    if (this.user && Object.keys(this.user).length) {
+      event.user = { ...this.user, ...event.user };
     }
-    if (this._contexts && Object.keys(this._contexts).length) {
-      event.contexts = { ...this._contexts, ...event.contexts };
+    if (this.contexts && Object.keys(this.contexts).length) {
+      event.contexts = { ...this.contexts, ...event.contexts };
     }
-    if (this._level) {
-      event.level = this._level;
+    if (this.level) {
+      event.level = this.level;
     }
-    if (this._transactionName) {
-      event.transaction = this._transactionName;
+    if (this.transactionName) {
+      event.transaction = this.transactionName;
     }
     // We want to set the trace context for normal events only if there isn't already
     // a trace context on the event. There is a product feature in place where we link
     // errors with transaction and it relys on that.
-    if (this._span) {
-      event.contexts = { trace: this._span.getTraceContext(), ...event.contexts };
-      const transactionName = this._span.transaction?.name;
+    if (this.span) {
+      event.contexts = { trace: this.span.getTraceContext(), ...event.contexts };
+      const transactionName = this.span.transaction?.name;
       if (transactionName) {
         event.tags = { transaction: transactionName, ...event.tags };
       }
@@ -431,7 +429,7 @@ export class Scope implements ScopeLike {
 
     this._applyFingerprint(event);
 
-    event.breadcrumbs = [...(event.breadcrumbs || []), ...this._breadcrumbs];
+    event.breadcrumbs = [...(event.breadcrumbs || []), ...this.breadcrumbs];
     event.breadcrumbs = event.breadcrumbs.length > 0 ? event.breadcrumbs : undefined;
 
     return this._notifyEventProcessors([...getGlobalEventProcessors(), ...this._eventProcessors], event, hint);
@@ -494,8 +492,8 @@ export class Scope implements ScopeLike {
       : [];
 
     // If we have something on the scope, then merge it with event
-    if (this._fingerprint) {
-      event.fingerprint = event.fingerprint.concat(this._fingerprint);
+    if (this.fingerprint) {
+      event.fingerprint = event.fingerprint.concat(this.fingerprint);
     }
 
     // If we have no data at all, remove empty array default
