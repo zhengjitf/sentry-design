@@ -1,5 +1,6 @@
 import {
   Breadcrumb,
+  BreadcrumbHint,
   Context,
   Event,
   EventHint,
@@ -141,7 +142,7 @@ export function clear(): ScopeLike | undefined {
     ?.clear();
 }
 
-export function addBreadcrumb(breadcrumb: Breadcrumb, hint?: Breadcrumb): ScopeLike | undefined {
+export function addBreadcrumb(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): ScopeLike | undefined {
   return getCurrentClient()
     ?.getScope()
     ?.addBreadcrumb(breadcrumb, hint);

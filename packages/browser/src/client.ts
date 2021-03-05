@@ -101,10 +101,17 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
 
   // TODO: Restore this functionality somewhere else, it definitely shouldn't be here.
   // protected _sendEvent(event: Event): void {
-  //   const integration = this.getIntegration(Breadcrumbs);
-  //   if (integration) {
-  //     integration.addSentryBreadcrumb(event);
-  //   }
+  //   this.getScope()?.addBreadcrumb(
+  //     {
+  //       category: `sentry.${event.type === 'transaction' ? 'transaction' : 'event'}`,
+  //       event_id: event.event_id,
+  //       level: event.level,
+  //       message: getEventDescription(event),
+  //     },
+  //     {
+  //       event,
+  //     },
+  //   );
   //   super._sendEvent(event);
   // }
 }

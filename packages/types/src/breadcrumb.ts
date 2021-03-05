@@ -6,10 +6,8 @@ export interface Breadcrumb {
   event_id?: string;
   category?: string;
   message?: string;
-  data?: { [key: string]: any };
+  data?: Record<string, unknown>;
   timestamp?: number;
 }
 
-export interface BreadcrumbHint {
-  [key: string]: any;
-}
+export type BreadcrumbHint = Record<string, unknown>;

@@ -3,10 +3,17 @@ import { getCurrentHub } from '@sentry/hub';
 import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import { InboundFilters } from '@sentry/integration-inboundfilters';
+import {
+  ConsoleBreadcrumbs,
+  DOMBreadcrumbs,
+  XHRBreadcrumbs,
+  FetchBreadcrumbs,
+  HistoryBreadcrumbs,
+} from '@sentry/integration-breadcrumbs';
 
 import { BrowserClient, BrowserOptions } from './client';
 import { wrap as internalWrap } from './helpers';
-import { Breadcrumbs, GlobalHandlers, LinkedErrors, TryCatch, UserAgent } from './integrations';
+import { GlobalHandlers, LinkedErrors, TryCatch, UserAgent } from './integrations';
 
 export const defaultIntegrations = [new TryCatch(), new LinkedErrors(), new UserAgent()];
 
@@ -69,7 +76,15 @@ export const defaultIntegrations = [new TryCatch(), new LinkedErrors(), new User
  */
 export function init(options: BrowserOptions = {}): void {
   // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
-  options.fancyIntegrations = [new InboundFilters(), new GlobalHandlers(), new Breadcrumbs()];
+  options.fancyIntegrations = [
+    new ConsoleBreadcrumbs(),
+    new DOMBreadcrumbs(),
+    new XHRBreadcrumbs(),
+    new FetchBreadcrumbs(),
+    new HistoryBreadcrumbs(),
+    new InboundFilters(),
+    new GlobalHandlers(),
+  ];
 
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;

@@ -238,7 +238,7 @@ export function wrapHandler<TEvent, TResult>(
       timeoutWarningTimer = setTimeout(() => {
         withScope(scope => {
           scope.setTag('timeout', humanReadableTimeout);
-          captureMessage(`Possible function timeout: ${context.functionName}`, Severity.Warning);
+          captureMessage(`Possible function timeout: ${context.functionName}`, { scope: { level: Severity.Warning } });
         });
       }, timeoutWarningDelay);
     }
