@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable max-lines */
-import { getCurrentHub } from '@sentry/hub';
-import { Event, Integration, Severity } from '@sentry/types';
+import { ClientLike, Event, IntegrationV7, Severity } from '@sentry/types';
 import {
   addInstrumentationHandler,
   getEventDescription,
@@ -24,7 +23,7 @@ interface BreadcrumbsOptions {
  * Default Breadcrumbs instrumentations
  * TODO: Deprecated - with v6, this will be renamed to `Instrument`
  */
-export class Breadcrumbs implements Integration {
+export class Breadcrumbs implements IntegrationV7 {
   /**
    * @inheritDoc
    */
@@ -36,6 +35,8 @@ export class Breadcrumbs implements Integration {
   public name: string = Breadcrumbs.id;
 
   private readonly _options: BreadcrumbsOptions;
+
+  private _client!: ClientLike;
 
   /**
    * @inheritDoc
@@ -52,35 +53,9 @@ export class Breadcrumbs implements Integration {
     };
   }
 
-  /**
-   * Create a breadcrumb of `sentry` from the events themselves
-   */
-  public addSentryBreadcrumb(event: Event): void {
-    if (!this._options.sentry) {
-      return;
-    }
-    getCurrentHub().addBreadcrumb(
-      {
-        category: `sentry.${event.type === 'transaction' ? 'transaction' : 'event'}`,
-        event_id: event.event_id,
-        level: event.level,
-        message: getEventDescription(event),
-      },
-      {
-        event,
-      },
-    );
-  }
+  public install(client: ClientLike): void {
+    this._client = client;
 
-  /**
-   * Instrument browser built-ins w/ breadcrumb capturing
-   *  - Console API
-   *  - DOM API (click/typing)
-   *  - XMLHttpRequest API
-   *  - Fetch API
-   *  - History API
-   */
-  public setupOnce(): void {
     if (this._options.console) {
       addInstrumentationHandler({
         callback: (...args) => {
@@ -124,6 +99,26 @@ export class Breadcrumbs implements Integration {
   }
 
   /**
+   * Create a breadcrumb of `sentry` from the events themselves
+   */
+  public addSentryBreadcrumb(event: Event): void {
+    if (!this._options.sentry) {
+      return;
+    }
+    this._client.getScope()?.addBreadcrumb(
+      {
+        category: `sentry.${event.type === 'transaction' ? 'transaction' : 'event'}`,
+        event_id: event.event_id,
+        level: event.level,
+        message: getEventDescription(event),
+      },
+      {
+        event,
+      },
+    );
+  }
+
+  /**
    * Creates breadcrumbs from console API calls
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,7 +143,7 @@ export class Breadcrumbs implements Integration {
       }
     }
 
-    getCurrentHub().addBreadcrumb(breadcrumb, {
+    this._client.getScope()?.addBreadcrumb(breadcrumb, {
       input: handlerData.args,
       level: handlerData.level,
     });
@@ -174,7 +169,7 @@ export class Breadcrumbs implements Integration {
       return;
     }
 
-    getCurrentHub().addBreadcrumb(
+    this._client.getScope()?.addBreadcrumb(
       {
         category: `ui.${handlerData.name}`,
         message: target,
@@ -200,7 +195,7 @@ export class Breadcrumbs implements Integration {
 
       const { method, url, status_code, body } = handlerData.xhr.__sentry_xhr__ || {};
 
-      getCurrentHub().addBreadcrumb(
+      this._client.getScope()?.addBreadcrumb(
         {
           category: 'xhr',
           data: {
@@ -236,7 +231,7 @@ export class Breadcrumbs implements Integration {
     }
 
     if (handlerData.error) {
-      getCurrentHub().addBreadcrumb(
+      this._client.getScope()?.addBreadcrumb(
         {
           category: 'fetch',
           data: handlerData.fetchData,
@@ -249,7 +244,7 @@ export class Breadcrumbs implements Integration {
         },
       );
     } else {
-      getCurrentHub().addBreadcrumb(
+      this._client.getScope()?.addBreadcrumb(
         {
           category: 'fetch',
           data: {
@@ -292,7 +287,7 @@ export class Breadcrumbs implements Integration {
       from = parsedFrom.relative;
     }
 
-    getCurrentHub().addBreadcrumb({
+    this._client.getScope()?.addBreadcrumb({
       category: 'navigation',
       data: {
         from,

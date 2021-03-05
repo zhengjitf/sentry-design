@@ -9,9 +9,6 @@ import { NodeClient, NodeOptions } from './client';
 import { Console, Http, LinkedErrors, OnUncaughtException, OnUnhandledRejection } from './integrations';
 
 export const defaultIntegrations = [
-  // Native Wrappers
-  new Console(),
-  new Http(),
   // Global Handlers
   new OnUncaughtException(),
   new OnUnhandledRejection(),
@@ -76,7 +73,7 @@ export const defaultIntegrations = [
  */
 export function init(options: NodeOptions = {}): void {
   // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
-  options.fancyIntegrations = [new InboundFilters()];
+  options.fancyIntegrations = [new Console(), new Http(), new InboundFilters()];
 
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;

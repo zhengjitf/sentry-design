@@ -1,11 +1,10 @@
 import * as util from 'util';
 
-import { getCurrentHub } from '@sentry/hub';
-import { Integration, Severity } from '@sentry/types';
+import { ClientLike, IntegrationV7, Severity } from '@sentry/types';
 import { fill } from '@sentry/utils';
 
 /** Console module integration */
-export class Console implements Integration {
+export class Console implements IntegrationV7 {
   /**
    * @inheritDoc
    */
@@ -16,14 +15,18 @@ export class Console implements Integration {
    */
   public name: string = Console.id;
 
+  private _client!: ClientLike;
+
   /**
    * @inheritDoc
    */
-  public setupOnce(): void {
+  public install(client: ClientLike): void {
+    this._client = client;
+
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const consoleModule = require('console');
     for (const level of ['debug', 'info', 'warn', 'error', 'log']) {
-      fill(consoleModule, level, createConsoleWrapper(level));
+      fill(consoleModule, level, createConsoleWrapper(level, this._client));
     }
   }
 }
@@ -31,7 +34,7 @@ export class Console implements Integration {
 /**
  * Wrapper function that'll be used for every console level
  */
-function createConsoleWrapper(level: string): (originalConsoleMethod: () => void) => void {
+function createConsoleWrapper(level: string, client: ClientLike): (originalConsoleMethod: () => void) => void {
   return function consoleWrapper(originalConsoleMethod: () => void): () => void {
     let sentryLevel: Severity;
 
@@ -53,19 +56,17 @@ function createConsoleWrapper(level: string): (originalConsoleMethod: () => void
     }
 
     return function(this: typeof console, ...args: unknown[]): void {
-      if (getCurrentHub().getIntegration(Console)) {
-        getCurrentHub().addBreadcrumb(
-          {
-            category: 'console',
-            level: sentryLevel,
-            message: util.format.apply(undefined, args),
-          },
-          {
-            input: [...args],
-            level,
-          },
-        );
-      }
+      client.getScope()?.addBreadcrumb(
+        {
+          category: 'console',
+          level: sentryLevel,
+          message: util.format.apply(undefined, args),
+        },
+        {
+          input: [...args],
+          level,
+        },
+      );
 
       originalConsoleMethod.apply(this, args);
     };
