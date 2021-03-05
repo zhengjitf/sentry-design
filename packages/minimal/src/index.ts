@@ -1,7 +1,7 @@
 import { getCurrentHub } from '@sentry/hub';
 import { CustomSamplingContext, ScopeLike, Transaction, TransactionContext } from '@sentry/types';
 
-import { getCurrentScope } from './carrier';
+import { getCurrentClient } from './carrier';
 
 export {
   addGlobalEventProcessor,
@@ -25,14 +25,17 @@ export {
 } from './scope';
 
 export function configureScope(callback: (scope: ScopeLike) => void): void {
-  const scope = getCurrentScope();
+  const scope = getCurrentClient()?.getScope();
   if (scope) {
     callback(scope);
   }
 }
 
 export function withScope(callback: (scope: ScopeLike) => void): void {
-  const scope = getCurrentScope()?.clone();
+  const scope = getCurrentClient()
+    ?.getScope()
+    ?.clone();
+
   if (scope) {
     try {
       callback(scope);

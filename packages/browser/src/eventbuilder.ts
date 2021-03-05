@@ -1,4 +1,4 @@
-import { Event, EventHint, Severity } from '@sentry/types';
+import { CaptureContext, Event, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -19,8 +19,12 @@ import { computeStackTrace } from './tracekit';
  * Builds and Event from a Exception
  * @hidden
  */
-export function eventFromException(options: BrowserOptions, exception: unknown, hint?: EventHint): PromiseLike<Event> {
-  const syntheticException = (hint && hint.syntheticException) || undefined;
+export function eventFromException(
+  options: BrowserOptions,
+  exception: unknown,
+  captureContext: CaptureContext,
+): PromiseLike<Event> {
+  const syntheticException = captureContext.hint?.syntheticException;
   const event = eventFromUnknownInput(exception, syntheticException, {
     attachStacktrace: options.attachStacktrace,
   });
@@ -28,8 +32,8 @@ export function eventFromException(options: BrowserOptions, exception: unknown, 
     handled: true,
     type: 'generic',
   });
-  if (hint && hint.event_id) {
-    event.event_id = hint.event_id;
+  if (captureContext.hint?.event_id) {
+    event.event_id = captureContext.hint?.event_id;
   }
   event.level = Severity.Error;
   event.platform = 'javascript';
@@ -43,17 +47,16 @@ export function eventFromException(options: BrowserOptions, exception: unknown, 
 export function eventFromMessage(
   options: BrowserOptions,
   message: string,
-  level: Severity = Severity.Info,
-  hint?: EventHint,
+  captureContext: CaptureContext,
 ): PromiseLike<Event> {
-  const syntheticException = (hint && hint.syntheticException) || undefined;
+  const syntheticException = captureContext.hint?.syntheticException;
   const event = eventFromString(message, syntheticException, {
     attachStacktrace: options.attachStacktrace,
   });
-  if (hint && hint.event_id) {
-    event.event_id = hint.event_id;
+  if (captureContext.hint?.event_id) {
+    event.event_id = captureContext.hint?.event_id;
   }
-  event.level = level;
+  event.level = captureContext.scope?.level ?? Severity.Info;
   event.platform = 'javascript';
   return SyncPromise.resolve(event);
 }

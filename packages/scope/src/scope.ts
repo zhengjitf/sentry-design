@@ -1,7 +1,6 @@
 /* eslint-disable max-lines */
 import {
   Breadcrumb,
-  CaptureContext,
   Context,
   Contexts,
   Event,

@@ -1,48 +1,36 @@
-import { CaptureContext, Event, EventHint, EventProcessor, ScopeLike, Session, Severity } from '@sentry/types';
+import { CaptureContext, Event, EventProcessor, Session } from '@sentry/types';
 
 import { getCurrentClient } from './carrier';
 
 // TODO: Use `ReturnType<ClientLike['captureException']>` instead?
-export function captureException(exception: unknown, captureContext?: CaptureContext): string | undefined {
-  let syntheticException: Error;
+export function captureException(exception: unknown, captureContext: CaptureContext = {}): string | undefined {
   try {
     throw new Error('Sentry syntheticException');
-  } catch (exception) {
-    syntheticException = exception as Error;
+  } catch (syntheticException) {
+    captureContext.hint = captureContext.hint ?? {};
+    captureContext.hint.originalException = exception;
+    captureContext.hint.syntheticException = syntheticException as Error;
   }
-  const hint = {
-    captureContext,
-    originalException: exception,
-    syntheticException,
-  };
 
-  return getCurrentClient()?.captureException(exception, hint);
+  return getCurrentClient()?.captureException(exception, captureContext);
 }
 
-// TODO: Unify the common API and use correct return types
-export function captureMessage(message: string, captureContext?: CaptureContext | Severity): string | undefined {
-  let syntheticException: Error;
+export function captureMessage(message: string, captureContext: CaptureContext = {}): string | undefined {
   try {
     throw new Error(message);
-  } catch (exception) {
-    syntheticException = exception as Error;
+  } catch (syntheticException) {
+    captureContext.hint = captureContext.hint ?? {};
+    captureContext.hint.syntheticException = syntheticException as Error;
   }
 
-  // This is necessary to provide explicit scopes upgrade, without changing the original
-  // arity of the `captureMessage(message, level)` method.
-  const level = typeof captureContext === 'string' ? captureContext : undefined;
-  const context = typeof captureContext !== 'string' ? { captureContext } : undefined;
-  const hint = {
-    originalException: message,
-    syntheticException,
-    ...context,
-  };
-  return getCurrentClient()?.captureMessage(message, level, hint);
+  return getCurrentClient()?.captureMessage(message, captureContext);
 }
 
-export function captureEvent(event: Event, hint?: EventHint, scope?: ScopeLike): string | undefined {
-  return getCurrentClient()?.captureEvent(event, hint, scope);
+export function captureEvent(event: Event, captureContext: CaptureContext = {}): string | undefined {
+  return getCurrentClient()?.captureEvent(event, captureContext);
 }
+
+// TODO: Add `captureEnvelope` and use it for sessions/events/transactions?
 
 export function captureSession(session: Session): void {
   return getCurrentClient()?.captureSession?.(session);

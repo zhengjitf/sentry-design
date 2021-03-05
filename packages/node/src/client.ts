@@ -1,7 +1,7 @@
 import * as domain from 'domain';
 
 import { BaseClient, SDK_VERSION } from '@sentry/core';
-import { Event, EventHint, Options, ScopeLike, SentryGlobal, Severity } from '@sentry/types';
+import { CaptureContext, Event, Options, ScopeLike, SentryGlobal } from '@sentry/types';
 import { HTTPTransport } from '@sentry/transport-http';
 import { getCarrier } from '@sentry/minimal';
 
@@ -78,18 +78,11 @@ export class NodeClient extends BaseClient<NodeOptions> {
     return getCarrier().scope;
   }
 
-  /**
-   * @inheritDoc
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  protected _eventFromException(exception: any, hint?: EventHint): PromiseLike<Event> {
-    return eventFromException(this.options, exception, hint);
+  protected _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<Event> {
+    return eventFromException(this.options, exception, captureContext);
   }
 
-  /**
-   * @inheritDoc
-   */
-  protected _eventFromMessage(message: string, level: Severity = Severity.Info, hint?: EventHint): PromiseLike<Event> {
-    return eventFromMessage(this.options, message, level, hint);
+  protected _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<Event> {
+    return eventFromMessage(this.options, message, captureContext);
   }
 }

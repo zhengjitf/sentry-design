@@ -5,7 +5,7 @@ import { Exception } from './exception';
 import { Extras } from './extra';
 import { Primitive } from './misc';
 import { Request } from './request';
-import { CaptureContext } from './scope';
+import { ScopeContext } from './scope';
 import { SdkInfo } from './sdkinfo';
 import { Severity } from './severity';
 import { Span } from './span';
@@ -47,10 +47,14 @@ export interface Event {
 
 export type EventType = 'transaction';
 
-export interface EventHint {
+export type EventHint = {
   event_id?: string;
-  captureContext?: CaptureContext;
-  syntheticException?: Error | null;
   originalException?: unknown;
-  data?: any;
-}
+  syntheticException?: Error;
+  data?: Record<string, unknown>;
+};
+
+export type CaptureContext = {
+  scope?: ScopeContext;
+  hint?: EventHint;
+};

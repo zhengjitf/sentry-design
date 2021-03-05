@@ -1,16 +1,15 @@
 /* eslint-disable max-lines */
 import { Scope, Session } from '@sentry/scope';
 import {
+  CaptureContext,
   ClientLike,
   Event,
-  EventHint,
   EventProcessor,
   Integration,
   IntegrationClass,
   OptionsV7,
   ScopeLike,
   SessionStatus,
-  Severity,
 } from '@sentry/types';
 import {
   dateTimestampInSeconds,
@@ -134,13 +133,12 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
   /**
    * @inheritDoc
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  public captureException(exception: any, hint?: EventHint, scope?: Scope): string | undefined {
-    let eventId: string | undefined = hint && hint.event_id;
+  public captureException(exception: unknown, captureContext: CaptureContext = {}): string | undefined {
+    let eventId = captureContext.hint?.event_id;
 
     this._process(
-      this._eventFromException(exception, hint)
-        .then(event => this._captureEvent(event, hint, scope))
+      this._eventFromException(exception, captureContext)
+        .then(event => this._captureEvent(event, captureContext))
         .then(result => {
           eventId = result;
         }),
@@ -152,21 +150,16 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
   /**
    * @inheritDoc
    */
-  public captureMessage(
-    message: string,
-    level: Severity = Severity.Info,
-    hint?: EventHint,
-    scope?: Scope,
-  ): string | undefined {
-    let eventId: string | undefined = hint && hint.event_id;
+  public captureMessage(message: string, captureContext: CaptureContext = {}): string | undefined {
+    let eventId = captureContext.hint?.event_id;
 
     const promisedEvent = isPrimitive(message)
-      ? this._eventFromMessage(String(message), level, hint)
-      : this._eventFromException(message, hint);
+      ? this._eventFromMessage(String(message), captureContext)
+      : this._eventFromException(message, captureContext);
 
     this._process(
       promisedEvent
-        .then(event => this._captureEvent(event, hint, scope))
+        .then(event => this._captureEvent(event, captureContext))
         .then(result => {
           eventId = result;
         }),
@@ -178,11 +171,11 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
   /**
    * @inheritDoc
    */
-  public captureEvent(event: Event, hint?: EventHint, scope?: Scope): string | undefined {
-    let eventId: string | undefined = hint && hint.event_id;
+  public captureEvent(event: Event, captureContext: CaptureContext = {}): string | undefined {
+    let eventId = captureContext.hint?.event_id;
 
     this._process(
-      this._captureEvent(event, hint, scope).then(result => {
+      this._captureEvent(event, captureContext).then(result => {
         eventId = result;
       }),
     );
@@ -332,12 +325,12 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * @param scope A scope containing event metadata.
    * @returns A new event with more information.
    */
-  protected _prepareEvent(event: Event, scope?: Scope, hint?: EventHint): PromiseLike<Event | null> {
+  protected _prepareEvent(event: Event, captureContext: CaptureContext): PromiseLike<Event | null> {
     const { normalizeDepth = 3 } = this.options;
     const prepared: Event = {
       ...event,
-      event_id: event.event_id || (hint && hint.event_id ? hint.event_id : uuid4()),
-      timestamp: event.timestamp || dateTimestampInSeconds(),
+      event_id: event.event_id ?? captureContext?.hint?.event_id ?? uuid4(),
+      timestamp: event.timestamp ?? dateTimestampInSeconds(),
     };
 
     this._applyClientOptions(prepared);
@@ -345,9 +338,11 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
 
     // If we have scope given to us, use it as the base for further modifications.
     // This allows us to prevent unnecessary copying of data if `captureContext` is not provided.
-    let finalScope = scope;
-    if (hint && hint.captureContext) {
-      finalScope = (finalScope?.clone() || new Scope()).update(hint.captureContext);
+
+    // TODO: We should be able to remove scope as dependency here somehow
+    let finalScope = this.getScope() || new Scope();
+    if (captureContext?.scope) {
+      finalScope = (finalScope?.clone() || new Scope()).update(captureContext?.scope);
     }
 
     // We prepare the result here with a resolved Event.
@@ -357,7 +352,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     // {@link Hub.addEventProcessor} gets the finished prepared event.
     if (finalScope) {
       // In case we have a hub we reassign it.
-      result = finalScope.applyToEvent(prepared, hint);
+      result = finalScope.applyToEvent(prepared, captureContext?.hint);
     }
 
     return result.then(evt => {
@@ -480,8 +475,8 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * @param hint
    * @param scope
    */
-  protected _captureEvent(event: Event, hint?: EventHint, scope?: Scope): PromiseLike<string | undefined> {
-    return this._processEvent(event, hint, scope).then(
+  protected _captureEvent(event: Event, captureContext: CaptureContext): PromiseLike<string | undefined> {
+    return this._processEvent(event, captureContext).then(
       finalEvent => {
         return finalEvent.event_id;
       },
@@ -505,7 +500,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * @param scope A scope containing event metadata.
    * @returns A SyncPromise that resolves with the event or rejects in case event was/will not be send.
    */
-  protected _processEvent(event: Event, hint?: EventHint, scope?: Scope): PromiseLike<Event> {
+  protected _processEvent(event: Event, captureContext: CaptureContext): PromiseLike<Event> {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const { beforeSend, sampleRate } = this.options;
 
@@ -525,18 +520,21 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
       );
     }
 
-    return this._prepareEvent(event, scope, hint)
+    return this._prepareEvent(event, captureContext)
       .then(prepared => {
         if (prepared === null) {
           throw new SentryError('An event processor returned null, will not send event.');
         }
 
-        const isInternalException = hint && hint.data && (hint.data as { __sentry__: boolean }).__sentry__ === true;
+        const isInternalException =
+          captureContext?.hint &&
+          captureContext?.hint?.data &&
+          (captureContext?.hint?.data as { __sentry__: boolean }).__sentry__ === true;
         if (isInternalException || isTransaction || !beforeSend) {
           return prepared;
         }
 
-        const beforeSendResult = beforeSend(prepared, hint);
+        const beforeSendResult = beforeSend(prepared, captureContext?.hint);
         if (typeof beforeSendResult === 'undefined') {
           throw new SentryError('`beforeSend` method has to return `null` or a valid event.');
         } else if (isThenable(beforeSendResult)) {
@@ -554,9 +552,9 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
           throw new SentryError('`beforeSend` returned `null`, will not send event.');
         }
 
-        const session = scope && scope.getSession && scope.getSession();
+        const session = this.getScope()?.getSession();
         if (!isTransaction && session) {
-          this._updateSessionFromEvent(session, processedEvent);
+          this._updateSessionFromEvent(session as Session, processedEvent);
         }
 
         this._sendEvent(processedEvent);
@@ -568,10 +566,12 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
         }
 
         this.captureException(reason, {
-          data: {
-            __sentry__: true,
+          hint: {
+            data: {
+              __sentry__: true,
+            },
+            originalException: reason as Error,
           },
-          originalException: reason as Error,
         });
         throw new SentryError(
           `Event processing pipeline threw an error, original event will not be sent. Details have been sent as a new event.\nReason: ${reason}`,
@@ -596,6 +596,6 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     );
   }
 
-  protected abstract _eventFromException(exception: unknown, hint?: EventHint): PromiseLike<Event>;
-  protected abstract _eventFromMessage(message: string, level: Severity, hint?: EventHint): PromiseLike<Event>;
+  protected abstract _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<Event>;
+  protected abstract _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<Event>;
 }

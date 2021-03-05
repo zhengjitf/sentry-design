@@ -1,5 +1,5 @@
 import { getCurrentHub } from '@sentry/hub';
-import { Event, EventHint, Mechanism, Severity } from '@sentry/types';
+import { CaptureContext, Event, Mechanism, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -13,7 +13,11 @@ import {
 import { NodeOptions } from './client';
 import { extractStackFromError, parseError, parseStack, prepareFramesForEvent } from './parsers';
 
-export function eventFromException(options: NodeOptions, exception: unknown, hint?: EventHint): PromiseLike<Event> {
+export function eventFromException(
+  options: NodeOptions,
+  exception: unknown,
+  captureContext: CaptureContext,
+): PromiseLike<Event> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ex: any = exception;
   const mechanism: Mechanism = {
@@ -31,12 +35,12 @@ export function eventFromException(options: NodeOptions, exception: unknown, hin
         scope.setExtra('__serialized__', normalizeToSize(exception as Record<string, unknown>));
       });
 
-      ex = (hint && hint.syntheticException) || new Error(message);
+      ex = captureContext.hint?.syntheticException || new Error(message);
       (ex as Error).message = message;
     } else {
       // This handles when someone does: `throw "something awesome";`
       // We use synthesized Error here so we can extract a (rough) stack trace.
-      ex = (hint && hint.syntheticException) || new Error(exception as string);
+      ex = captureContext.hint?.syntheticException || new Error(exception as string);
       (ex as Error).message = exception as string;
     }
     mechanism.synthetic = true;
@@ -47,8 +51,8 @@ export function eventFromException(options: NodeOptions, exception: unknown, hin
       .then(event => {
         addExceptionTypeValue(event, undefined, undefined);
         addExceptionMechanism(event, mechanism);
-        if (hint && hint.event_id) {
-          event.event_id = hint.event_id;
+        if (captureContext.hint?.event_id) {
+          event.event_id = captureContext.hint?.event_id;
         }
         event.platform = 'node';
         if (options.serverName) {
@@ -63,22 +67,21 @@ export function eventFromException(options: NodeOptions, exception: unknown, hin
 export function eventFromMessage(
   options: NodeOptions,
   message: string,
-  level: Severity = Severity.Info,
-  hint?: EventHint,
+  captureContext: CaptureContext,
 ): PromiseLike<Event> {
   const event: Event = {
-    level,
+    level: captureContext.scope?.level ?? Severity.Info,
     message,
     platform: 'node',
   };
 
-  if (hint && hint.event_id) {
-    event.event_id = hint.event_id;
+  if (captureContext.hint?.event_id) {
+    event.event_id = captureContext.hint?.event_id;
   }
 
   return new SyncPromise<Event>(resolve => {
-    if (options.attachStacktrace && hint && hint.syntheticException) {
-      const stack = hint.syntheticException ? extractStackFromError(hint.syntheticException) : [];
+    if (options.attachStacktrace && captureContext.hint?.syntheticException) {
+      const stack = extractStackFromError(captureContext.hint?.syntheticException);
       parseStack(stack, options)
         .then(frames => {
           event.stacktrace = {

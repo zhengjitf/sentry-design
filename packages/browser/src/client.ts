@@ -1,5 +1,5 @@
 import { BaseClient, SDK_VERSION } from '@sentry/core';
-import { Event, EventHint, Options, ScopeLike, Severity } from '@sentry/types';
+import { CaptureContext, Event, Options, ScopeLike } from '@sentry/types';
 import { getGlobalObject, logger, supportsFetch } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import { FetchTransport } from '@sentry/transport-fetch';
@@ -91,17 +91,12 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
     });
   }
 
-  /**
-   * @inheritDoc
-   */
-  protected _eventFromException(exception: unknown, hint?: EventHint): PromiseLike<Event> {
-    return eventFromException(this.options, exception, hint);
+  protected _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<Event> {
+    return eventFromException(this.options, exception, captureContext);
   }
-  /**
-   * @inheritDoc
-   */
-  protected _eventFromMessage(message: string, level: Severity = Severity.Info, hint?: EventHint): PromiseLike<Event> {
-    return eventFromMessage(this.options, message, level, hint);
+
+  protected _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<Event> {
+    return eventFromMessage(this.options, message, captureContext);
   }
 
   // TODO: Restore this functionality somewhere else, it definitely shouldn't be here.

@@ -1,11 +1,10 @@
 import { Dsn } from './dsn';
-import { Event, EventHint } from './event';
+import { CaptureContext, Event } from './event';
 import { EventProcessor } from './eventprocessor';
 import { Integration, IntegrationClass } from './integration';
 import { OptionsV7 } from './options';
-import { Scope, ScopeLike } from './scope';
+import { ScopeLike } from './scope';
 import { Session } from './session';
-import { Severity } from './severity';
 
 /**
  * User-Facing Sentry SDK Client.
@@ -20,69 +19,18 @@ export interface ClientLike<O extends OptionsV7 = OptionsV7> {
   options: O;
 
   lastEventId(): string | undefined;
-
   getScope(): ScopeLike | undefined;
-
   addEventProcessor(callback: EventProcessor): void;
-
   // TODO: To be removed? Can be obtained from options
-  /** Returns the current Dsn. */
   getDsn(): Dsn | undefined;
-
   // TODO: To be removed
-  /** Returns an array of installed integrations on the client. */
   getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null;
 
-  /**
-   * Captures an exception event and sends it to Sentry.
-   *
-   * @param exception An exception-like object.
-   * @param hint May contain additional information about the original exception.
-   * @param scope An optional scope containing event metadata.
-   * @returns The event id
-   */
-  captureException(exception: any, hint?: EventHint, scope?: Scope): string | undefined;
+  captureException(exception: unknown, captureContext?: CaptureContext): string | undefined;
+  captureMessage(message: string, captureContext?: CaptureContext): string | undefined;
+  captureEvent(event: Event, captureContext?: CaptureContext): string | undefined;
+  captureSession(session: Session): void;
 
-  /**
-   * Captures a message event and sends it to Sentry.
-   *
-   * @param message The message to send to Sentry.
-   * @param level Define the level of the message.
-   * @param hint May contain additional information about the original exception.
-   * @param scope An optional scope containing event metadata.
-   * @returns The event id
-   */
-  captureMessage(message: string, level?: Severity, hint?: EventHint, scope?: Scope): string | undefined;
-
-  /**
-   * Captures a manually created event and sends it to Sentry.
-   *
-   * @param event The event to send to Sentry.
-   * @param hint May contain additional information about the original exception.
-   * @param scope An optional scope containing event metadata.
-   * @returns The event id
-   */
-  captureEvent(event: Event, hint?: EventHint, scope?: Scope): string | undefined;
-
-  /** Captures a session
-   *
-   * @param session Session to be delivered
-   */
-  captureSession?(session: Session): void;
-
-  /**
-   * A promise that resolves when all current events have been sent.
-   * If you provide a timeout and the queue takes longer to drain the promise returns false.
-   *
-   * @param timeout Maximum time in ms the client should wait.
-   */
   flush(timeout?: number): PromiseLike<boolean>;
-
-  /**
-   * A promise that resolves when all current events have been sent.
-   * If you provide a timeout and the queue takes longer to drain the promise returns false.
-   *
-   * @param timeout Maximum time in ms the client should wait.
-   */
   close(timeout?: number): PromiseLike<boolean>;
 }

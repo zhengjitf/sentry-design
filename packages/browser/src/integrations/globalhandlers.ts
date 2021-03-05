@@ -84,9 +84,7 @@ export class GlobalHandlers implements IntegrationV7 {
           type: 'onerror',
         });
 
-        this._client.captureEvent(event, {
-          originalException: error,
-        });
+        this._client.captureEvent(event, { hint: { originalException: error } });
       },
       type: 'error',
     });
@@ -136,7 +134,7 @@ export class GlobalHandlers implements IntegrationV7 {
         });
 
         this._client.captureEvent(event, {
-          originalException: error,
+          hint: { originalException: error },
         });
 
         return;

@@ -1,6 +1,5 @@
 import {
   Breadcrumb,
-  CaptureContext,
   Context,
   Event,
   EventHint,
@@ -8,6 +7,7 @@ import {
   Extra,
   Extras,
   Primitive,
+  ScopeContext,
   ScopeLike,
   Session,
   SessionContext,
@@ -129,10 +129,10 @@ export function getSession(): SessionContext | undefined {
     ?.getSession();
 }
 
-export function update(captureContext?: CaptureContext): ScopeLike | undefined {
+export function update(scope?: ScopeContext): ScopeLike | undefined {
   return getCurrentClient()
     ?.getScope()
-    ?.update(captureContext);
+    ?.update(scope);
 }
 
 export function clear(): ScopeLike | undefined {
