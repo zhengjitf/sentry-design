@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import { CarrierV7, ClientLike, EventProcessor, ScopeLike, SentryGlobal } from '@sentry/types';
 import { getGlobalObject, logger } from '@sentry/utils';
 

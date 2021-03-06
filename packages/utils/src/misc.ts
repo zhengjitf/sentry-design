@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Event, SentryGlobal, StackFrame, WrappedFunction } from '@sentry/types';
 
 import { isNodeEnv } from './node';

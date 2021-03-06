@@ -1,5 +1,3 @@
-/* eslint-disable max-lines */
-
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { Event, EventHint } from './event';
 import { Integration, IntegrationV7 } from './integration';

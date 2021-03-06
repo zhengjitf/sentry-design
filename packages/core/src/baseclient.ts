@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import { Scope, Session } from '@sentry/scope';
 import {
   CaptureContext,

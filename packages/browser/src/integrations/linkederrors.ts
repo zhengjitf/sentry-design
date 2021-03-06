@@ -9,6 +9,8 @@ import { computeStackTrace } from '../tracekit';
 const DEFAULT_KEY = 'cause';
 const DEFAULT_LIMIT = 5;
 
+// TODO: Make it built-in (?)
+
 /** Adds SDK info to an event. */
 export class LinkedErrors implements Integration {
   /**

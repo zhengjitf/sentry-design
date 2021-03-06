@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Measurements, SpanContext } from '@sentry/types';
 import { browserPerformanceTimeOrigin, getGlobalObject, logger } from '@sentry/utils';

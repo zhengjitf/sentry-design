@@ -34,9 +34,6 @@ module.exports = {
     // Prefer use of template expression over string literal concatenation
     'prefer-template': 'error',
 
-    // Limit maximum file size to reduce complexity. Turned off in tests.
-    'max-lines': 'error',
-
     // We should require a whitespace beginning a comment
     'spaced-comment': 'error',
 
@@ -178,7 +175,6 @@ module.exports = {
       },
       files: ['test/**/*'],
       rules: {
-        'max-lines': 'off',
         'no-unused-expressions': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-unused-expressions': 'off',

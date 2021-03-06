@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ExtendedError, WrappedFunction } from '@sentry/types';
 
 import { htmlTreeAsString } from './browser';

@@ -1,4 +1,4 @@
-/* eslint-disable max-lines, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BrowserOptions, getCurrentHub, init as browserInit, SDK_VERSION } from '@sentry/browser';
 import { getTransaction } from '@sentry/minimal';
 import { Span } from '@sentry/types';
