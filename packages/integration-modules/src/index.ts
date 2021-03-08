@@ -1,9 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 
-import { EventProcessor, Hub, Integration } from '@sentry/types';
-
-let moduleCache: { [key: string]: string };
+import { ClientLike, IntegrationV7 } from '@sentry/types';
 
 /** Extract information about paths */
 function getPaths(): string[] {
@@ -67,25 +65,14 @@ function collectModules(): {
 }
 
 /** Add node modules / packages to the event */
-export class Modules implements Integration {
-  /**
-   * @inheritDoc
-   */
+export class Modules implements IntegrationV7 {
   public static id: string = 'Modules';
-
-  /**
-   * @inheritDoc
-   */
   public name: string = Modules.id;
 
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    addGlobalEventProcessor(event => {
-      if (!getCurrentHub().getIntegration(Modules)) {
-        return event;
-      }
+  private _moduleCache?: { [key: string]: string };
+
+  public install(client: ClientLike): void {
+    client.addEventProcessor(event => {
       return {
         ...event,
         modules: this._getModules(),
@@ -95,9 +82,9 @@ export class Modules implements Integration {
 
   /** Fetches the list of modules and the versions loaded by the entry file for your node.js app. */
   private _getModules(): { [key: string]: string } {
-    if (!moduleCache) {
-      moduleCache = collectModules();
+    if (!this._moduleCache) {
+      this._moduleCache = collectModules();
     }
-    return moduleCache;
+    return this._moduleCache;
   }
 }
