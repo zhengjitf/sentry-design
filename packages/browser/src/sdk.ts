@@ -1,8 +1,10 @@
+import { captureException } from '@sentry/minimal';
 import { initAndBind } from '@sentry/core';
 import { getCurrentHub } from '@sentry/hub';
 import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import { InboundFilters } from '@sentry/integration-inboundfilters';
+import { EventTargetWrap, TimersWrap, XHRWrap } from '@sentry/integration-wrap';
 import {
   ConsoleBreadcrumbs,
   DOMBreadcrumbs,
@@ -12,10 +14,9 @@ import {
 } from '@sentry/integration-breadcrumbs';
 
 import { BrowserClient, BrowserOptions } from './client';
-import { wrap as internalWrap } from './helpers';
-import { GlobalHandlers, LinkedErrors, TryCatch, UserAgent } from './integrations';
+import { GlobalHandlers, LinkedErrors, UserAgent } from './integrations';
 
-export const defaultIntegrations = [new TryCatch(), new LinkedErrors(), new UserAgent()];
+export const defaultIntegrations = [new LinkedErrors(), new UserAgent()];
 
 /**
  * The Sentry Browser SDK Client.
@@ -77,6 +78,9 @@ export const defaultIntegrations = [new TryCatch(), new LinkedErrors(), new User
 export function init(options: BrowserOptions = {}): void {
   // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
   options.fancyIntegrations = [
+    new EventTargetWrap(),
+    new TimersWrap(),
+    new XHRWrap(),
     new ConsoleBreadcrumbs(),
     new DOMBreadcrumbs(),
     new XHRBreadcrumbs(),
@@ -143,11 +147,17 @@ export function onLoad(callback: () => void): void {
  *
  * @param fn A function to wrap.
  *
- * @returns The result of wrapped function call.
+ * @returns Wrapped function.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function wrap(fn: (...args: any) => any): any {
-  return internalWrap(fn)();
+export function wrap(fn: (...args: unknown[]) => unknown): unknown {
+  return function(this: unknown, ...args: unknown[]): ReturnType<typeof fn> {
+    try {
+      return fn.apply(this, args);
+    } catch (e) {
+      captureException(e);
+      return;
+    }
+  };
 }
 
 /**

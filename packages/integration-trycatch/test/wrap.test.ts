@@ -2,10 +2,10 @@ import { WrappedFunction } from '@sentry/types';
 import { expect } from 'chai';
 import { SinonSpy, spy } from 'sinon';
 
-import { wrap } from '../../../src/helpers';
+import { wrap } from '../src/wrap';
 
 describe('internal wrap()', () => {
-  it('should wrap only functions', () => {
+  it('should wrap functions only', () => {
     const fn = (): number => 1337;
     const obj = { pickle: 'Rick' };
     const arr = ['Morty'];
@@ -64,16 +64,6 @@ describe('internal wrap()', () => {
     const wrapped = wrap(fn);
 
     expect(wrap(wrapped)).equal(wrapped);
-  });
-
-  it('calls "before" function when invoking wrapped function', () => {
-    const fn = (() => 1337) as WrappedFunction;
-    const before = spy();
-
-    const wrapped = wrap(fn, {}, before);
-    wrapped();
-
-    expect(before.called).equal(true);
   });
 
   it('attaches metadata to original and wrapped functions', () => {
