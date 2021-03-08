@@ -4,6 +4,7 @@ import { getCurrentHub } from '@sentry/hub';
 import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import { InboundFilters } from '@sentry/integration-inboundfilters';
+import { UserAgent } from '@sentry/integration-useragent';
 import { EventTargetWrap, TimersWrap, XHRWrap } from '@sentry/integration-wrap';
 import {
   ConsoleBreadcrumbs,
@@ -14,9 +15,9 @@ import {
 } from '@sentry/integration-breadcrumbs';
 
 import { BrowserClient, BrowserOptions } from './client';
-import { GlobalHandlers, LinkedErrors, UserAgent } from './integrations';
+import { GlobalHandlers, LinkedErrors } from './integrations';
 
-export const defaultIntegrations = [new LinkedErrors(), new UserAgent()];
+export const defaultIntegrations = [new LinkedErrors()];
 
 /**
  * The Sentry Browser SDK Client.
@@ -87,6 +88,7 @@ export function init(options: BrowserOptions = {}): void {
     new FetchBreadcrumbs(),
     new HistoryBreadcrumbs(),
     new InboundFilters(),
+    new UserAgent(),
     new GlobalHandlers(),
   ];
 
