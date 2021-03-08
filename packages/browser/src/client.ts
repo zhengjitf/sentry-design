@@ -1,12 +1,10 @@
 import { BaseClient, SDK_VERSION } from '@sentry/core';
 import { CaptureContext, Event, Options, ScopeLike } from '@sentry/types';
-import { getGlobalObject, logger, supportsFetch } from '@sentry/utils';
-import { ReportDialogOptions } from '@sentry/transport-base';
+import { supportsFetch } from '@sentry/utils';
 import { FetchTransport } from '@sentry/transport-fetch';
 import { XHRTransport } from '@sentry/transport-xhr';
 import { getCarrier } from '@sentry/minimal';
 
-import { injectReportDialog } from './helpers';
 import { eventFromException, eventFromMessage } from './eventbuilder';
 
 /**
@@ -66,29 +64,6 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
 
   public getScope(): ScopeLike | undefined {
     return this._scope || getCarrier().scope;
-  }
-
-  /**
-   * Show a report dialog to the user to send feedback to a specific event.
-   *
-   * @param options Set individual options for the dialog
-   */
-  public showReportDialog(options: ReportDialogOptions = {}): void {
-    // doesn't work without a document (React Native)
-    const document = getGlobalObject<Window>().document;
-    if (!document) {
-      return;
-    }
-
-    if (!this._isEnabled()) {
-      logger.error('Trying to call showReportDialog with Sentry Client disabled');
-      return;
-    }
-
-    injectReportDialog({
-      ...options,
-      dsn: options.dsn || this.getDsn()?.toString(),
-    });
   }
 
   protected _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<Event> {

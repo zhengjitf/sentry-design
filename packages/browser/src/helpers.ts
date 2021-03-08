@@ -21,14 +21,15 @@ export function ignoreNextOnError(): void {
   });
 }
 
-// TODO: Move it from helpers and remove helpers completely
+// TODO: Move it from helpers and remove helpers completely. Unfortunatelly Electron (or RN?) is importing it :(
 export function injectReportDialog(options: ReportDialogOptions & { onLoad?(): void } = {}): void {
   if (!options.eventId) {
-    logger.error(`Missing eventId option in showReportDialog call`);
+    logger.error(`ReportDialog is missing EventID`);
     return;
   }
+
   if (!options.dsn) {
-    logger.error(`Missing dsn option in showReportDialog call`);
+    logger.error(`ReportDialog is missing DSN`);
     return;
   }
 

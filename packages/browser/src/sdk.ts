@@ -1,4 +1,5 @@
-import { captureException } from '@sentry/minimal';
+import { ClientLike } from '@sentry/types';
+import { captureException, getCurrentClient } from '@sentry/minimal';
 import { initAndBind } from '@sentry/core';
 import { getCurrentHub } from '@sentry/hub';
 import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
@@ -16,6 +17,7 @@ import {
 
 import { BrowserClient, BrowserOptions } from './client';
 import { GlobalHandlers, LinkedErrors } from './integrations';
+import { injectReportDialog } from './helpers';
 
 export const defaultIntegrations = [new LinkedErrors()];
 
@@ -118,14 +120,28 @@ export function init(options: BrowserOptions = {}): void {
  *
  * @param options Everything is optional, we try to fetch all info need from the global scope.
  */
-export function showReportDialog(options: ReportDialogOptions = {}): void {
-  if (!options.eventId) {
-    options.eventId = getCurrentHub().lastEventId();
+export function showReportDialog(options: ReportDialogOptions = {}, client?: ClientLike): void {
+  // doesn't work without a document (React Native)
+  const document = getGlobalObject<Window>().document;
+  if (!document) {
+    return;
   }
-  const client = getCurrentHub().getClient<BrowserClient>();
-  if (client) {
-    client.showReportDialog(options);
+
+  const usableClient = client ?? getCurrentClient();
+  if (!usableClient) {
+    return;
   }
+
+  options.eventId = options.eventId ?? usableClient.lastEventId();
+  options.dsn = options.dsn ?? usableClient.getDsn()?.toString();
+
+  // TODO: Should we keep `isEnabled` around?
+  // if (!this._isEnabled()) {
+  //   logger.error('Trying to call showReportDialog with Sentry Client disabled');
+  //   return;
+  // }
+
+  injectReportDialog(options);
 }
 
 /**
