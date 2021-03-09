@@ -37,8 +37,7 @@ const EVENT_TARGETS = [
 ] as const;
 
 export class EventTargetWrap implements IntegrationV7 {
-  public static id: string = 'EventTargetWrap';
-  public name: string = EventTargetWrap.id;
+  public name = this.constructor.name;
 
   private _targets: Target[];
 

@@ -5,15 +5,7 @@ import { fill } from '@sentry/utils';
 
 /** Console module integration */
 export class Console implements IntegrationV7 {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Console';
-
-  /**
-   * @inheritDoc
-   */
-  public name: string = Console.id;
+  public name = this.constructor.name;
 
   private _client!: ClientLike;
 

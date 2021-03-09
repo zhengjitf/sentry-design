@@ -2,15 +2,7 @@ import { ClientLike, IntegrationV7 } from '@sentry/types';
 import { getCurrentScope } from '@sentry/minimal';
 
 export class ScopeIntegration implements IntegrationV7 {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'ScopeIntegration';
-
-  /**
-   * @inheritDoc
-   */
-  public name: string = ScopeIntegration.id;
+  public name = this.constructor.name;
 
   /**
    * @inheritDoc

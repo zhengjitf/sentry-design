@@ -6,8 +6,7 @@ import { wrap } from './wrap';
 type XMLHttpRequestProp = 'onload' | 'onerror' | 'onprogress' | 'onreadystatechange';
 
 export class XHRWrap implements IntegrationV7 {
-  public static id: string = 'XHRWrap';
-  public name: string = XHRWrap.id;
+  public name = this.constructor.name;
 
   public install(): void {
     if (!('XMLHttpRequest' in getGlobalObject())) {

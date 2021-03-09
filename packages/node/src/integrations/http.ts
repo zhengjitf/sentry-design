@@ -18,15 +18,7 @@ const NODE_VERSION = parseSemver(process.versions.node);
 
 /** http module integration */
 export class Http implements IntegrationV7 {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Http';
-
-  /**
-   * @inheritDoc
-   */
-  public name: string = Http.id;
+  public name = this.constructor.name;
 
   private _client!: ClientLike;
 

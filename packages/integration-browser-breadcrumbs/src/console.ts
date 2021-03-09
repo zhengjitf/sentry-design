@@ -2,8 +2,7 @@ import { ClientLike, IntegrationV7, Severity } from '@sentry/types';
 import { addInstrumentationHandler, safeJoin } from '@sentry/utils';
 
 export class ConsoleBreadcrumbs implements IntegrationV7 {
-  public static id: string = 'ConsoleBreadcrumbs';
-  public name: string = ConsoleBreadcrumbs.id;
+  public name = this.constructor.name;
 
   public install(client: ClientLike): void {
     addInstrumentationHandler({

@@ -10,8 +10,7 @@ type TimersWrapOptions = {
 };
 
 export class TimersWrap implements IntegrationV7 {
-  public static id: string = 'TimersWrap';
-  public name: string = TimersWrap.id;
+  public name = this.constructor.name;
 
   private _setTimeout: boolean;
   private _setInterval: boolean;

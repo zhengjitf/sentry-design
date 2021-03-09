@@ -2,8 +2,7 @@ import { ClientLike, IntegrationV7 } from '@sentry/types';
 import { addInstrumentationHandler, getGlobalObject, parseUrl } from '@sentry/utils';
 
 export class HistoryBreadcrumbs implements IntegrationV7 {
-  public static id: string = 'HistoryBreadcrumbs';
-  public name: string = HistoryBreadcrumbs.id;
+  public name = this.constructor.name;
 
   public install(client: ClientLike): void {
     addInstrumentationHandler({

@@ -20,15 +20,7 @@ type GlobalHandlersIntegrations = {
 
 /** Global handlers */
 export class GlobalHandlers implements IntegrationV7 {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'GlobalHandlers';
-
-  /**
-   * @inheritDoc
-   */
-  public name: string = GlobalHandlers.id;
+  public name = this.constructor.name;
 
   private readonly _options: GlobalHandlersIntegrations;
 

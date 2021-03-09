@@ -14,15 +14,7 @@ interface InboundFiltersOptions {
 
 /** Inbound filters configurable by the user */
 export class InboundFilters implements IntegrationV7 {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'InboundFilters';
-
-  /**
-   * @inheritDoc
-   */
-  public name: string = InboundFilters.id;
+  public name = this.constructor.name;
 
   public constructor(private readonly _options: Partial<InboundFiltersOptions> = {}) {}
 

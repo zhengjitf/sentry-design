@@ -66,8 +66,7 @@ function collectModules(): {
 
 /** Add node modules / packages to the event */
 export class Modules implements IntegrationV7 {
-  public static id: string = 'Modules';
-  public name: string = Modules.id;
+  public name = this.constructor.name;
 
   private _moduleCache?: { [key: string]: string };
 

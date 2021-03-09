@@ -2,8 +2,7 @@ import { ClientLike, Event, IntegrationV7 } from '@sentry/types';
 import { getGlobalObject } from '@sentry/utils';
 
 export class UserAgent implements IntegrationV7 {
-  public static id: string = 'UserAgent';
-  public name: string = UserAgent.id;
+  public name = this.constructor.name;
 
   public install(client: ClientLike): void {
     const global = getGlobalObject<Window>();

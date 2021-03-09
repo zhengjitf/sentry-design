@@ -2,8 +2,7 @@ import { Breadcrumb, BreadcrumbHint, ClientLike, IntegrationV7, Severity } from 
 import { addInstrumentationHandler } from '@sentry/utils';
 
 export class FetchBreadcrumbs implements IntegrationV7 {
-  public static id: string = 'FetchBreadcrumbs';
-  public name: string = FetchBreadcrumbs.id;
+  public name = this.constructor.name;
 
   public install(client: ClientLike): void {
     addInstrumentationHandler({

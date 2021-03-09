@@ -2,8 +2,7 @@ import { ClientLike, IntegrationV7 } from '@sentry/types';
 import { addInstrumentationHandler } from '@sentry/utils';
 
 export class XHRBreadcrumbs implements IntegrationV7 {
-  public static id: string = 'XHRBreadcrumbs';
-  public name: string = XHRBreadcrumbs.id;
+  public name = this.constructor.name;
 
   public install(client: ClientLike): void {
     addInstrumentationHandler({
