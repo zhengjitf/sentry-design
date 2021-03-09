@@ -2,8 +2,7 @@ import { getCurrentHub } from '@sentry/hub';
 import { addGlobalEventProcessor } from '@sentry/minimal';
 import { Event, EventHint, Exception, ExtendedError, Integration } from '@sentry/types';
 import { isInstanceOf, SyncPromise } from '@sentry/utils';
-
-import { getExceptionFromError } from '../parsers';
+import { getExceptionFromError } from '@sentry/eventbuilder-node';
 
 const DEFAULT_KEY = 'cause';
 const DEFAULT_LIMIT = 5;

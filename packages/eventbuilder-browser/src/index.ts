@@ -1,4 +1,6 @@
-import { CaptureContext, Event, Severity } from '@sentry/types';
+// TODO: All these functions are confusing af. They _have_ to be unified and become more descriptive in one way or another.
+
+import { CaptureContext, Event, OptionsV7, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -11,16 +13,19 @@ import {
   SyncPromise,
 } from '@sentry/utils';
 
-import { BrowserOptions } from './client';
 import { eventFromPlainObject, eventFromStacktrace, prepareFramesForEvent } from './parsers';
 import { computeStackTrace } from './tracekit';
+
+// TODO: Export only necessary thing. Or nothing at all directly from parsers/tracekit.
+export * from './tracekit';
+export * from './parsers';
 
 /**
  * Builds and Event from a Exception
  * @hidden
  */
 export function eventFromException(
-  options: BrowserOptions,
+  options: OptionsV7,
   exception: unknown,
   captureContext: CaptureContext,
 ): PromiseLike<Event> {
@@ -45,7 +50,7 @@ export function eventFromException(
  * @hidden
  */
 export function eventFromMessage(
-  options: BrowserOptions,
+  options: OptionsV7,
   message: string,
   captureContext: CaptureContext,
 ): PromiseLike<Event> {

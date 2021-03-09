@@ -1,5 +1,6 @@
-import { getCurrentHub } from '@sentry/hub';
-import { CaptureContext, Event, Mechanism, Severity } from '@sentry/types';
+// TODO: All these functions are confusing af. They _have_ to be unified and become more descriptive in one way or another.
+
+import { CaptureContext, Event, Mechanism, OptionsV7, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -10,11 +11,11 @@ import {
   SyncPromise,
 } from '@sentry/utils';
 
-import { NodeOptions } from './client';
 import { extractStackFromError, parseError, parseStack, prepareFramesForEvent } from './parsers';
+export { getExceptionFromError } from './parsers';
 
 export function eventFromException(
-  options: NodeOptions,
+  options: OptionsV7,
   exception: unknown,
   captureContext: CaptureContext,
 ): PromiseLike<Event> {
@@ -24,17 +25,14 @@ export function eventFromException(
     handled: true,
     type: 'generic',
   };
+  let shouldSerializeException = false;
 
   if (!isError(exception)) {
     if (isPlainObject(exception)) {
       // This will allow us to group events based on top-level keys
       // which is much better than creating new group when any key/value change
       const message = `Non-Error exception captured with keys: ${extractExceptionKeysForMessage(exception)}`;
-
-      getCurrentHub().configureScope(scope => {
-        scope.setExtra('__serialized__', normalizeToSize(exception as Record<string, unknown>));
-      });
-
+      shouldSerializeException = true;
       ex = captureContext.hint?.syntheticException || new Error(message);
       (ex as Error).message = message;
     } else {
@@ -55,8 +53,13 @@ export function eventFromException(
           event.event_id = captureContext.hint?.event_id;
         }
         event.platform = 'node';
-        if (options.serverName) {
-          event.server_name = options.serverName;
+        // TODO: Fix options type - we dont want to have a circular dependency on @sentry/node here
+        if ((options as { serverName?: string }).serverName) {
+          event.server_name = (options as { serverName?: string }).serverName;
+        }
+        if (shouldSerializeException) {
+          event.extra = event.extra ?? {};
+          event.extra.__serialized__ = normalizeToSize(exception as Record<string, unknown>);
         }
         resolve(event);
       })
@@ -65,7 +68,7 @@ export function eventFromException(
 }
 
 export function eventFromMessage(
-  options: NodeOptions,
+  options: OptionsV7,
   message: string,
   captureContext: CaptureContext,
 ): PromiseLike<Event> {

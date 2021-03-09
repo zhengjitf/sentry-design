@@ -2,9 +2,7 @@ import { getCurrentHub } from '@sentry/hub';
 import { addGlobalEventProcessor } from '@sentry/minimal';
 import { Event, EventHint, Exception, ExtendedError, Integration } from '@sentry/types';
 import { isInstanceOf } from '@sentry/utils';
-
-import { exceptionFromStacktrace } from '../parsers';
-import { computeStackTrace } from '../tracekit';
+import { computeStackTrace, exceptionFromStacktrace } from '@sentry/eventbuilder-browser';
 
 const DEFAULT_KEY = 'cause';
 const DEFAULT_LIMIT = 5;

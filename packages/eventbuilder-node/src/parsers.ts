@@ -1,10 +1,9 @@
 import { readFile } from 'fs';
 
-import { Event, Exception, ExtendedError, StackFrame } from '@sentry/types';
+import { Event, Exception, ExtendedError, OptionsV7, StackFrame } from '@sentry/types';
 import { addContextToFrame, basename, dirname, SyncPromise } from '@sentry/utils';
 import { LRUMap } from 'lru_map';
 
-import { NodeOptions } from './client';
 import * as stacktrace from './stacktrace';
 
 const DEFAULT_LINES_OF_CONTEXT: number = 7;
@@ -134,11 +133,14 @@ export function extractStackFromError(error: Error): stacktrace.StackFrame[] {
 /**
  * @hidden
  */
-export function parseStack(stack: stacktrace.StackFrame[], options?: NodeOptions): PromiseLike<StackFrame[]> {
+export function parseStack(stack: stacktrace.StackFrame[], options?: OptionsV7): PromiseLike<StackFrame[]> {
   const filesToRead: string[] = [];
 
+  // TODO: Move context lines to a separate integration
   const linesOfContext =
-    options && options.frameContextLines !== undefined ? options.frameContextLines : DEFAULT_LINES_OF_CONTEXT;
+    options && (options as { frameContextLines?: number }).frameContextLines !== undefined
+      ? (options as { frameContextLines: number }).frameContextLines
+      : DEFAULT_LINES_OF_CONTEXT;
 
   const frames: StackFrame[] = stack.map(frame => {
     const parsedFrame: StackFrame = {
@@ -222,7 +224,7 @@ function addPrePostContext(
 /**
  * @hidden
  */
-export function getExceptionFromError(error: Error, options?: NodeOptions): PromiseLike<Exception> {
+export function getExceptionFromError(error: Error, options?: OptionsV7): PromiseLike<Exception> {
   const name = error.name || error.constructor.name;
   const stack = extractStackFromError(error);
   return new SyncPromise<Exception>(resolve =>
@@ -242,7 +244,7 @@ export function getExceptionFromError(error: Error, options?: NodeOptions): Prom
 /**
  * @hidden
  */
-export function parseError(error: ExtendedError, options?: NodeOptions): PromiseLike<Event> {
+export function parseError(error: ExtendedError, options?: OptionsV7): PromiseLike<Event> {
   return new SyncPromise<Event>(resolve =>
     getExceptionFromError(error, options).then((exception: Exception) => {
       resolve({

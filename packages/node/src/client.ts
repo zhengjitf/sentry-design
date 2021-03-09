@@ -4,8 +4,7 @@ import { BaseClient, SDK_VERSION } from '@sentry/core';
 import { CaptureContext, Event, Options, ScopeLike, SentryGlobal } from '@sentry/types';
 import { HTTPTransport } from '@sentry/transport-http';
 import { getCarrier } from '@sentry/minimal';
-
-import { eventFromException, eventFromMessage } from './eventbuilder';
+import { eventFromException, eventFromMessage } from '@sentry/eventbuilder-node';
 
 /**
  * Configuration options for the Sentry Node SDK.

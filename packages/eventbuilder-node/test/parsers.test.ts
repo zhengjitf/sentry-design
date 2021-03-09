@@ -3,7 +3,9 @@ import * as fs from 'fs';
 import * as Parsers from '../src/parsers';
 import * as stacktrace from '../src/stacktrace';
 
-import { getError } from './helper/error';
+function getError(): Error {
+  return new Error('mock error');
+}
 
 describe('parsers.ts', () => {
   let frames: stacktrace.StackFrame[];

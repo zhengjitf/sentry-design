@@ -4,8 +4,7 @@ import { supportsFetch } from '@sentry/utils';
 import { FetchTransport } from '@sentry/transport-fetch';
 import { XHRTransport } from '@sentry/transport-xhr';
 import { getCarrier } from '@sentry/minimal';
-
-import { eventFromException, eventFromMessage } from './eventbuilder';
+import { eventFromException, eventFromMessage } from '@sentry/eventbuilder-browser';
 
 /**
  * Configuration options for the Sentry Browser SDK.

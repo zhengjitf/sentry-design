@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { computeStackTrace } from '../../../src/tracekit';
+import { computeStackTrace } from '../../src/tracekit';
 
 import {
   ANDROID_REACT_NATIVE,

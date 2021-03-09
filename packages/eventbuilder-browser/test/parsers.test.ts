@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { prepareFramesForEvent } from '../../src/parsers';
+import { prepareFramesForEvent } from '../src/parsers';
 
 describe('Parsers', () => {
   describe('prepareFramesForEvent()', () => {
