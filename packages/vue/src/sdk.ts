@@ -66,7 +66,7 @@ interface ViewModel {
   $once(hook: string, cb: () => void): void;
 }
 
-/** Optional metadata attached to Sentry Event */
+/** Optional metadata attached to Sentry SentryEvent */
 interface Metadata {
   [key: string]: any;
   componentName?: string;

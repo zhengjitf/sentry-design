@@ -5,7 +5,7 @@ export { Context, Contexts } from './context';
 export { Dsn, DsnComponents, DsnLike, DsnProtocol } from './dsn';
 export { DebugImage, DebugImageType, DebugMeta } from './debugMeta';
 export { ExtendedError } from './error';
-export { CaptureContext, Event, EventHint } from './event';
+export { CaptureContext, SentryEvent, EventHint } from './event';
 export { EventProcessor } from './eventprocessor';
 export { Exception } from './exception';
 export { Extra, Extras } from './extra';

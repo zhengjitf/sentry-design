@@ -2,7 +2,7 @@ import {
   Breadcrumb,
   Context,
   Contexts,
-  Event,
+  SentryEvent,
   EventHint,
   EventProcessor,
   Extra,
@@ -395,7 +395,7 @@ export class Scope implements ScopeLike {
    * @param hint May contain additional informartion about the original exception.
    * @hidden
    */
-  public applyToEvent(event: Event, hint?: EventHint): PromiseLike<Event | null> {
+  public applyToEvent(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null> {
     if (this.extra && Object.keys(this.extra).length) {
       event.extra = { ...this.extra, ...event.extra };
     }
@@ -438,18 +438,18 @@ export class Scope implements ScopeLike {
    */
   protected _notifyEventProcessors(
     processors: EventProcessor[],
-    event: Event | null,
+    event: SentryEvent | null,
     hint?: EventHint,
     index: number = 0,
-  ): PromiseLike<Event | null> {
-    return new SyncPromise<Event | null>((resolve, reject) => {
+  ): PromiseLike<SentryEvent | null> {
+    return new SyncPromise<SentryEvent | null>((resolve, reject) => {
       const processor = processors[index];
       if (event === null || typeof processor !== 'function') {
         resolve(event);
       } else {
-        const result = processor({ ...event }, hint) as Event | null;
+        const result = processor({ ...event }, hint) as SentryEvent | null;
         if (isThenable(result)) {
-          (result as PromiseLike<Event | null>)
+          (result as PromiseLike<SentryEvent | null>)
             .then(final => this._notifyEventProcessors(processors, final, hint, index + 1).then(resolve))
             .then(null, reject);
         } else {
@@ -481,7 +481,7 @@ export class Scope implements ScopeLike {
    * Applies fingerprint from the scope to the event if there's one,
    * uses message if there's one instead or get rid of empty fingerprint
    */
-  private _applyFingerprint(event: Event): void {
+  private _applyFingerprint(event: SentryEvent): void {
     // Make sure it's an array first and we actually have something in place
     event.fingerprint = event.fingerprint
       ? Array.isArray(event.fingerprint)

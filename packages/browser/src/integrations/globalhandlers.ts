@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { ClientLike, Event, IntegrationV7, Primitive, Severity } from '@sentry/types';
+import { ClientLike, SentryEvent, IntegrationV7, Primitive, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addInstrumentationHandler,
@@ -139,7 +139,7 @@ export class GlobalHandlers implements IntegrationV7 {
    * This function creates a stack from an old, error-less onerror handler.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _eventFromIncompleteOnError(msg: any, url: any, line: any, column: any): Event {
+  private _eventFromIncompleteOnError(msg: any, url: any, line: any, column: any): SentryEvent {
     const ERROR_TYPES_RE = /^(?:[Uu]ncaught (?:exception: )?)?(?:((?:Eval|Internal|Range|Reference|Syntax|Type|URI|)Error): )?(.*)$/i;
 
     // If 'message' is ErrorEvent, get real message from inside
@@ -174,7 +174,7 @@ export class GlobalHandlers implements IntegrationV7 {
    * @param reason: The `reason` property of the promise rejection
    * @returns An Event object with an appropriate `exception` value
    */
-  private _eventFromRejectionWithPrimitive(reason: Primitive): Event {
+  private _eventFromRejectionWithPrimitive(reason: Primitive): SentryEvent {
     return {
       exception: {
         values: [
@@ -189,7 +189,7 @@ export class GlobalHandlers implements IntegrationV7 {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _enhanceEventWithInitialFrame(event: Event, url: any, line: any, column: any): Event {
+  private _enhanceEventWithInitialFrame(event: SentryEvent, url: any, line: any, column: any): SentryEvent {
     event.exception = event.exception || {};
     event.exception.values = event.exception.values || [];
     event.exception.values[0] = event.exception.values[0] || {};

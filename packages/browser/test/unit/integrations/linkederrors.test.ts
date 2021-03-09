@@ -1,11 +1,11 @@
-import { Event, ExtendedError } from '@sentry/types';
+import { SentryEvent, ExtendedError } from '@sentry/types';
 import { expect } from 'chai';
 import { stub } from 'sinon';
 
 import { LinkedErrors } from '../../../src/integrations/linkederrors';
 
 class BrowserBackend {
-  eventFromException: (ex: unknown) => PromiseLike<Event> = () => Promise.resolve({});
+  eventFromException: (ex: unknown) => PromiseLike<SentryEvent> = () => Promise.resolve({});
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

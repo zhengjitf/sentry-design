@@ -1,4 +1,4 @@
-import { Event, EventProcessor, Hub, Integration } from '@sentry/types';
+import { SentryEvent, EventProcessor, Hub, Integration } from '@sentry/types';
 
 /** This function adds duration since Sentry was initialized till the time event was sent */
 export class SessionTiming implements Integration {
@@ -31,7 +31,7 @@ export class SessionTiming implements Integration {
   /**
    * @inheritDoc
    */
-  public process(event: Event): Event {
+  public process(event: SentryEvent): SentryEvent {
     const now = Date.now();
 
     return {

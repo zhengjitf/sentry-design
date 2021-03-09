@@ -1,7 +1,7 @@
 import { Hub } from '@sentry/hub';
 import { Scope } from '@sentry/scope';
 import { TransportRequest } from '@sentry/transport-base';
-import { Event, Severity, Span } from '@sentry/types';
+import { SentryEvent, Severity, Span } from '@sentry/types';
 import { logger, SentryError, SyncPromise } from '@sentry/utils';
 
 import { TestClient } from '../mocks/client';
@@ -14,7 +14,7 @@ declare var global: any;
 
 class TestBackend {
   public static instance?: TestBackend;
-  public event?: Event;
+  public event?: SentryEvent;
 }
 
 jest.mock('@sentry/utils', () => {
@@ -621,7 +621,7 @@ describe.skip('BaseClient', () => {
     test('normalization applies to Transaction and Span consistently', () => {
       expect.assertions(1);
       const client = new TestClient({ dsn: PUBLIC_DSN });
-      const transaction: Event = {
+      const transaction: SentryEvent = {
         contexts: {
           trace: {
             data: { _sentry_web_vitals: { LCP: { value: 99.9 } } },
@@ -715,7 +715,7 @@ describe.skip('BaseClient', () => {
       expect.assertions(1);
       const beforeSend = jest.fn(
         async event =>
-          new Promise<Event>(resolve => {
+          new Promise<SentryEvent>(resolve => {
             setTimeout(() => {
               resolve(event);
             }, 1);
@@ -738,7 +738,7 @@ describe.skip('BaseClient', () => {
       expect.assertions(1);
       const beforeSend = jest.fn(
         async () =>
-          new Promise<Event>(resolve => {
+          new Promise<SentryEvent>(resolve => {
             setTimeout(() => {
               resolve({ message: 'changed2' });
             }, 1);

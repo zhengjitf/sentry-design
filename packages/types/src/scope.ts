@@ -1,6 +1,6 @@
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { Context, Contexts } from './context';
-import { Event, EventHint } from './event';
+import { SentryEvent, EventHint } from './event';
 import { EventProcessor } from './eventprocessor';
 import { Extra, Extras } from './extra';
 import { Primitive } from './misc';
@@ -26,7 +26,7 @@ export type ScopeContext = {
  * called by the client before an event will be sent.
  */
 export interface Scope {
-  applyToEvent(event: Event, hint?: EventHint): PromiseLike<Event | null>;
+  applyToEvent(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null>;
 
   /** Add new event processor that will be called after {@link applyToEvent}. */
   addEventProcessor(callback: EventProcessor): this;

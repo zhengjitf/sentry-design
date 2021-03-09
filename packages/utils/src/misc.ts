@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Event, SentryGlobal, StackFrame, WrappedFunction } from '@sentry/types';
+import { SentryEvent, SentryGlobal, StackFrame, WrappedFunction } from '@sentry/types';
 
 import { isNodeEnv } from './node';
 import { snipLine } from './string';
@@ -111,7 +111,7 @@ export function parseUrl(
  * Extracts either message or type+value from an event that can be used for user-facing logs
  * @returns event's description
  */
-export function getEventDescription(event: Event): string {
+export function getEventDescription(event: SentryEvent): string {
   if (event.message) {
     return event.message;
   }
@@ -169,7 +169,7 @@ export function consoleSandbox(callback: () => any): any {
  * @param type Type of the exception.
  * @hidden
  */
-export function addExceptionTypeValue(event: Event, value?: string, type?: string): void {
+export function addExceptionTypeValue(event: SentryEvent, value?: string, type?: string): void {
   event.exception = event.exception || {};
   event.exception.values = event.exception.values || [];
   event.exception.values[0] = event.exception.values[0] || {};
@@ -184,7 +184,7 @@ export function addExceptionTypeValue(event: Event, value?: string, type?: strin
  * @hidden
  */
 export function addExceptionMechanism(
-  event: Event,
+  event: SentryEvent,
   mechanism: {
     [key: string]: any;
   } = {},

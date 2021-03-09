@@ -1,5 +1,5 @@
 import { getCurrentHub, Hub } from '@sentry/hub';
-import { Event, Measurements, Transaction as TransactionInterface, TransactionContext } from '@sentry/types';
+import { SentryEvent, Measurements, Transaction as TransactionInterface, TransactionContext } from '@sentry/types';
 import { dropUndefinedKeys, isInstanceOf, logger } from '@sentry/utils';
 
 import { Span as SpanClass, SpanRecorder } from './span';
@@ -109,7 +109,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
       }).endTimestamp;
     }
 
-    const transaction: Event = {
+    const transaction: SentryEvent = {
       contexts: {
         trace: this.getTraceContext(),
       },

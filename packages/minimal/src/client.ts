@@ -1,4 +1,4 @@
-import { CaptureContext, Event, EventProcessor, Session } from '@sentry/types';
+import { CaptureContext, SentryEvent, EventProcessor, Session } from '@sentry/types';
 
 import { getCurrentClient } from './carrier';
 
@@ -26,7 +26,7 @@ export function captureMessage(message: string, captureContext: CaptureContext =
   return getCurrentClient()?.captureMessage(message, captureContext);
 }
 
-export function captureEvent(event: Event, captureContext: CaptureContext = {}): string | undefined {
+export function captureEvent(event: SentryEvent, captureContext: CaptureContext = {}): string | undefined {
   return getCurrentClient()?.captureEvent(event, captureContext);
 }
 

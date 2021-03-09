@@ -15,9 +15,9 @@ export type CloudEventFunctionWrapperOptions = WrapperOptions;
 /**
  * Wraps an event function handler adding it error capture and tracing capabilities.
  *
- * @param fn Event handler
+ * @param fn SentryEvent handler
  * @param options Options
- * @returns Event handler
+ * @returns SentryEvent handler
  */
 export function wrapCloudEventFunction(
   fn: CloudEventFunction | CloudEventFunctionWithCallback,

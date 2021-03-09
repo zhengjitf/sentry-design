@@ -1,4 +1,4 @@
-import { Event, EventHint, EventProcessor, ExtendedError, Hub, Integration } from '@sentry/types';
+import { SentryEvent, EventHint, EventProcessor, ExtendedError, Hub, Integration } from '@sentry/types';
 import { isError, isPlainObject, logger, normalize } from '@sentry/utils';
 
 interface ExtraErrorDataOptions {
@@ -26,7 +26,7 @@ export class ExtraErrorData implements Integration {
    * @inheritDoc
    */
   public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    addGlobalEventProcessor((event: Event, hint?: EventHint) => {
+    addGlobalEventProcessor((event: SentryEvent, hint?: EventHint) => {
       const self = getCurrentHub().getIntegration(ExtraErrorData);
       if (!self) {
         return event;
@@ -38,7 +38,7 @@ export class ExtraErrorData implements Integration {
   /**
    * Attaches extracted information from the Error object to extra field in the Event
    */
-  public enhanceEventWithErrorData(event: Event, hint?: EventHint): Event {
+  public enhanceEventWithErrorData(event: SentryEvent, hint?: EventHint): SentryEvent {
     if (!hint || !hint.originalException || !isError(hint.originalException)) {
       return event;
     }

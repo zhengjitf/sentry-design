@@ -1,4 +1,4 @@
-import { Event, EventProcessor, Hub, Integration, StackFrame } from '@sentry/types';
+import { SentryEvent, EventProcessor, Hub, Integration, StackFrame } from '@sentry/types';
 
 import { patchWebAssembly } from './patchWebAssembly';
 import { getImage, getImages } from './registry';
@@ -48,7 +48,7 @@ export class Wasm implements Integration {
   public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, _getCurrentHub: () => Hub): void {
     patchWebAssembly();
 
-    addGlobalEventProcessor((event: Event) => {
+    addGlobalEventProcessor((event: SentryEvent) => {
       let haveWasm = false;
 
       if (event.exception && event.exception.values) {

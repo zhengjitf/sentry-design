@@ -1,4 +1,4 @@
-import { Event, Session } from '@sentry/types';
+import { SentryEvent, Session } from '@sentry/types';
 
 import { ResponseStatus } from './responseStatus';
 
@@ -32,7 +32,7 @@ export enum EventType {
  * Merge with existing data if any.
  **/
 // TODO: Restore this functionality
-// function enhanceEventWithSdkInfo(event: Event, sdkInfo?: SdkInfo): Event {
+// function enhanceEventWithSdkInfo(event: SentryEvent, sdkInfo?: SdkInfo): SentryEvent {
 //   if (!sdkInfo) {
 //     return event;
 //   }
@@ -61,7 +61,7 @@ export function sessionToTransportRequest(session: Session): TransportRequest<st
     type: EventType.Session,
   };
 }
-export function eventToTransportRequest(event: Event): TransportRequest<string> {
+export function eventToTransportRequest(event: SentryEvent): TransportRequest<string> {
   const req = {
     body: JSON.stringify(event),
     type: event.type === 'transaction' ? EventType.Transaction : EventType.Error,

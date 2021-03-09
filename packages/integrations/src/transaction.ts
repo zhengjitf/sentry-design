@@ -1,4 +1,4 @@
-import { Event, EventProcessor, Hub, Integration, StackFrame } from '@sentry/types';
+import { SentryEvent, EventProcessor, Hub, Integration, StackFrame } from '@sentry/types';
 
 /** Add node transaction to the event */
 export class Transaction implements Integration {
@@ -28,7 +28,7 @@ export class Transaction implements Integration {
   /**
    * @inheritDoc
    */
-  public process(event: Event): Event {
+  public process(event: SentryEvent): SentryEvent {
     const frames = this._getFramesFromEvent(event);
 
     // use for loop so we don't have to reverse whole frames array
@@ -44,7 +44,7 @@ export class Transaction implements Integration {
     return event;
   }
 
-  private _getFramesFromEvent(event: Event): StackFrame[] {
+  private _getFramesFromEvent(event: SentryEvent): StackFrame[] {
     const exception = event.exception && event.exception.values && event.exception.values[0];
     return (exception && exception.stacktrace && exception.stacktrace.frames) || [];
   }

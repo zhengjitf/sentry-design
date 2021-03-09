@@ -1,7 +1,7 @@
 // TODO: Fix all tests once moved to a separate plugin package
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { Event, EventProcessor, Hub, Integration } from '@sentry/types';
+import { SentryEvent, EventProcessor, Hub, Integration } from '@sentry/types';
 import * as utils from '@sentry/utils';
 
 import { Offline } from '../src/offline';
@@ -9,11 +9,11 @@ import { Offline } from '../src/offline';
 // mock localforage methods
 jest.mock('localforage', () => ({
   createInstance(_options: { name: string }): any {
-    let items: { key: string; value: Event }[] = [];
+    let items: { key: string; value: SentryEvent }[] = [];
 
     return {
       // @ts-ignore
-      async getItem(key: string): Event {
+      async getItem(key: string): SentryEvent {
         // @ts-ignore
         return items.find(item => item.key === key);
       },
@@ -33,7 +33,7 @@ jest.mock('localforage', () => ({
         items = items.filter(item => item.key !== key);
       },
       // @ts-ignore
-      async setItem(key: string, value: Event): void {
+      async setItem(key: string, value: SentryEvent): void {
         items.push({
           key,
           value,
@@ -159,7 +159,7 @@ describe.skip('Offline', () => {
 
 let eventListeners: any[];
 let eventProcessors: EventProcessor[];
-let events: Event[];
+let events: SentryEvent[];
 
 function addGlobalEventProcessor(callback: EventProcessor): void {
   eventProcessors.push(callback);
@@ -167,7 +167,7 @@ function addGlobalEventProcessor(callback: EventProcessor): void {
 
 function getCurrentHub(): Hub {
   return {
-    captureEvent(_event: Event): string {
+    captureEvent(_event: SentryEvent): string {
       return 'an-event-id';
     },
     // @ts-ignore
@@ -215,7 +215,7 @@ function processEventListeners(): void {
 function processEvents(): void {
   eventProcessors.forEach(processor => {
     events.forEach(event => {
-      processor(event) as Event | null;
+      processor(event) as SentryEvent | null;
     });
   });
 }

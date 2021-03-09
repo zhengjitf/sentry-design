@@ -1,4 +1,4 @@
-import { Event, EventProcessor, Exception, Hub, Integration, StackFrame } from '@sentry/types';
+import { SentryEvent, EventProcessor, Exception, Hub, Integration, StackFrame } from '@sentry/types';
 
 /** Deduplication filter */
 export class Dedupe implements Integration {
@@ -15,13 +15,13 @@ export class Dedupe implements Integration {
   /**
    * @inheritDoc
    */
-  private _previousEvent?: Event;
+  private _previousEvent?: SentryEvent;
 
   /**
    * @inheritDoc
    */
   public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    addGlobalEventProcessor((currentEvent: Event) => {
+    addGlobalEventProcessor((currentEvent: SentryEvent) => {
       const self = getCurrentHub().getIntegration(Dedupe);
       if (self) {
         // Juuust in case something goes wrong
@@ -39,7 +39,7 @@ export class Dedupe implements Integration {
     });
   }
 
-  private _shouldDropEvent(currentEvent: Event, previousEvent?: Event): boolean {
+  private _shouldDropEvent(currentEvent: SentryEvent, previousEvent?: SentryEvent): boolean {
     if (!previousEvent) {
       return false;
     }
@@ -55,7 +55,7 @@ export class Dedupe implements Integration {
     return false;
   }
 
-  private _isSameMessageEvent(currentEvent: Event, previousEvent: Event): boolean {
+  private _isSameMessageEvent(currentEvent: SentryEvent, previousEvent: SentryEvent): boolean {
     const currentMessage = currentEvent.message;
     const previousMessage = previousEvent.message;
 
@@ -84,7 +84,7 @@ export class Dedupe implements Integration {
     return true;
   }
 
-  private _getFramesFromEvent(event: Event): StackFrame[] | undefined {
+  private _getFramesFromEvent(event: SentryEvent): StackFrame[] | undefined {
     const exception = event.exception;
 
     if (exception) {
@@ -100,7 +100,7 @@ export class Dedupe implements Integration {
     return undefined;
   }
 
-  private _isSameStacktrace(currentEvent: Event, previousEvent: Event): boolean {
+  private _isSameStacktrace(currentEvent: SentryEvent, previousEvent: SentryEvent): boolean {
     let currentFrames = this._getFramesFromEvent(currentEvent);
     let previousFrames = this._getFramesFromEvent(previousEvent);
 
@@ -140,11 +140,11 @@ export class Dedupe implements Integration {
     return true;
   }
 
-  private _getExceptionFromEvent(event: Event): Exception | undefined {
+  private _getExceptionFromEvent(event: SentryEvent): Exception | undefined {
     return event.exception && event.exception.values && event.exception.values[0];
   }
 
-  private _isSameExceptionEvent(currentEvent: Event, previousEvent: Event): boolean {
+  private _isSameExceptionEvent(currentEvent: SentryEvent, previousEvent: SentryEvent): boolean {
     const previousException = this._getExceptionFromEvent(previousEvent);
     const currentException = this._getExceptionFromEvent(currentEvent);
 
@@ -167,7 +167,7 @@ export class Dedupe implements Integration {
     return true;
   }
 
-  private _isSameFingerprint(currentEvent: Event, previousEvent: Event): boolean {
+  private _isSameFingerprint(currentEvent: SentryEvent, previousEvent: SentryEvent): boolean {
     let currentFingerprint = currentEvent.fingerprint;
     let previousFingerprint = previousEvent.fingerprint;
 

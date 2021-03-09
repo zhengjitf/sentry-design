@@ -1,4 +1,4 @@
-import { ClientLike, Event, IntegrationV7 } from '@sentry/types';
+import { ClientLike, SentryEvent, IntegrationV7 } from '@sentry/types';
 import { getGlobalObject } from '@sentry/utils';
 
 export class UserAgent implements IntegrationV7 {
@@ -7,7 +7,7 @@ export class UserAgent implements IntegrationV7 {
   public install(client: ClientLike): void {
     const global = getGlobalObject<Window>();
 
-    client.addEventProcessor((event: Event) => {
+    client.addEventProcessor((event: SentryEvent) => {
       // if none of the information we want exists, don't bother
       if (!global.navigator && !global.location && !global.document) {
         return event;

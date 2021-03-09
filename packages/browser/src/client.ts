@@ -1,5 +1,5 @@
 import { BaseClient, SDK_VERSION } from '@sentry/core';
-import { CaptureContext, Event, Options, ScopeLike } from '@sentry/types';
+import { CaptureContext, SentryEvent, Options, ScopeLike } from '@sentry/types';
 import { supportsFetch } from '@sentry/utils';
 import { FetchTransport } from '@sentry/transport-fetch';
 import { XHRTransport } from '@sentry/transport-xhr';
@@ -65,16 +65,16 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
     return this._scope || getCarrier().scope;
   }
 
-  protected _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<Event> {
+  protected _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<SentryEvent> {
     return eventFromException(this.options, exception, captureContext);
   }
 
-  protected _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<Event> {
+  protected _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<SentryEvent> {
     return eventFromMessage(this.options, message, captureContext);
   }
 
   // TODO: Restore this functionality somewhere else, it definitely shouldn't be here.
-  // protected _sendEvent(event: Event): void {
+  // protected _sendEvent(event: SentryEvent): void {
   //   this.getScope()?.addBreadcrumb(
   //     {
   //       category: `sentry.${event.type === 'transaction' ? 'transaction' : 'event'}`,

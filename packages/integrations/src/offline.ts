@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Event, EventProcessor, Hub, Integration } from '@sentry/types';
+import { SentryEvent, EventProcessor, Hub, Integration } from '@sentry/types';
 import { getGlobalObject, logger, normalize, uuid4 } from '@sentry/utils';
 import * as localForageType from 'localforage';
 
@@ -67,12 +67,12 @@ export class Offline implements Integration {
       });
     }
 
-    addGlobalEventProcessor((event: Event) => {
+    addGlobalEventProcessor((event: SentryEvent) => {
       if (this.hub && this.hub.getIntegration(Offline)) {
         // cache if we are positively offline
         if ('navigator' in this.global && 'onLine' in this.global.navigator && !this.global.navigator.onLine) {
           this._cacheEvent(event)
-            .then((_event: Event): Promise<void> => this._enforceMaxEvents())
+            .then((_event: SentryEvent): Promise<void> => this._enforceMaxEvents())
             .catch((_error): void => {
               logger.warn('could not cache event while offline');
             });
@@ -97,18 +97,18 @@ export class Offline implements Integration {
    * cache an event to send later
    * @param event an event
    */
-  private async _cacheEvent(event: Event): Promise<Event> {
-    return this.offlineEventStore.setItem<Event>(uuid4(), normalize(event));
+  private async _cacheEvent(event: SentryEvent): Promise<SentryEvent> {
+    return this.offlineEventStore.setItem<SentryEvent>(uuid4(), normalize(event));
   }
 
   /**
    * purge excess events if necessary
    */
   private async _enforceMaxEvents(): Promise<void> {
-    const events: Array<{ event: Event; cacheKey: string }> = [];
+    const events: Array<{ event: SentryEvent; cacheKey: string }> = [];
 
     return this.offlineEventStore
-      .iterate<Event, void>((event: Event, cacheKey: string, _index: number): void => {
+      .iterate<SentryEvent, void>((event: SentryEvent, cacheKey: string, _index: number): void => {
         // aggregate events
         events.push({ cacheKey, event });
       })
@@ -147,16 +147,18 @@ export class Offline implements Integration {
    * send all events
    */
   private async _sendEvents(): Promise<void> {
-    return this.offlineEventStore.iterate<Event, void>((event: Event, cacheKey: string, _index: number): void => {
-      if (this.hub) {
-        this.hub.captureEvent(event);
+    return this.offlineEventStore.iterate<SentryEvent, void>(
+      (event: SentryEvent, cacheKey: string, _index: number): void => {
+        if (this.hub) {
+          this.hub.captureEvent(event);
 
-        this._purgeEvent(cacheKey).catch((_error): void => {
-          logger.warn('could not purge event from cache');
-        });
-      } else {
-        logger.warn('no hub found - could not send cached event');
-      }
-    });
+          this._purgeEvent(cacheKey).catch((_error): void => {
+            logger.warn('could not purge event from cache');
+          });
+        } else {
+          logger.warn('no hub found - could not send cached event');
+        }
+      },
+    );
   }
 }

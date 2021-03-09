@@ -1,4 +1,4 @@
-import { Event, EventProcessor, Hub, Integration } from '@sentry/types';
+import { SentryEvent, EventProcessor, Hub, Integration } from '@sentry/types';
 import { getGlobalObject, logger } from '@sentry/utils';
 
 // See https://github.com/angular/angular.js/blob/v1.4.7/src/minErr.js
@@ -96,7 +96,7 @@ export class Angular implements Integration {
             scope.setExtra('cause', cause);
           }
 
-          scope.addEventProcessor((event: Event) => {
+          scope.addEventProcessor((event: SentryEvent) => {
             const ex = event.exception && event.exception.values && event.exception.values[0];
 
             if (ex) {

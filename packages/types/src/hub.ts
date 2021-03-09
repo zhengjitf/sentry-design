@@ -1,5 +1,5 @@
 import { ClientLike } from './client';
-import { Event, EventHint } from './event';
+import { SentryEvent, EventHint } from './event';
 import { Integration, IntegrationClass } from './integration';
 import { Scope } from './scope';
 import { Session, SessionContext } from './session';
@@ -92,7 +92,7 @@ export interface Hub {
    * @param event The event to send to Sentry.
    * @param hint May contain additional information about the original exception.
    */
-  captureEvent(event: Event, hint?: EventHint): string;
+  captureEvent(event: SentryEvent, hint?: EventHint): string;
 
   /**
    * This is the getter for lastEventId.

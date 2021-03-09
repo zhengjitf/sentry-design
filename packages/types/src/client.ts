@@ -1,5 +1,5 @@
 import { Dsn } from './dsn';
-import { CaptureContext, Event } from './event';
+import { CaptureContext, SentryEvent } from './event';
 import { EventProcessor } from './eventprocessor';
 import { Integration, IntegrationClass } from './integration';
 import { OptionsV7 } from './options';
@@ -28,7 +28,7 @@ export interface ClientLike<O extends OptionsV7 = OptionsV7> {
 
   captureException(exception: unknown, captureContext?: CaptureContext): string | undefined;
   captureMessage(message: string, captureContext?: CaptureContext): string | undefined;
-  captureEvent(event: Event, captureContext?: CaptureContext): string | undefined;
+  captureEvent(event: SentryEvent, captureContext?: CaptureContext): string | undefined;
   captureSession(session: Session): void;
 
   flush(timeout?: number): PromiseLike<boolean>;

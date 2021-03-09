@@ -1,6 +1,6 @@
 import { readFile } from 'fs';
 
-import { Event, Exception, ExtendedError, OptionsV7, StackFrame } from '@sentry/types';
+import { SentryEvent, Exception, ExtendedError, OptionsV7, StackFrame } from '@sentry/types';
 import { addContextToFrame, basename, dirname, SyncPromise } from '@sentry/utils';
 import { LRUMap } from 'lru_map';
 
@@ -244,8 +244,8 @@ export function getExceptionFromError(error: Error, options?: OptionsV7): Promis
 /**
  * @hidden
  */
-export function parseError(error: ExtendedError, options?: OptionsV7): PromiseLike<Event> {
-  return new SyncPromise<Event>(resolve =>
+export function parseError(error: ExtendedError, options?: OptionsV7): PromiseLike<SentryEvent> {
+  return new SyncPromise<SentryEvent>(resolve =>
     getExceptionFromError(error, options).then((exception: Exception) => {
       resolve({
         exception: {

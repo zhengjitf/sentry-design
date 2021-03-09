@@ -7,7 +7,7 @@ import * as url from 'url';
 import { getCurrentHub } from '@sentry/hub';
 import { captureException, flush, startTransaction, withScope } from '@sentry/minimal';
 import { extractTraceparentData, Span } from '@sentry/tracing';
-import { Event, ExtractedNodeRequestData, Transaction } from '@sentry/types';
+import { SentryEvent, ExtractedNodeRequestData, Transaction } from '@sentry/types';
 import { forget, isPlainObject, isString, logger, normalize, stripUrlQueryAndFragment } from '@sentry/utils';
 import * as cookie from 'cookie';
 
@@ -292,7 +292,7 @@ export interface ParseRequestOptions {
  * @param options object containing flags to enable functionality
  * @hidden
  */
-export function parseRequest(event: Event, req: ExpressRequest, options?: ParseRequestOptions): Event {
+export function parseRequest(event: SentryEvent, req: ExpressRequest, options?: ParseRequestOptions): SentryEvent {
   // eslint-disable-next-line no-param-reassign
   options = {
     ip: false,
@@ -395,7 +395,7 @@ export function requestHandler(
     local.on('error', next);
     local.run(() => {
       getCurrentHub().configureScope(scope =>
-        scope.addEventProcessor((event: Event) => parseRequest(event, req, options)),
+        scope.addEventProcessor((event: SentryEvent) => parseRequest(event, req, options)),
       );
       next();
     });

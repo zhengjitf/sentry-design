@@ -2,7 +2,7 @@ export {
   Breadcrumb,
   Request,
   SdkInfo,
-  Event,
+  SentryEvent,
   Exception,
   Response,
   Severity,

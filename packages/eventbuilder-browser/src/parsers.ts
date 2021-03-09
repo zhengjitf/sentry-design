@@ -1,4 +1,4 @@
-import { Event, Exception, StackFrame } from '@sentry/types';
+import { SentryEvent, Exception, StackFrame } from '@sentry/types';
 import { extractExceptionKeysForMessage, isEvent, normalizeToSize } from '@sentry/utils';
 
 import { computeStackTrace, StackFrame as TraceKitStackFrame, StackTrace as TraceKitStackTrace } from './tracekit';
@@ -36,8 +36,8 @@ export function eventFromPlainObject(
   exception: Record<string, unknown>,
   syntheticException?: Error,
   rejection?: boolean,
-): Event {
-  const event: Event = {
+): SentryEvent {
+  const event: SentryEvent = {
     exception: {
       values: [
         {
@@ -67,7 +67,7 @@ export function eventFromPlainObject(
 /**
  * @hidden
  */
-export function eventFromStacktrace(stacktrace: TraceKitStackTrace): Event {
+export function eventFromStacktrace(stacktrace: TraceKitStackTrace): SentryEvent {
   const exception = exceptionFromStacktrace(stacktrace);
 
   return {

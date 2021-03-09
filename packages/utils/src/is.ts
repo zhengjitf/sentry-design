@@ -89,7 +89,7 @@ export function isPlainObject(wat: any): boolean {
 }
 
 /**
- * Checks whether given value's type is an Event instance
+ * Checks whether given value's type is an SentryEvent instance
  * {@link isEvent}.
  *
  * @param wat A value to be checked.

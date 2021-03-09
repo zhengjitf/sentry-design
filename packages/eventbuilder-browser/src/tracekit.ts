@@ -246,7 +246,7 @@ function popFrames(stacktrace: StackTrace, popSize: number): StackTrace {
 }
 
 /**
- * There are cases where stacktrace.message is an Event object
+ * There are cases where stacktrace.message is an SentryEvent object
  * https://github.com/getsentry/sentry-javascript/issues/1949
  * In this specific case we try to extract stacktrace.message.error.message
  */

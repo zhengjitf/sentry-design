@@ -1,6 +1,6 @@
 // TODO: All these functions are confusing af. They _have_ to be unified and become more descriptive in one way or another.
 
-import { CaptureContext, Event, OptionsV7, Severity } from '@sentry/types';
+import { CaptureContext, SentryEvent, OptionsV7, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -21,14 +21,14 @@ export * from './tracekit';
 export * from './parsers';
 
 /**
- * Builds and Event from a Exception
+ * Builds and SentryEvent from a Exception
  * @hidden
  */
 export function eventFromException(
   options: OptionsV7,
   exception: unknown,
   captureContext: CaptureContext,
-): PromiseLike<Event> {
+): PromiseLike<SentryEvent> {
   const syntheticException = captureContext.hint?.syntheticException;
   const event = eventFromUnknownInput(exception, syntheticException, {
     attachStacktrace: options.attachStacktrace,
@@ -46,14 +46,14 @@ export function eventFromException(
 }
 
 /**
- * Builds and Event from a Message
+ * Builds and SentryEvent from a Message
  * @hidden
  */
 export function eventFromMessage(
   options: OptionsV7,
   message: string,
   captureContext: CaptureContext,
-): PromiseLike<Event> {
+): PromiseLike<SentryEvent> {
   const syntheticException = captureContext.hint?.syntheticException;
   const event = eventFromString(message, syntheticException, {
     attachStacktrace: options.attachStacktrace,
@@ -76,8 +76,8 @@ export function eventFromUnknownInput(
     rejection?: boolean;
     attachStacktrace?: boolean;
   } = {},
-): Event {
-  let event: Event;
+): SentryEvent {
+  let event: SentryEvent;
 
   if (isErrorEvent(exception as ErrorEvent) && (exception as ErrorEvent).error) {
     // If it is an ErrorEvent with `error` property, extract it to get actual Error
@@ -110,7 +110,7 @@ export function eventFromUnknownInput(
     return event;
   }
   if (isPlainObject(exception) || isEvent(exception)) {
-    // If it is plain Object or Event, serialize it manually and extract options
+    // If it is plain Object or SentryEvent, serialize it manually and extract options
     // This will allow us to group events based on top-level keys
     // which is much better than creating new group when any key/value change
     const objectException = exception as Record<string, unknown>;
@@ -148,8 +148,8 @@ export function eventFromString(
   options: {
     attachStacktrace?: boolean;
   } = {},
-): Event {
-  const event: Event = {
+): SentryEvent {
+  const event: SentryEvent = {
     message: input,
   };
 

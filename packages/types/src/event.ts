@@ -13,7 +13,7 @@ import { Stacktrace } from './stacktrace';
 import { Measurements } from './transaction';
 import { User } from './user';
 
-export interface Event {
+export interface SentryEvent {
   event_id?: string;
   message?: string;
   timestamp?: number;

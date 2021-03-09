@@ -1,10 +1,10 @@
 import { ExtendedError } from '@sentry/types';
 
-import { Event } from '../../src';
+import { SentryEvent } from '../../src';
 import { LinkedErrors } from '../../src/integrations/linkederrors';
 
 class NodeBackend {
-  eventFromException: (ex: unknown) => PromiseLike<Event> = () => Promise.resolve({});
+  eventFromException: (ex: unknown) => PromiseLike<SentryEvent> = () => Promise.resolve({});
 }
 
 let linkedErrors: any;
@@ -32,7 +32,7 @@ describe('LinkedErrors', () => {
       const spy = jest.spyOn(linkedErrors, '_walkErrorTree');
       const one = new Error('originalException');
       const backend = new NodeBackend();
-      let event: Event | undefined;
+      let event: SentryEvent | undefined;
       return backend
         .eventFromException(one)
         .then(eventFromException => {

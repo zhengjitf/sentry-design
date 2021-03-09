@@ -1,6 +1,6 @@
 import * as domain from 'domain';
 
-import { Event } from '@sentry/types';
+import { SentryEvent } from '@sentry/types';
 
 import * as Sentry from '../src';
 import { wrapCloudEventFunction, wrapEventFunction, wrapHttpFunction } from '../src/gcpfunction';
@@ -158,7 +158,7 @@ describe('GCPFunction', () => {
       res.end();
     };
     const wrappedHandler = wrapHttpFunction(handler);
-    const event: Event = {};
+    const event: SentryEvent = {};
     // @ts-ignore see "Why @ts-ignore" note
     Sentry.fakeScope.addEventProcessor.mockImplementation(cb => cb(event));
     await handleHttp(wrappedHandler);

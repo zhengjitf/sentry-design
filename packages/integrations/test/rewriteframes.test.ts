@@ -1,12 +1,12 @@
-import { Event, StackFrame } from '@sentry/types';
+import { SentryEvent, StackFrame } from '@sentry/types';
 
 import { RewriteFrames } from '../src/rewriteframes';
 
 let rewriteFrames: RewriteFrames;
-let messageEvent: Event;
-let exceptionEvent: Event;
-let windowsExceptionEvent: Event;
-let multipleStacktracesEvent: Event;
+let messageEvent: SentryEvent;
+let exceptionEvent: SentryEvent;
+let windowsExceptionEvent: SentryEvent;
+let multipleStacktracesEvent: SentryEvent;
 
 describe('RewriteFrames', () => {
   beforeEach(() => {

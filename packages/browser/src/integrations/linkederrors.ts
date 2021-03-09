@@ -1,6 +1,6 @@
 import { getCurrentHub } from '@sentry/hub';
 import { addGlobalEventProcessor } from '@sentry/minimal';
-import { Event, EventHint, Exception, ExtendedError, Integration } from '@sentry/types';
+import { SentryEvent, EventHint, Exception, ExtendedError, Integration } from '@sentry/types';
 import { isInstanceOf } from '@sentry/utils';
 import { computeStackTrace, exceptionFromStacktrace } from '@sentry/eventbuilder-browser';
 
@@ -43,7 +43,7 @@ export class LinkedErrors implements Integration {
    * @inheritDoc
    */
   public setupOnce(): void {
-    addGlobalEventProcessor((event: Event, hint?: EventHint) => {
+    addGlobalEventProcessor((event: SentryEvent, hint?: EventHint) => {
       const self = getCurrentHub().getIntegration(LinkedErrors);
       if (self) {
         return self._handler(event, hint);
@@ -55,7 +55,7 @@ export class LinkedErrors implements Integration {
   /**
    * @inheritDoc
    */
-  private _handler(event: Event, hint?: EventHint): Event | null {
+  private _handler(event: SentryEvent, hint?: EventHint): SentryEvent | null {
     if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
       return event;
     }

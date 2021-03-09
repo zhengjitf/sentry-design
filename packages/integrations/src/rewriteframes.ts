@@ -1,4 +1,4 @@
-import { Event, EventProcessor, Hub, Integration, StackFrame, Stacktrace } from '@sentry/types';
+import { SentryEvent, EventProcessor, Hub, Integration, StackFrame, Stacktrace } from '@sentry/types';
 import { basename, relative } from '@sentry/utils';
 
 type StackFrameIteratee = (frame: StackFrame) => StackFrame;
@@ -45,7 +45,7 @@ export class RewriteFrames implements Integration {
     });
   }
 
-  public process(event: Event): Event {
+  public process(event: SentryEvent): SentryEvent {
     if (event.exception && Array.isArray(event.exception.values)) {
       return this._processExceptionsEvent(event);
     }
@@ -79,7 +79,7 @@ export class RewriteFrames implements Integration {
     return frame;
   };
 
-  private _processExceptionsEvent(event: Event): Event {
+  private _processExceptionsEvent(event: SentryEvent): SentryEvent {
     try {
       return {
         ...event,
@@ -98,7 +98,7 @@ export class RewriteFrames implements Integration {
     }
   }
 
-  private _processStacktraceEvent(event: Event): Event {
+  private _processStacktraceEvent(event: SentryEvent): SentryEvent {
     try {
       return {
         ...event,

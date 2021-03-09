@@ -1,4 +1,4 @@
-import { Event, EventHint, EventProcessor, Hub, Integration } from '@sentry/types';
+import { SentryEvent, EventHint, EventProcessor, Hub, Integration } from '@sentry/types';
 import { consoleSandbox } from '@sentry/utils';
 
 interface DebugOptions {
@@ -34,7 +34,7 @@ export class Debug implements Integration {
    * @inheritDoc
    */
   public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    addGlobalEventProcessor((event: Event, hint?: EventHint) => {
+    addGlobalEventProcessor((event: SentryEvent, hint?: EventHint) => {
       const self = getCurrentHub().getIntegration(Debug);
       if (self) {
         if (self._options.debugger) {

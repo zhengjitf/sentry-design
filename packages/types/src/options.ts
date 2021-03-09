@@ -1,5 +1,5 @@
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
-import { Event, EventHint } from './event';
+import { SentryEvent, EventHint } from './event';
 import { Integration, IntegrationV7 } from './integration';
 import { LogLevel } from './loglevel';
 import { SdkMetadata } from './sdkmetadata';
@@ -160,7 +160,7 @@ export interface Options {
    * @param hint May contain additional information about the original exception.
    * @returns A new event that will be sent | null.
    */
-  beforeSend?(event: Event, hint?: EventHint): PromiseLike<Event | null> | Event | null;
+  beforeSend?(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null> | SentryEvent | null;
 
   /**
    * A callback invoked when adding a breadcrumb, allowing to optionally modify
@@ -330,7 +330,7 @@ export interface OptionsV7 {
    * @param hint May contain additional information about the original exception.
    * @returns A new event that will be sent | null.
    */
-  beforeSend?(event: Event, hint?: EventHint): PromiseLike<Event | null> | Event | null;
+  beforeSend?(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null> | SentryEvent | null;
 
   /**
    * A callback invoked when adding a breadcrumb, allowing to optionally modify

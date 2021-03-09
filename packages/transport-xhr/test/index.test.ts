@@ -4,7 +4,7 @@
 
 import { expect } from 'chai';
 import { fakeServer, SinonFakeServer, stub } from 'sinon';
-import { Event, Status } from '@sentry/types';
+import { SentryEvent, Status } from '@sentry/types';
 import { eventToTransportRequest } from '@sentry/transport-base';
 
 import { XHRTransport } from '../src/index';
@@ -12,10 +12,10 @@ import { XHRTransport } from '../src/index';
 const testDsn = 'https://123@sentry.io/42';
 const storeUrl = 'https://sentry.io/api/42/store/?sentry_key=123&sentry_version=7';
 const envelopeUrl = 'https://sentry.io/api/42/envelope/?sentry_key=123&sentry_version=7';
-const eventPayload: Event = {
+const eventPayload: SentryEvent = {
   event_id: '1337',
 };
-const transactionPayload: Event = {
+const transactionPayload: SentryEvent = {
   event_id: '42',
   type: 'transaction',
 };

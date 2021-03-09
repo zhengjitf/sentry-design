@@ -1,6 +1,6 @@
 // TODO: All these functions are confusing af. They _have_ to be unified and become more descriptive in one way or another.
 
-import { CaptureContext, Event, Mechanism, OptionsV7, Severity } from '@sentry/types';
+import { CaptureContext, SentryEvent, Mechanism, OptionsV7, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -18,7 +18,7 @@ export function eventFromException(
   options: OptionsV7,
   exception: unknown,
   captureContext: CaptureContext,
-): PromiseLike<Event> {
+): PromiseLike<SentryEvent> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ex: any = exception;
   const mechanism: Mechanism = {
@@ -44,7 +44,7 @@ export function eventFromException(
     mechanism.synthetic = true;
   }
 
-  return new SyncPromise<Event>((resolve, reject) =>
+  return new SyncPromise<SentryEvent>((resolve, reject) =>
     parseError(ex as Error, options)
       .then(event => {
         addExceptionTypeValue(event, undefined, undefined);
@@ -71,8 +71,8 @@ export function eventFromMessage(
   options: OptionsV7,
   message: string,
   captureContext: CaptureContext,
-): PromiseLike<Event> {
-  const event: Event = {
+): PromiseLike<SentryEvent> {
+  const event: SentryEvent = {
     level: captureContext.scope?.level ?? Severity.Info,
     message,
     platform: 'node',
@@ -82,7 +82,7 @@ export function eventFromMessage(
     event.event_id = captureContext.hint?.event_id;
   }
 
-  return new SyncPromise<Event>(resolve => {
+  return new SyncPromise<SentryEvent>(resolve => {
     if (options.attachStacktrace && captureContext.hint?.syntheticException) {
       const stack = extractStackFromError(captureContext.hint?.syntheticException);
       parseStack(stack, options)

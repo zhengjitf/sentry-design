@@ -2,7 +2,7 @@ import { Scope, Session } from '@sentry/scope';
 import {
   CaptureContext,
   ClientLike,
-  Event,
+  SentryEvent,
   EventProcessor,
   Integration,
   IntegrationClass,
@@ -170,7 +170,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
   /**
    * @inheritDoc
    */
-  public captureEvent(event: Event, captureContext: CaptureContext = {}): string | undefined {
+  public captureEvent(event: SentryEvent, captureContext: CaptureContext = {}): string | undefined {
     let eventId = captureContext.hint?.event_id;
 
     this._process(
@@ -241,7 +241,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
   }
 
   /** Updates existing session based on the provided event */
-  protected _updateSessionFromEvent(session: Session, event: Event): void {
+  protected _updateSessionFromEvent(session: Session, event: SentryEvent): void {
     let crashed = false;
     let errored = false;
     let userAgent;
@@ -324,9 +324,9 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * @param scope A scope containing event metadata.
    * @returns A new event with more information.
    */
-  protected _prepareEvent(event: Event, captureContext: CaptureContext): PromiseLike<Event | null> {
+  protected _prepareEvent(event: SentryEvent, captureContext: CaptureContext): PromiseLike<SentryEvent | null> {
     const { normalizeDepth = 3 } = this.options;
-    const prepared: Event = {
+    const prepared: SentryEvent = {
       ...event,
       event_id: event.event_id ?? captureContext?.hint?.event_id ?? uuid4(),
       timestamp: event.timestamp ?? dateTimestampInSeconds(),
@@ -345,7 +345,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     }
 
     // We prepare the result here with a resolved Event.
-    let result = SyncPromise.resolve<Event | null>(prepared);
+    let result = SyncPromise.resolve<SentryEvent | null>(prepared);
 
     // This should be the last thing called, since we want that
     // {@link Hub.addEventProcessor} gets the finished prepared event.
@@ -372,7 +372,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * @param event Event
    * @returns Normalized event
    */
-  protected _normalizeEvent(event: Event | null, depth: number): Event | null {
+  protected _normalizeEvent(event: SentryEvent | null, depth: number): SentryEvent | null {
     if (!event) {
       return null;
     }
@@ -417,7 +417,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    *  as well as truncating overly long values.
    * @param event event instance to be enhanced
    */
-  protected _applyClientOptions(event: Event): void {
+  protected _applyClientOptions(event: SentryEvent): void {
     const options = this.options;
     const { environment, release, dist, maxValueLength = 250 } = options;
 
@@ -452,7 +452,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * This function adds all used integrations to the SDK info in the event.
    * @param event The event that will be filled with all integrations.
    */
-  protected _applyIntegrationsMetadata(event: Event): void {
+  protected _applyIntegrationsMetadata(event: SentryEvent): void {
     const sdkInfo = event.sdk;
     const integrationsArray = Object.keys(this._integrations);
     if (sdkInfo && integrationsArray.length > 0) {
@@ -464,7 +464,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * Tells the backend to send this event
    * @param event The Sentry event to send
    */
-  protected _sendEvent(event: Event): void {
+  protected _sendEvent(event: SentryEvent): void {
     this._sendRequest(eventToTransportRequest(event));
   }
 
@@ -474,7 +474,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * @param hint
    * @param scope
    */
-  protected _captureEvent(event: Event, captureContext: CaptureContext): PromiseLike<string | undefined> {
+  protected _captureEvent(event: SentryEvent, captureContext: CaptureContext): PromiseLike<string | undefined> {
     return this._processEvent(event, captureContext).then(
       finalEvent => {
         return finalEvent.event_id;
@@ -499,7 +499,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * @param scope A scope containing event metadata.
    * @returns A SyncPromise that resolves with the event or rejects in case event was/will not be send.
    */
-  protected _processEvent(event: Event, captureContext: CaptureContext): PromiseLike<Event> {
+  protected _processEvent(event: SentryEvent, captureContext: CaptureContext): PromiseLike<SentryEvent> {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const { beforeSend, sampleRate } = this.options;
 
@@ -537,7 +537,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
         if (typeof beforeSendResult === 'undefined') {
           throw new SentryError('`beforeSend` method has to return `null` or a valid event.');
         } else if (isThenable(beforeSendResult)) {
-          return (beforeSendResult as PromiseLike<Event | null>).then(
+          return (beforeSendResult as PromiseLike<SentryEvent | null>).then(
             event => event,
             e => {
               throw new SentryError(`beforeSend rejected with ${e}`);
@@ -595,6 +595,6 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     );
   }
 
-  protected abstract _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<Event>;
-  protected abstract _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<Event>;
+  protected abstract _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<SentryEvent>;
+  protected abstract _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<SentryEvent>;
 }

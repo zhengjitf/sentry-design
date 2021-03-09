@@ -1,6 +1,6 @@
 import { getCurrentHub } from '@sentry/hub';
 import { addGlobalEventProcessor } from '@sentry/minimal';
-import { Event, EventHint, Exception, ExtendedError, Integration } from '@sentry/types';
+import { SentryEvent, EventHint, Exception, ExtendedError, Integration } from '@sentry/types';
 import { isInstanceOf, SyncPromise } from '@sentry/utils';
 import { getExceptionFromError } from '@sentry/eventbuilder-node';
 
@@ -41,7 +41,7 @@ export class LinkedErrors implements Integration {
    * @inheritDoc
    */
   public setupOnce(): void {
-    addGlobalEventProcessor((event: Event, hint?: EventHint) => {
+    addGlobalEventProcessor((event: SentryEvent, hint?: EventHint) => {
       const self = getCurrentHub().getIntegration(LinkedErrors);
       if (self) {
         const handler = self._handler && self._handler.bind(self);
@@ -54,12 +54,12 @@ export class LinkedErrors implements Integration {
   /**
    * @inheritDoc
    */
-  private _handler(event: Event, hint?: EventHint): PromiseLike<Event> {
+  private _handler(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent> {
     if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
       return SyncPromise.resolve(event);
     }
 
-    return new SyncPromise<Event>(resolve => {
+    return new SyncPromise<SentryEvent>(resolve => {
       this._walkErrorTree(hint.originalException as Error, this._key)
         .then((linkedErrors: Exception[]) => {
           if (event && event.exception && event.exception.values) {

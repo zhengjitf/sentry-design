@@ -1,4 +1,4 @@
-import { Event, EventHint, Options, Severity } from '@sentry/types';
+import { SentryEvent, EventHint, Options, Severity } from '@sentry/types';
 
 import { initAndBind } from '../../src/sdk';
 import { BaseClient } from '../../src/baseclient';
@@ -17,7 +17,7 @@ export class TestClient extends BaseClient<TestOptions> {
     TestClient.instance = this;
   }
 
-  protected _eventFromException(_exception: unknown, _hint?: EventHint): PromiseLike<Event> {
+  protected _eventFromException(_exception: unknown, _hint?: EventHint): PromiseLike<SentryEvent> {
     return Promise.resolve({});
   }
 
@@ -25,7 +25,7 @@ export class TestClient extends BaseClient<TestOptions> {
     _message: string,
     _level: Severity = Severity.Info,
     _hint?: EventHint,
-  ): PromiseLike<Event> {
+  ): PromiseLike<SentryEvent> {
     return Promise.resolve({});
   }
 }

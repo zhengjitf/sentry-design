@@ -1,5 +1,5 @@
 import { captureException, withScope } from '@sentry/minimal';
-import { Event as SentryEvent, Mechanism, Scope, WrappedFunction } from '@sentry/types';
+import { SentryEvent, Mechanism, Scope, WrappedFunction } from '@sentry/types';
 import { addExceptionMechanism, addExceptionTypeValue } from '@sentry/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

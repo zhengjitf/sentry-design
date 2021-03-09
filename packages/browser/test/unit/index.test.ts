@@ -9,7 +9,7 @@ import {
   captureException,
   captureMessage,
   configureScope,
-  Event,
+  SentryEvent,
   flush,
   getCurrentHub,
   init,
@@ -24,7 +24,7 @@ const dsn = 'https://53039209a22b4ec1bcc296a3c9fdecd6@sentry.io/4291';
 declare var global: any;
 
 describe('SentryBrowser', () => {
-  const beforeSend: SinonSpy<[Event], Event> = spy((event: Event) => event);
+  const beforeSend: SinonSpy<[Event], Event> = spy((event: SentryEvent) => event);
 
   before(() => {
     init({
@@ -105,7 +105,7 @@ describe('SentryBrowser', () => {
     it('should capture a message', done => {
       getCurrentHub().bindClient(
         new BrowserClient({
-          beforeSend: (event: Event): Event | null => {
+          beforeSend: (event: SentryEvent): SentryEvent | null => {
             expect(event.message).to.equal('test');
             expect(event.exception).to.be.undefined;
             done();
@@ -120,7 +120,7 @@ describe('SentryBrowser', () => {
     it('should capture an event', done => {
       getCurrentHub().bindClient(
         new BrowserClient({
-          beforeSend: (event: Event): Event | null => {
+          beforeSend: (event: SentryEvent): SentryEvent | null => {
             expect(event.message).to.equal('event');
             expect(event.exception).to.be.undefined;
             done();
@@ -243,7 +243,7 @@ describe('wrap()', () => {
   it('should wrap and call function while capturing error', done => {
     getCurrentHub().bindClient(
       new BrowserClient({
-        beforeSend: (event: Event): Event | null => {
+        beforeSend: (event: SentryEvent): SentryEvent | null => {
           /* eslint-disable @typescript-eslint/no-non-null-assertion */
           expect(event.exception!.values![0].type).to.equal('TypeError');
           expect(event.exception!.values![0].value).to.equal('mkey');

@@ -1,4 +1,4 @@
-import { ClientLike, Event, IntegrationV7 } from '@sentry/types';
+import { ClientLike, SentryEvent, IntegrationV7 } from '@sentry/types';
 import { getEventDescription, isMatchingPattern, logger } from '@sentry/utils';
 
 // "Script error." is hard coded into browsers for errors that it can't read.
@@ -22,7 +22,7 @@ export class InboundFilters implements IntegrationV7 {
    * @inheritDoc
    */
   public install(client: ClientLike): void {
-    client.addEventProcessor((event: Event) => {
+    client.addEventProcessor((event: SentryEvent) => {
       const clientOptions = client?.options ?? {};
       const options = this._mergeOptions(clientOptions);
       if (this._shouldDropEvent(event, options)) {
@@ -32,7 +32,7 @@ export class InboundFilters implements IntegrationV7 {
     });
   }
 
-  private _shouldDropEvent(event: Event, options: Partial<InboundFiltersOptions>): boolean {
+  private _shouldDropEvent(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
     if (this._isSentryError(event, options)) {
       logger.warn(`Event dropped due to being internal Sentry Error.\nEvent: ${getEventDescription(event)}`);
       return true;
@@ -66,7 +66,7 @@ export class InboundFilters implements IntegrationV7 {
     return false;
   }
 
-  private _isSentryError(event: Event, options: Partial<InboundFiltersOptions>): boolean {
+  private _isSentryError(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
     if (!options.ignoreInternal) {
       return false;
     }
@@ -85,7 +85,7 @@ export class InboundFilters implements IntegrationV7 {
     }
   }
 
-  private _isIgnoredError(event: Event, options: Partial<InboundFiltersOptions>): boolean {
+  private _isIgnoredError(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
     if (!options.ignoreErrors || !options.ignoreErrors.length) {
       return false;
     }
@@ -96,7 +96,7 @@ export class InboundFilters implements IntegrationV7 {
     );
   }
 
-  private _isDeniedUrl(event: Event, options: Partial<InboundFiltersOptions>): boolean {
+  private _isDeniedUrl(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
     // TODO: Use Glob instead?
     if (!options.denyUrls || !options.denyUrls.length) {
       return false;
@@ -105,7 +105,7 @@ export class InboundFilters implements IntegrationV7 {
     return !url ? false : options.denyUrls.some(pattern => isMatchingPattern(url, pattern));
   }
 
-  private _isAllowedUrl(event: Event, options: Partial<InboundFiltersOptions>): boolean {
+  private _isAllowedUrl(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
     // TODO: Use Glob instead?
     if (!options.allowUrls || !options.allowUrls.length) {
       return true;
@@ -128,7 +128,7 @@ export class InboundFilters implements IntegrationV7 {
     };
   }
 
-  private _getPossibleEventMessages(event: Event): string[] {
+  private _getPossibleEventMessages(event: SentryEvent): string[] {
     if (event.message) {
       return [event.message];
     }
@@ -144,7 +144,7 @@ export class InboundFilters implements IntegrationV7 {
     return [];
   }
 
-  private _getEventFilterUrl(event: Event): string | null {
+  private _getEventFilterUrl(event: SentryEvent): string | null {
     try {
       if (event.stacktrace) {
         const frames = event.stacktrace.frames;

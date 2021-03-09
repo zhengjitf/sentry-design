@@ -1,4 +1,4 @@
-import { Event } from '@sentry/types';
+import { SentryEvent } from '@sentry/types';
 
 import { getCurrentHub, Hub, Scope } from '../src';
 
@@ -91,14 +91,14 @@ describe('Hub', () => {
 
     test('inherit processors', () => {
       expect.assertions(1);
-      const event: Event = {
+      const event: SentryEvent = {
         extra: { b: 3 },
       };
       const localScope = new Scope();
       localScope.setExtra('a', 'b');
       const hub = new Hub({ a: 'b' } as any, localScope);
 
-      localScope.addEventProcessor(async (processedEvent: Event) => {
+      localScope.addEventProcessor(async (processedEvent: SentryEvent) => {
         processedEvent.dist = '1';
         return processedEvent;
       });
@@ -245,7 +245,7 @@ describe('Hub', () => {
 
   describe('captureEvent', () => {
     test('simple', () => {
-      const event: Event = {
+      const event: SentryEvent = {
         extra: { b: 3 },
       };
       const hub = new Hub();
@@ -257,7 +257,7 @@ describe('Hub', () => {
     });
 
     test('should set event_id in hint', () => {
-      const event: Event = {
+      const event: SentryEvent = {
         extra: { b: 3 },
       };
       const hub = new Hub();
@@ -269,7 +269,7 @@ describe('Hub', () => {
   });
 
   test('lastEventId should be the same as last created', () => {
-    const event: Event = {
+    const event: SentryEvent = {
       extra: { b: 3 },
     };
     const hub = new Hub();
@@ -298,10 +298,10 @@ describe('Hub', () => {
       hub.addBreadcrumb({ message: 'My Breadcrumb' });
       hub.withScope(scope => {
         scope.addBreadcrumb({ message: 'scope breadcrumb' });
-        const event: Event = {};
+        const event: SentryEvent = {};
         scope
           .applyToEvent(event)
-          .then((appliedEvent: Event | null) => {
+          .then((appliedEvent: SentryEvent | null) => {
             expect(appliedEvent).toBeTruthy();
             expect(appliedEvent!.breadcrumbs).toHaveLength(2);
             expect(appliedEvent!.breadcrumbs![0].message).toEqual('My Breadcrumb');

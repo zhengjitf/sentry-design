@@ -104,7 +104,7 @@ export abstract class BaseTransport {
 export class NoopTransport implements Transport {
   public sendRequest(_request: TransportRequest<unknown>): PromiseLike<TransportResponse> {
     return Promise.resolve({
-      reason: `NoopTransport: Event has been skipped because no Dsn is configured.`,
+      reason: `NoopTransport: SentryEvent has been skipped because no Dsn is configured.`,
       status: ResponseStatus.Skipped,
     });
   }
