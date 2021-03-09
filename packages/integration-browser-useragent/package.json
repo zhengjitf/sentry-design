@@ -1,9 +1,9 @@
 {
-  "name": "@sentry/integration-modules",
+  "name": "@sentry/integration-browser-useragent",
   "version": "7.0.0-alpha.0",
-  "description": "Sentry package for handling SDK event filtering",
+  "description": "TODO: Write proper description",
   "repository": "git://github.com/getsentry/sentry-javascript.git",
-  "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/integration-modules",
+  "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/integration-browser-useragent",
   "author": "Sentry",
   "license": "BSD-3-Clause",
   "publishConfig": {

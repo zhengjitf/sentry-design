@@ -5,15 +5,15 @@ import { getCurrentHub } from '@sentry/hub';
 import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import { InboundFilters } from '@sentry/integration-inboundfilters';
-import { UserAgent } from '@sentry/integration-useragent';
-import { EventTargetWrap, TimersWrap, XHRWrap } from '@sentry/integration-wrap';
+import { UserAgent } from '@sentry/integration-browser-useragent';
+import { EventTargetWrap, TimersWrap, XHRWrap } from '@sentry/integration-browser-wrap';
 import {
   ConsoleBreadcrumbs,
   DOMBreadcrumbs,
   XHRBreadcrumbs,
   FetchBreadcrumbs,
   HistoryBreadcrumbs,
-} from '@sentry/integration-breadcrumbs';
+} from '@sentry/integration-browser-breadcrumbs';
 
 import { BrowserClient, BrowserOptions } from './client';
 import { GlobalHandlers, LinkedErrors } from './integrations';
