@@ -1,100 +1,56 @@
-import { Scope } from '@sentry/scope';
-import { getCurrentHub } from '@sentry/hub';
-import { Integration, Severity } from '@sentry/types';
+import { ClientLike, IntegrationV7, Severity } from '@sentry/types';
 import { logger } from '@sentry/utils';
 
-import { NodeClient } from '../client';
-import { logAndExitProcess } from '../handlers';
+import { logAndExitProcess } from './exit';
 
-/** Global Promise Rejection handler */
-export class OnUncaughtException implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'OnUncaughtException';
+type onFatalErrorHandler = (firstError: Error, secondError?: Error) => void;
+type OnUncaughtExceptionOptions = {
+  onFatalError?: onFatalErrorHandler;
+};
 
-  /**
-   * @inheritDoc
-   */
-  public name: string = OnUncaughtException.id;
+export class OnUncaughtException implements IntegrationV7 {
+  public name = this.constructor.name;
 
-  /**
-   * @inheritDoc
-   */
-  public readonly handler: (error: Error) => void = this._makeErrorHandler();
+  public constructor(private _options: OnUncaughtExceptionOptions = {}) {}
 
-  /**
-   * @inheritDoc
-   */
-  public constructor(
-    private readonly _options: {
-      /**
-       * Default onFatalError handler
-       * @param firstError Error that has been thrown
-       * @param secondError If this was called multiple times this will be set
-       */
-      onFatalError?(firstError: Error, secondError?: Error): void;
-    } = {},
-  ) {}
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(): void {
-    global.process.on('uncaughtException', this.handler.bind(this));
+  public install(client: ClientLike): void {
+    const handler = this._makeErrorHandler(client);
+    global.process.on('uncaughtException', handler);
   }
 
   /**
    * @hidden
    */
-  private _makeErrorHandler(): (error: Error) => void {
+  private _makeErrorHandler(client: ClientLike): (error: Error) => void {
     const timeout = 2000;
     let caughtFirstError: boolean = false;
     let caughtSecondError: boolean = false;
     let calledFatalError: boolean = false;
     let firstError: Error;
 
+    const logAndExit = logAndExitProcess(client);
+    const onFatalError =
+      this._options.onFatalError ??
+      (client.options as { onFatalError: onFatalErrorHandler }).onFatalError ??
+      logAndExit;
+
     return (error: Error): void => {
-      type onFatalErrorHandlerType = (firstError: Error, secondError?: Error) => void;
-
-      let onFatalError: onFatalErrorHandlerType = logAndExitProcess;
-      const client = getCurrentHub().getClient<NodeClient>();
-
-      if (this._options.onFatalError) {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        onFatalError = this._options.onFatalError;
-      } else if (client?.options?.onFatalError) {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        onFatalError = client.options.onFatalError as onFatalErrorHandlerType;
-      }
-
       if (!caughtFirstError) {
-        const hub = getCurrentHub();
-
         // this is the first uncaught error and the ultimate reason for shutting down
         // we want to do absolutely everything possible to ensure it gets captured
         // also we want to make sure we don't go recursion crazy if more errors happen after this one
         firstError = error;
         caughtFirstError = true;
 
-        if (hub.getIntegration(OnUncaughtException)) {
-          hub.withScope((scope: Scope) => {
-            scope.setLevel(Severity.Fatal);
-            hub.captureException(error, { originalException: error });
-            if (!calledFatalError) {
-              calledFatalError = true;
-              onFatalError(error);
-            }
-          });
-        } else {
-          if (!calledFatalError) {
-            calledFatalError = true;
-            onFatalError(error);
-          }
+        client.captureException(error, { hint: { originalException: error }, scope: { level: Severity.Fatal } });
+        if (!calledFatalError) {
+          calledFatalError = true;
+          onFatalError(error);
         }
       } else if (calledFatalError) {
         // we hit an error *after* calling onFatalError - pretty boned at this point, just shut it down
         logger.warn('uncaught exception after calling fatal error shutdown callback - this is bad! forcing shutdown');
-        logAndExitProcess(error);
+        logAndExit(error);
       } else if (!caughtSecondError) {
         // two cases for how we can hit this branch:
         //   - capturing of first error blew up and we just caught the exception from that

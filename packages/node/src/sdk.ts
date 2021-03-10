@@ -5,15 +5,12 @@ import { getCurrentHub, getMainCarrier, setHubOnCarrier } from '@sentry/hub';
 import { getGlobalObject } from '@sentry/utils';
 import { InboundFilters } from '@sentry/integration-inboundfilters';
 import { LinkedErrors } from '@sentry/integration-node-linkederrors';
+import { OnUncaughtException, OnUnhandledRejection } from '@sentry/integration-node-globalhandlers';
 
 import { NodeClient, NodeOptions } from './client';
-import { Console, Http, OnUncaughtException, OnUnhandledRejection } from './integrations';
+import { Console, Http } from './integrations';
 
-export const defaultIntegrations = [
-  // Global Handlers
-  new OnUncaughtException(),
-  new OnUnhandledRejection(),
-];
+export const defaultIntegrations = [];
 
 /**
  * The Sentry Node SDK Client.
@@ -72,7 +69,14 @@ export const defaultIntegrations = [
  */
 export function init(options: NodeOptions = {}): void {
   // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
-  options.fancyIntegrations = [new Console(), new Http(), new LinkedErrors(), new InboundFilters()];
+  options.fancyIntegrations = [
+    new Console(),
+    new Http(),
+    new LinkedErrors(),
+    new InboundFilters(),
+    new OnUncaughtException(),
+    new OnUnhandledRejection(),
+  ];
 
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;

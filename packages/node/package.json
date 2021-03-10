@@ -20,6 +20,7 @@
     "@sentry/hub": "6.2.3",
     "@sentry/eventbuilder-node": "7.0.0-alpha.0",
     "@sentry/integration-inboundfilters": "7.0.0-alpha.0",
+    "@sentry/integration-node-globalhandlers": "7.0.0-alpha.0",
     "@sentry/integration-node-linkederrors": "7.0.0-alpha.0",
     "@sentry/minimal": "6.2.1",
     "@sentry/scope": "7.0.0-alpha.0",
