@@ -6,9 +6,9 @@ import { getGlobalObject } from '@sentry/utils';
 import { InboundFilters } from '@sentry/integration-inboundfilters';
 import { LinkedErrors } from '@sentry/integration-node-linkederrors';
 import { OnUncaughtException, OnUnhandledRejection } from '@sentry/integration-node-globalhandlers';
+import { ConsoleBreadcrumbs, HTTPBreadcrumbs } from '@sentry/integration-node-breadcrumbs';
 
 import { NodeClient, NodeOptions } from './client';
-import { Console, Http } from './integrations';
 
 export const defaultIntegrations = [];
 
@@ -70,8 +70,8 @@ export const defaultIntegrations = [];
 export function init(options: NodeOptions = {}): void {
   // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
   options.fancyIntegrations = [
-    new Console(),
-    new Http(),
+    new ConsoleBreadcrumbs(),
+    new HTTPBreadcrumbs(),
     new LinkedErrors(),
     new InboundFilters(),
     new OnUncaughtException(),

@@ -27,6 +27,9 @@ export { SDK_NAME } from './version';
 
 // TODO: Can be written as `export * as Handlers from './handlers'` but ESLint doesnt understand it for some reason. Investigate.
 import * as Handlers from './handlers';
-import * as Integrations from './integrations';
+
+// TODO: Expose all integrations through `Sentry.Integrations` again?
+const Integrations = {};
+// import * as Integrations from './integrations';
 
 export { Handlers, Integrations };
