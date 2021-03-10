@@ -1,7 +1,6 @@
-import { ExtendedError } from '@sentry/types';
+import { ExtendedError, SentryEvent } from '@sentry/types';
 
-import { SentryEvent } from '../../src';
-import { LinkedErrors } from '../../src/integrations/linkederrors';
+import { LinkedErrors } from '../src/index';
 
 class NodeBackend {
   eventFromException: (ex: unknown) => PromiseLike<SentryEvent> = () => Promise.resolve({});

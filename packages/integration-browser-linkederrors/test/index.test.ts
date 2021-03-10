@@ -2,7 +2,7 @@ import { SentryEvent, ExtendedError } from '@sentry/types';
 import { expect } from 'chai';
 import { stub } from 'sinon';
 
-import { LinkedErrors } from '../../../src/integrations/linkederrors';
+import { LinkedErrors } from '../src/index';
 
 class BrowserBackend {
   eventFromException: (ex: unknown) => PromiseLike<SentryEvent> = () => Promise.resolve({});

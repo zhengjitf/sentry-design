@@ -14,12 +14,13 @@ import {
   FetchBreadcrumbs,
   HistoryBreadcrumbs,
 } from '@sentry/integration-browser-breadcrumbs';
+import { LinkedErrors } from '@sentry/integration-browser-linkederrors';
 
 import { BrowserClient, BrowserOptions } from './client';
-import { GlobalHandlers, LinkedErrors } from './integrations';
+import { GlobalHandlers } from './integrations';
 import { injectReportDialog } from './helpers';
 
-export const defaultIntegrations = [new LinkedErrors()];
+export const defaultIntegrations = [];
 
 /**
  * The Sentry Browser SDK Client.
@@ -91,6 +92,7 @@ export function init(options: BrowserOptions = {}): void {
     new HistoryBreadcrumbs(),
     new InboundFilters(),
     new UserAgent(),
+    new LinkedErrors(),
     new GlobalHandlers(),
   ];
 
