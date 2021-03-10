@@ -4,7 +4,7 @@ import { initAndBind } from '@sentry/core';
 import { getCurrentHub } from '@sentry/hub';
 import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
-import { InboundFilters } from '@sentry/integration-inboundfilters';
+import { InboundFilters } from '@sentry/integration-common-inboundfilters';
 import { UserAgent } from '@sentry/integration-browser-useragent';
 import { EventTargetWrap, TimersWrap, XHRWrap } from '@sentry/integration-browser-wrap';
 import {

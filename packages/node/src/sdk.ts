@@ -3,7 +3,7 @@ import * as domain from 'domain';
 import { initAndBind } from '@sentry/core';
 import { getCurrentHub, getMainCarrier, setHubOnCarrier } from '@sentry/hub';
 import { getGlobalObject } from '@sentry/utils';
-import { InboundFilters } from '@sentry/integration-inboundfilters';
+import { InboundFilters } from '@sentry/integration-common-inboundfilters';
 import { LinkedErrors } from '@sentry/integration-node-linkederrors';
 import { OnUncaughtException, OnUnhandledRejection } from '@sentry/integration-node-globalhandlers';
 import { ConsoleBreadcrumbs, HTTPBreadcrumbs } from '@sentry/integration-node-breadcrumbs';
