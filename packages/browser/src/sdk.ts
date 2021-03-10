@@ -15,9 +15,9 @@ import {
   HistoryBreadcrumbs,
 } from '@sentry/integration-browser-breadcrumbs';
 import { LinkedErrors } from '@sentry/integration-browser-linkederrors';
+import { OnError, OnUnhandledRejection } from '@sentry/integration-browser-globalhandlers';
 
 import { BrowserClient, BrowserOptions } from './client';
-import { GlobalHandlers } from './integrations';
 import { injectReportDialog } from './helpers';
 
 export const defaultIntegrations = [];
@@ -93,7 +93,8 @@ export function init(options: BrowserOptions = {}): void {
     new InboundFilters(),
     new UserAgent(),
     new LinkedErrors(),
-    new GlobalHandlers(),
+    new OnError(),
+    new OnUnhandledRejection(),
   ];
 
   if (options.defaultIntegrations === undefined) {

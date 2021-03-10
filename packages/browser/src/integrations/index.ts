@@ -1,1 +1,0 @@
-export { GlobalHandlers } from './globalhandlers';

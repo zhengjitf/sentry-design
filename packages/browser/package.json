@@ -20,6 +20,7 @@
     "@sentry/eventbuilder-browser": "7.0.0-alpha.0",
     "@sentry/hub": "6.2.3",
     "@sentry/integration-browser-breadcrumbs": "7.0.0-alpha.0",
+    "@sentry/integration-browser-globalhandlers": "7.0.0-alpha.0",
     "@sentry/integration-browser-linkederrors": "7.0.0-alpha.0",
     "@sentry/integration-browser-useragent": "7.0.0-alpha.0",
     "@sentry/integration-browser-wrap": "7.0.0-alpha.0",

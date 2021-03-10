@@ -2,8 +2,9 @@ export * from './exports';
 
 import { getGlobalObject } from '@sentry/utils';
 
-import * as BrowserIntegrations from './integrations';
-
+// TODO: Expose all integrations through `Sentry.Integrations` again?
+// import * as BrowserIntegrations from './integrations';
+const BrowserIntegrations = {};
 let windowIntegrations = {};
 
 // This block is needed to add compatibility with the integrations packages when used with a CDN
