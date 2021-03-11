@@ -1,4 +1,4 @@
-import { ClientLike, IntegrationV7 } from '@sentry/types';
+import { ClientLike, IntegrationV7, ScopeContext } from '@sentry/types';
 import { consoleSandbox } from '@sentry/utils';
 
 import { logAndExitProcess } from './exit';
@@ -8,7 +8,7 @@ type OnUncaughtExceptionOptions = {
   mode?: UnhandledRejectionMode;
 };
 type PromiseRejectionWithDomainContext = {
-  domain?: { sentryContext?: Record<string, Record<string, unknown>> };
+  domain?: { sentryContext?: ScopeContext };
 };
 
 const DEFAULT_REJECTION_MODE = 'warn';
@@ -29,7 +29,7 @@ export class OnUnhandledRejection implements IntegrationV7 {
     return (reason: { stack?: string }, promise: PromiseRejectionWithDomainContext): void => {
       const context = promise.domain?.sentryContext ?? {};
 
-      const scope: Record<string, Record<string, unknown>> = { extra: { unhandledPromiseRejection: true } };
+      const scope: ScopeContext = { extra: { unhandledPromiseRejection: true } };
 
       // TODO: Validate whether its still necessary to keep it
       // Preserve backwards compatibility with raven-node for now
