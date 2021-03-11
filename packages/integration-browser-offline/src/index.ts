@@ -1,34 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { SentryEvent, EventProcessor, Hub, Integration } from '@sentry/types';
+import { SentryEvent, ClientLike, IntegrationV7 } from '@sentry/types';
 import { getGlobalObject, logger, normalize, uuid4 } from '@sentry/utils';
 import * as localForageType from 'localforage';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const localForage = require('localforage');
-/**
- * cache offline errors and send when connected
- */
-export class Offline implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Offline';
 
-  /**
-   * @inheritDoc
-   */
-  public readonly name: string = Offline.id;
+type OfflineOptions = {
+  maxStoredEvents?: number;
+};
+
+export class Offline implements IntegrationV7 {
+  public name = this.constructor.name;
 
   /**
    * the global instance
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public global: any;
-
-  /**
-   * the current hub instance
-   */
-  public hub?: Hub;
 
   /**
    * maximum number of events to store while offline
@@ -40,13 +29,15 @@ export class Offline implements Integration {
    */
   public offlineEventStore: typeof localForageType; // type imported from localforage
 
+  private _client!: ClientLike;
+
   /**
    * @inheritDoc
    */
-  public constructor(options: { maxStoredEvents?: number } = {}) {
+  public constructor(options: OfflineOptions = {}) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.global = getGlobalObject<any>();
-    this.maxStoredEvents = options.maxStoredEvents || 30; // set a reasonable default
+    this.maxStoredEvents = options.maxStoredEvents ?? 30; // set a reasonable default
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     this.offlineEventStore = localForage.createInstance({
       name: 'sentry/offlineEventStore',
@@ -56,8 +47,8 @@ export class Offline implements Integration {
   /**
    * @inheritDoc
    */
-  public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    this.hub = getCurrentHub();
+  public install(client: ClientLike): void {
+    this._client = client;
 
     if ('addEventListener' in this.global) {
       this.global.addEventListener('online', () => {
@@ -67,19 +58,17 @@ export class Offline implements Integration {
       });
     }
 
-    addGlobalEventProcessor((event: SentryEvent) => {
-      if (this.hub && this.hub.getIntegration(Offline)) {
-        // cache if we are positively offline
-        if ('navigator' in this.global && 'onLine' in this.global.navigator && !this.global.navigator.onLine) {
-          this._cacheEvent(event)
-            .then((_event: SentryEvent): Promise<void> => this._enforceMaxEvents())
-            .catch((_error): void => {
-              logger.warn('could not cache event while offline');
-            });
+    client.addEventProcessor((event: SentryEvent) => {
+      // cache if we are positively offline
+      if ('navigator' in this.global && 'onLine' in this.global.navigator && !this.global.navigator.onLine) {
+        this._cacheEvent(event)
+          .then((_event: SentryEvent): Promise<void> => this._enforceMaxEvents())
+          .catch((_error): void => {
+            logger.warn('could not cache event while offline');
+          });
 
-          // return null on success or failure, because being offline will still result in an error
-          return null;
-        }
+        // return null on success or failure, because being offline will still result in an error
+        return null;
       }
 
       return event;
@@ -149,15 +138,11 @@ export class Offline implements Integration {
   private async _sendEvents(): Promise<void> {
     return this.offlineEventStore.iterate<SentryEvent, void>(
       (event: SentryEvent, cacheKey: string, _index: number): void => {
-        if (this.hub) {
-          this.hub.captureEvent(event);
+        this._client.captureEvent(event);
 
-          this._purgeEvent(cacheKey).catch((_error): void => {
-            logger.warn('could not purge event from cache');
-          });
-        } else {
-          logger.warn('no hub found - could not send cached event');
-        }
+        this._purgeEvent(cacheKey).catch((_error): void => {
+          logger.warn('could not purge event from cache');
+        });
       },
     );
   }

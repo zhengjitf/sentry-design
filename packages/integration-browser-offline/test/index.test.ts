@@ -4,7 +4,7 @@
 import { SentryEvent, EventProcessor, Hub, Integration } from '@sentry/types';
 import * as utils from '@sentry/utils';
 
-import { Offline } from '../src/offline';
+import { Offline } from '../src/index';
 
 // mock localforage methods
 jest.mock('localforage', () => ({
