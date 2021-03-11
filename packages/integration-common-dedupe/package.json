@@ -1,0 +1,42 @@
+{
+  "name": "@sentry/integration-common-dedupe",
+  "version": "7.0.0-alpha.0",
+  "description": "TODO: Write proper description",
+  "repository": "git://github.com/getsentry/sentry-javascript.git",
+  "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/integration-common-dedupe",
+  "author": "Sentry",
+  "license": "BSD-3-Clause",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "module": "esm/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@sentry/types": "6.2.1",
+    "@sentry/utils": "6.2.1"
+  },
+  "scripts": {
+    "build": "run-p build:es5 build:esm",
+    "build:es5": "tsc -p tsconfig.build.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:watch": "run-p build:watch:es5 build:watch:esm",
+    "build:watch:es5": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
+    "build:watch:esm": "tsc -p tsconfig.esm.json -w --preserveWatchOutput",
+    "clean": "rimraf dist coverage",
+    "link:yarn": "yarn link",
+    "lint": "run-s lint:prettier lint:eslint",
+    "lint:prettier": "prettier --check \"{src,test}/**/*.ts\"",
+    "lint:eslint": "eslint .",
+    "fix": "run-s fix:eslint fix:prettier",
+    "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
+    "fix:eslint": "eslint . --fix",
+    "test": "jest -c ../../jest.config.js",
+    "test:watch": "npm run test -- --watch",
+    "pack": "npm pack"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  },
+  "sideEffects": false
+}

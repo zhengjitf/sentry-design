@@ -1,7 +1,6 @@
 export { Angular } from './angular';
 export { CaptureConsole } from './captureconsole';
 export { Debug } from './debug';
-export { Dedupe } from './dedupe';
 export { Ember } from './ember';
 export { ExtraErrorData } from './extraerrordata';
 export { Offline } from './offline';

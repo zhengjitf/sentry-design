@@ -1,40 +1,21 @@
-import { SentryEvent, EventProcessor, Exception, Hub, Integration, StackFrame } from '@sentry/types';
+import { SentryEvent, Exception, ClientLike, IntegrationV7, StackFrame } from '@sentry/types';
 
-/** Deduplication filter */
-export class Dedupe implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Dedupe';
+export class Dedupe implements IntegrationV7 {
+  public name = this.constructor.name;
 
-  /**
-   * @inheritDoc
-   */
-  public name: string = Dedupe.id;
-
-  /**
-   * @inheritDoc
-   */
   private _previousEvent?: SentryEvent;
 
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    addGlobalEventProcessor((currentEvent: SentryEvent) => {
-      const self = getCurrentHub().getIntegration(Dedupe);
-      if (self) {
-        // Juuust in case something goes wrong
-        try {
-          if (self._shouldDropEvent(currentEvent, self._previousEvent)) {
-            return null;
-          }
-        } catch (_oO) {
-          return (self._previousEvent = currentEvent);
+  public install(client: ClientLike): void {
+    client.addEventProcessor((currentEvent: SentryEvent) => {
+      // Juuust in case something goes wrong
+      try {
+        if (this._shouldDropEvent(currentEvent, this._previousEvent)) {
+          return null;
         }
-
-        return (self._previousEvent = currentEvent);
+      } catch (_oO) {
+        // no-empty
       }
+      this._previousEvent = currentEvent;
       return currentEvent;
     });
   }
