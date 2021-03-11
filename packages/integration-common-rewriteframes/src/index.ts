@@ -1,29 +1,18 @@
-import { SentryEvent, EventProcessor, Hub, Integration, StackFrame, Stacktrace } from '@sentry/types';
+import { SentryEvent, StackFrame, Stacktrace, ClientLike, IntegrationV7 } from '@sentry/types';
 import { basename, relative } from '@sentry/utils';
 
 type StackFrameIteratee = (frame: StackFrame) => StackFrame;
+type RewriteFramesOptions = {
+  root?: string;
+  iteratee?: StackFrameIteratee;
+};
 
-/** Rewrite event frames paths */
-export class RewriteFrames implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'RewriteFrames';
+export class RewriteFrames implements IntegrationV7 {
+  public name = this.constructor.name;
 
-  /**
-   * @inheritDoc
-   */
-  public name: string = RewriteFrames.id;
-
-  /**
-   * @inheritDoc
-   */
   private readonly _root?: string;
 
-  /**
-   * @inheritDoc
-   */
-  public constructor(options: { root?: string; iteratee?: StackFrameIteratee } = {}) {
+  public constructor(options: RewriteFramesOptions = {}) {
     if (options.root) {
       this._root = options.root;
     }
@@ -32,17 +21,8 @@ export class RewriteFrames implements Integration {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    addGlobalEventProcessor(event => {
-      const self = getCurrentHub().getIntegration(RewriteFrames);
-      if (self) {
-        return self.process(event);
-      }
-      return event;
-    });
+  public install(client: ClientLike): void {
+    client.addEventProcessor(event => this.process(event));
   }
 
   public process(event: SentryEvent): SentryEvent {
