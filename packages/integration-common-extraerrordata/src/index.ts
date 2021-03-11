@@ -1,38 +1,20 @@
-import { SentryEvent, EventHint, EventProcessor, ExtendedError, Hub, Integration } from '@sentry/types';
+import { SentryEvent, EventHint, ExtendedError, ClientLike, IntegrationV7 } from '@sentry/types';
 import { isError, isPlainObject, logger, normalize } from '@sentry/utils';
 
 interface ExtraErrorDataOptions {
   depth?: number;
 }
 
-/** Patch toString calls to return proper name for wrapped functions */
-export class ExtraErrorData implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'ExtraErrorData';
+export class ExtraErrorData implements IntegrationV7 {
+  public name = this.constructor.name;
 
-  /**
-   * @inheritDoc
-   */
-  public name: string = ExtraErrorData.id;
-
-  /**
-   * @inheritDoc
-   */
   public constructor(private readonly _options: ExtraErrorDataOptions = { depth: 3 }) {}
 
   /**
    * @inheritDoc
    */
-  public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    addGlobalEventProcessor((event: SentryEvent, hint?: EventHint) => {
-      const self = getCurrentHub().getIntegration(ExtraErrorData);
-      if (!self) {
-        return event;
-      }
-      return self.enhanceEventWithErrorData(event, hint);
-    });
+  public install(client: ClientLike): void {
+    client.addEventProcessor((event: SentryEvent, hint?: EventHint) => this.enhanceEventWithErrorData(event, hint));
   }
 
   /**
