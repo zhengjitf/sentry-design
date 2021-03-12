@@ -1,10 +1,11 @@
 import { BrowserTracing } from './browser';
 import { addExtensionMethods } from './hubextensions';
-import * as TracingIntegrations from './integrations';
+import { Integrations as TracingIntegrations } from './integrations';
 
 const Integrations = { ...TracingIntegrations, BrowserTracing };
 
 export { Integrations };
+export { instrumentMiddlewares } from './integrations';
 export { Span } from './span';
 export { Transaction } from './transaction';
 export {

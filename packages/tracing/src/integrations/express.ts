@@ -1,5 +1,7 @@
+/* eslint-disable max-lines */
 import { Integration, Transaction } from '@sentry/types';
 import { logger } from '@sentry/utils';
+import * as http from 'http';
 
 type Method =
   | 'all'
@@ -30,7 +32,7 @@ type Method =
 
 type Router = {
   [method in Method]: (...args: any) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-};
+} & { _router?: Router; lazyrouter: () => void; process_params: (...args: unknown[]) => void };
 
 interface ExpressResponse {
   once(name: string, callback: () => void): void;
@@ -102,15 +104,21 @@ export class Express implements Integration {
  */
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
 function wrap(fn: Function, method: Method): (...args: any[]) => void {
+  let wrappedFunction;
   const arity = fn.length;
 
   switch (arity) {
     case 2: {
-      return function(this: NodeJS.Global, req: unknown, res: ExpressResponse & SentryTracingResponse): void {
+      wrappedFunction = function(
+        this: NodeJS.Global,
+        req: http.IncomingMessage,
+        res: ExpressResponse & SentryTracingResponse,
+      ): void {
         const transaction = res.__sentry_transaction;
         if (transaction) {
           const span = transaction.startChild({
-            description: fn.name,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            description: (fn as any)._name || fn.name,
             op: `middleware.${method}`,
           });
           res.once('finish', () => {
@@ -119,48 +127,56 @@ function wrap(fn: Function, method: Method): (...args: any[]) => void {
         }
         return fn.call(this, req, res);
       };
+      break;
     }
     case 3: {
-      return function(
+      wrappedFunction = function(
         this: NodeJS.Global,
-        req: unknown,
+        req: http.IncomingMessage,
         res: ExpressResponse & SentryTracingResponse,
         next: () => void,
       ): void {
         const transaction = res.__sentry_transaction;
         const span = transaction?.startChild({
-          description: fn.name,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          description: (fn as any)._name || fn.name,
           op: `middleware.${method}`,
         });
         fn.call(this, req, res, function(this: NodeJS.Global, ...args: unknown[]): void {
           span?.finish();
-          next.call(this, ...args);
+          next.apply(this, args);
         });
       };
+      break;
     }
     case 4: {
-      return function(
+      wrappedFunction = function(
         this: NodeJS.Global,
         err: Error,
-        req: Request,
+        req: http.IncomingMessage,
         res: Response & SentryTracingResponse,
         next: () => void,
       ): void {
         const transaction = res.__sentry_transaction;
         const span = transaction?.startChild({
-          description: fn.name,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          description: (fn as any)._name || fn.name,
           op: `middleware.${method}`,
         });
         fn.call(this, err, req, res, function(this: NodeJS.Global, ...args: unknown[]): void {
           span?.finish();
-          next.call(this, ...args);
+          next.apply(this, args);
         });
       };
+      break;
     }
     default: {
       throw new Error(`Express middleware takes 2-4 arguments. Got: ${arity}`);
     }
   }
+
+  Object.defineProperty(wrappedFunction, 'name', { value: fn.name });
+  return wrappedFunction;
 }
 
 /**
@@ -205,9 +221,133 @@ function patchMiddleware(router: Router, method: Method): Router {
   return router;
 }
 
+interface ExpressRouterLayer {
+  path: string;
+  keys: Array<{
+    name: string;
+    optional: boolean;
+    offset: number;
+  }>;
+  regexp: RegExp;
+}
+
 /**
- * Patches original router methods
+ *
  */
-function instrumentMiddlewares(router: Router, methods: Method[] = []): void {
-  methods.forEach((method: Method) => patchMiddleware(router, method));
+function wrapProcessParams(routerPrototype: Router): void {
+  const oldProcessParams = routerPrototype.process_params;
+
+  /**
+   *
+   */
+  function newProcessParams(this: Router, ...args: unknown[]): void {
+    const layer = args[0] as ExpressRouterLayer;
+    const req = args[2] as { _reconstructedPath: string };
+    req._reconstructedPath = req._reconstructedPath || '';
+
+    // Every router, top-level or nested, contains an array of Layer objects, one per path/method/handler combo within
+    // that router. When Express finds a layer that matches the current part of the specific path being considered, it
+    // temporarily adds that path to the layer (otherwise, layers only contain a regex to match to future paths).
+    if (layer.path) {
+      // This is a real hack, necessitated by the fact that Express neither keeps track of the full parameterized path
+      // itself nor exports Layer, the constructor of which seems to be the only place the path as typed by the Express
+      // user is accessible. Alas. So, we reconstruct it, making sure to differentiate between hard-coded path segments
+      // and parameters, between parameters with identical names, and between parameters with identical values.
+
+      // The overall idea here is to modify the path's regex to insert capture groups around each hard-coded part of the
+      // path. The parameters already have capture groups around them, so by capturing the hard-coded parts, too, we end
+      // up being able to reconstruct the entire path, while at the same time being sure that we're only substituting
+      // parameter names for values which actually are in the parameter spots. (Since each capture group for a
+      // hard-coded part of the path fills the entire space between consecutive parameters, we can be sure that the
+      // groups alternate between hard-coded segments and parameterized segments, making it easy to tell which is
+      // which.) Parameter keys are stored on the layer in order, so we also can be assured that we're matching the
+      // right parameter name to the right value, even if the values happen to be the same for this instance of the
+      // path.
+      const parameterRegexPattern = '(?:([^\\/]+?))';
+      const pathPartsRegexSource = layer.regexp.source
+        // get all the hard-coded in-between parts
+        .split(parameterRegexPattern)
+        // surround each one with parentheses
+        .map(hardCodedSegment => `(${hardCodedSegment})`)
+        // and then put all the parameter segments back in place
+        .join(parameterRegexPattern);
+      const pathParts = new RegExp(pathPartsRegexSource, layer.regexp.flags).exec(layer.path);
+      // we wouldn't be here otherwise, but this keeps TS happy
+      if (pathParts) {
+        // The first (index 0) thing in the match array is the full match; the capture groups start at index 1. Even if
+        // the first path segment is a parameter, there will always be at least a leading slash to take up the first
+        // capture group slot. The first parameter capture group will therefore always be at index 2.
+        for (let i = 2; i < pathParts.length; i += 2) {
+          const keyIndex = i / 2 - 1;
+          pathParts[i] = `:${layer.keys[keyIndex].name}`;
+        }
+
+        // slice so we don't include the full match as part of the path, then glue everything back together and add it to
+        // the parameterized path we're building
+        req._reconstructedPath += pathParts.slice(1).join('');
+      }
+      // no else because on the other end `req.url` will just be used instead
+    }
+
+    // now we can let Express do its thing
+    oldProcessParams.apply(this, args);
+
+    // TODO kmclb We're currently not handling the case where an array of paths is passed.
+
+    // We'll need to strip off the initial (?: and ending ), detect the pattern
+    //    \/?(?=\/|$)|^\/
+    // (which is the end of one option, the OR, and the beginning of another option), replace the | with some illegal
+    // regex character (illegal so we know it won't appear anywhere else in the regex string), split on that character,
+    // apply the above logic to each piece, for any that match (could there be more than one, or will it just always use
+    // the first or last one?) do the substitution, wrap all options with quotes and surround the whole thing with [] to
+    // make it an array, and finally deal with a) how to display these arrays when they're only part of a larger path
+    // (concatenation alone probably won't cut it) and b) if there can be multiple matches, figure out if we need some
+    // sort of cross-product... or maybe we just need to find one matching one, and as long as we're consistent about
+    // which one we pick, we'll only be wrong some of the time? The offset might help here, even if it's off by a
+    // little, though it's not at all guaranteed to... I think it's first necessary to know how express does it (since
+    // the parameters get acted upon, it actually does matter if it matches /blah or /:someParam where the value of
+    // someParam turns out to be "blah", so they must have some way of deciding). Anyway, this is an edgy edge case, so
+    // not for solving now.
+
+    // TODO kmclb - we should pull the method and replace the .use in the span's "middleware.xxxx"
+
+    // TODO kmclb - also, what description are we going to use? the ultimate handler, I guess? Probably need to adjust
+    // this, as we likely default to the first router
+  }
+
+  routerPrototype.process_params = newProcessParams;
+}
+
+/**
+ * Patches original app methods (app.use, app.get, app.post, app.patch, etc) and router methods (someRouter.use,
+ * someRouter.get, etc) as well as an internal router method which allows us to keep track of the full parameterized
+ * path (since Express doesn't)
+ */
+export function instrumentMiddlewares(appOrRouter: Router, methods: Method[] = []): void {
+  // TODO kmclb If we do export this, pull out the `wrapProcessParams` stuff, because otherwise we end up with stuff
+  // double-wrapped or triple-wrapped and that breaks transaction naming
+
+  // Wrap .use, .get, etc. so that each invokation creates a span. (These methods live both on the app and on its
+  // individual routers, so it doesn't matter which one we're working with.)
+  methods.forEach((method: Method) => patchMiddlewareOnRouter(appOrRouter, method));
+
+  // Wrap an internal router method which gets called on each potential "layer" (router or middleware) which could be
+  // applied given where we are in the path resolution process (i.e., how much of the path has already been matched with
+  // routers). This lets us detect when there's a match and gives us access to the parameter keys and values and the
+  // regex used for the match, so that we can substitute parameter names for values (in the right places, even if
+  // there are multiple instances of the same value).
+
+  // Here it does matter whether we have an App instance or a Router instance
+  const isApp = 'settings' in appOrRouter;
+
+  // Since we're doing this wrapping before any requests have been handled, the main router for the app likely hasn't
+  // yet been initialized; force that to happen now.
+  if (isApp && appOrRouter._router === undefined) {
+    appOrRouter.lazyrouter();
+  }
+
+  const routerPrototype = Object.getPrototypeOf(isApp ? appOrRouter._router : appOrRouter);
+  wrapProcessParams(routerPrototype);
+  // TODO kmclb there's a much easier way, now that I know we can get ahold of the Layer prototype
+  // it's at appOrRouter._router.stack[0].__proto__.constructor
 }

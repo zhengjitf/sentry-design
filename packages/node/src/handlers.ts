@@ -39,6 +39,7 @@ export interface ExpressRequest {
   user?: {
     [key: string]: any;
   };
+  _reconstructedPath?: string;
 }
 
 /**
@@ -63,6 +64,7 @@ export function tracingHandler(): (
 
     const transaction = startTransaction(
       {
+        // TODO Do we need to do this at both the beginning AND end of the transaction?
         name: extractExpressTransactionName(req, { path: true, method: true }),
         op: 'http.server',
         ...traceparentData,
@@ -101,7 +103,8 @@ export function tracingHandler(): (
 function addExpressReqToTransaction(transaction: Transaction | undefined, req: ExpressRequest): void {
   if (!transaction) return;
   transaction.name = extractExpressTransactionName(req, { path: true, method: true });
-  transaction.setData('url', req.originalUrl);
+  transaction.setData('url', req.originalUrl || req.url);
+  // TODO if we have the full parameterized URL as the transaction name, do we need baseUrl?
   transaction.setData('baseUrl', req.baseUrl);
   transaction.setData('query', req.query);
 }
@@ -122,13 +125,28 @@ function extractExpressTransactionName(
 ): string {
   const method = req.method?.toUpperCase();
 
-  let path = '';
-  if (req.route) {
-    // if the mountpoint is `/`, req.baseUrl is '' (not undefined), so it's safe to include it here
-    // see https://github.com/expressjs/express/blob/508936853a6e311099c9985d4c11a4b1b8f6af07/test/req.baseUrl.js#L7
-    path = `${req.baseUrl}${req.route.path}`;
-  } else if (req.originalUrl || req.url) {
-    path = stripUrlQueryAndFragment(req.originalUrl || req.url || '');
+  // `req.originalUrl` comes from Express, but in practice sometimes is missing; `req.url` comes from Node's `http`
+  // module, but can get rewritten by Express. Either way, strip any trailing slash so we can later compare it to
+  // `reconstructedPath`, which we create, and which will never have a trailing slash.
+  let origUrl = stripUrlQueryAndFragment(req.originalUrl || req.url || '');
+  origUrl = origUrl.endsWith('/') ? origUrl.slice(0, -1) : origUrl;
+
+  let path = origUrl;
+
+  // Since Express doesn't keep track of which routers its visited, if the app has nested routers, the parameterized
+  // version of the path will only include the final route's bit of the full path. We therefore track this ourselves as
+  // part of wrapping middleware and routes.
+  const reconstructedPath = req._reconstructedPath;
+
+  // we'd prefer our path be parameterized, so transactions will group better, so use that instead if possible
+  if (reconstructedPath) {
+    path = reconstructedPath;
+    // if we're 404ing, but part of the path matched, include as much as did match, in case it's helpful to know where
+    // people are going wrong (doing this is also better than the alternative, which is having a separate transaction
+    // group for every wrong URL someone types)
+    if (reconstructedPath.split('/').length !== origUrl.split('/').length) {
+      path += '/<missing resource>';
+    }
   }
 
   let info = '';

@@ -102,6 +102,15 @@ export class Transaction extends SpanClass implements TransactionInterface {
       return undefined;
     }
 
+    this.spanRecorder?.spans?.forEach(span => {
+      if (span.op?.startsWith('middleware')) {
+        console.log(`force-finishing ${span.description || (span as any).name}`);
+        span.finish();
+      } else {
+        console.log(`not force-finishing ${span.description || (span as any).name} with op ${span.op}`);
+      }
+    });
+
     const finishedSpans = this.spanRecorder ? this.spanRecorder.spans.filter(s => s !== this && s.endTimestamp) : [];
 
     if (this._trimEnd && finishedSpans.length > 0) {
