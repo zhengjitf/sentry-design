@@ -1,7 +1,11 @@
 import { Client, Integration } from '@sentry/types';
 
-import { initAndBind } from '../../src/sdk';
 import { TestClient } from '../mocks/client';
+
+// TODO: Fixme, theres no initAndBind anymore, but the tests are still usable and worth being imported
+const initAndBind = () => {
+  // no-empty
+};
 
 // eslint-disable-next-line no-var
 declare var global: any;

@@ -1,6 +1,5 @@
 import { SentryEvent, EventHint, Options, Severity } from '@sentry/types';
 
-import { initAndBind } from '../../src/sdk';
 import { BaseClient } from '../../src/baseclient';
 
 export interface TestOptions extends Options {
@@ -30,6 +29,7 @@ export class TestClient extends BaseClient<TestOptions> {
   }
 }
 
-export function init(options: TestOptions): void {
-  initAndBind(TestClient, options);
+// TODO: Fixme, theres no initAndBind anymore, but the tests are still usable and worth being imported
+export function init(_options: TestOptions): void {
+  // no-empty
 }

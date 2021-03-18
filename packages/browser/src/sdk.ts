@@ -1,6 +1,5 @@
 import { ClientLike } from '@sentry/types';
-import { captureException, getCurrentClient } from '@sentry/minimal';
-import { initAndBind } from '@sentry/core';
+import { captureException, getCarrier, getCurrentClient } from '@sentry/minimal';
 import { getCurrentHub } from '@sentry/hub';
 import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
 import { ReportDialogOptions } from '@sentry/transport-base';
@@ -111,7 +110,10 @@ export function init(options: BrowserOptions = {}): void {
     options.autoSessionTracking = true;
   }
 
-  initAndBind(BrowserClient, options);
+  const carrier = getCarrier();
+  const client = new BrowserClient(options);
+  carrier.client = client;
+  // TODO: Should we return client here instead of void?
 
   if (options.autoSessionTracking) {
     startSessionTracking();

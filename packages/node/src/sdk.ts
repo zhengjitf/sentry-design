@@ -1,6 +1,6 @@
 import * as domain from 'domain';
 
-import { initAndBind } from '@sentry/core';
+import { getCarrier } from '@sentry/minimal';
 import { getCurrentHub, getMainCarrier, setHubOnCarrier } from '@sentry/hub';
 import { getGlobalObject } from '@sentry/utils';
 import { InboundFilters } from '@sentry/integration-common-inboundfilters';
@@ -114,5 +114,8 @@ export function init(options: NodeOptions = {}): void {
     setHubOnCarrier(getMainCarrier(), getCurrentHub());
   }
 
-  initAndBind(NodeClient, options);
+  const carrier = getCarrier();
+  const client = new NodeClient(options);
+  carrier.client = client;
+  // TODO: Should we return client here instead of void?
 }
