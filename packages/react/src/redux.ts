@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { configureScope } from '@sentry/minimal';
-import { Scope } from '@sentry/types';
+import { ScopeLike } from '@sentry/types';
 
 interface Action<T = any> {
   type: T;
@@ -63,7 +63,7 @@ export interface SentryEnhancerOptions<S = any> {
   /**
    * Called on every state update, configure the Sentry Scope with the redux state.
    */
-  configureScopeWithState?(scope: Scope, state: S): void;
+  configureScopeWithState?(scope: ScopeLike, state: S): void;
 }
 
 const ACTION_BREADCRUMB_CATEGORY = 'redux.action';

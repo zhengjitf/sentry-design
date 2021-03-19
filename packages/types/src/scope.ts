@@ -10,8 +10,6 @@ import { Span } from './span';
 import { Transaction } from './transaction';
 import { User } from './user';
 
-export type ScopeLike = Scope & ScopeContext;
-
 export type ScopeContext = {
   user?: User;
   level?: Severity;
@@ -25,7 +23,7 @@ export type ScopeContext = {
  * Holds additional event information. {@link Scope.applyToEvent} will be
  * called by the client before an event will be sent.
  */
-export interface Scope {
+export interface ScopeLike extends ScopeContext {
   applyToEvent(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null>;
 
   /** Add new event processor that will be called after {@link applyToEvent}. */
@@ -135,7 +133,7 @@ export interface Scope {
   clear(): this;
 
   /** Clones the current scope and its properties. */
-  clone(): Scope;
+  clone(): ScopeLike;
 
   addBreadcrumb(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): this;
 

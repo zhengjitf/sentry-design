@@ -1,5 +1,5 @@
 import { captureException, withScope } from '@sentry/minimal';
-import { SentryEvent, Mechanism, Scope, WrappedFunction } from '@sentry/types';
+import { SentryEvent, Mechanism, WrappedFunction } from '@sentry/types';
 import { addExceptionMechanism, addExceptionTypeValue } from '@sentry/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,7 +51,7 @@ export function wrap(fn: WrappedFunction, mechanism?: Mechanism): any {
       // TODO: Fix ignoring next error (read metadata from the ex value itself like we do with `__sentry_own_request__`?)
       // ignoreNextOnError();
 
-      withScope((scope: Scope) => {
+      withScope(scope => {
         scope.addEventProcessor((event: SentryEvent) => {
           const processedEvent = { ...event };
 

@@ -19,7 +19,7 @@ export { Package } from './package';
 export { Request, SentryRequest, SentryRequestType } from './request';
 export { Response } from './response';
 export { Runtime } from './runtime';
-export { Scope, ScopeLike, ScopeContext } from './scope';
+export { ScopeLike, ScopeContext } from './scope';
 export { SdkInfo } from './sdkinfo';
 export { SdkMetadata } from './sdkmetadata';
 export { Session, SessionContext, SessionStatus } from './session';

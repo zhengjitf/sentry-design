@@ -1,7 +1,7 @@
 import { ClientLike } from './client';
 import { SentryEvent, EventHint } from './event';
 import { Integration, IntegrationClass } from './integration';
-import { Scope } from './scope';
+import { ScopeLike } from './scope';
 import { Session, SessionContext } from './session';
 import { Severity } from './severity';
 import { Span, SpanContext } from './span';
@@ -38,7 +38,7 @@ export interface Hub {
    *
    * @returns Scope, the new cloned scope
    */
-  pushScope(): Scope;
+  pushScope(): ScopeLike;
 
   /**
    * Removes a previously pushed scope from the stack.
@@ -62,7 +62,7 @@ export interface Hub {
    *
    * @param callback that will be enclosed into push/popScope.
    */
-  withScope(callback: (scope: Scope) => void): void;
+  withScope(callback: (scope: ScopeLike) => void): void;
 
   /** Returns the client of the top stack. */
   getClient(): ClientLike | undefined;
@@ -106,7 +106,7 @@ export interface Hub {
    *
    * @param callback Callback function that receives Scope.
    */
-  configureScope(callback: (scope: Scope) => void): void;
+  configureScope(callback: (scope: ScopeLike) => void): void;
 
   /**
    * For the duraction of the callback, this hub will be set as the global current Hub.

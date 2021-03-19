@@ -5,7 +5,7 @@ import { Exception } from './exception';
 import { Extras } from './extra';
 import { Primitive } from './misc';
 import { Request } from './request';
-import { ScopeContext } from './scope';
+import { ScopeContext, ScopeLike } from './scope';
 import { SdkInfo } from './sdkinfo';
 import { Severity } from './severity';
 import { Span } from './span';
@@ -55,6 +55,6 @@ export type EventHint = {
 };
 
 export type CaptureContext = {
-  scope?: ScopeContext;
+  scope?: ScopeContext | ScopeLike;
   hint?: EventHint;
 };
