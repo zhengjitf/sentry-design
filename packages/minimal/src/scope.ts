@@ -20,8 +20,6 @@ import {
 
 import { getCurrentClient } from './carrier';
 
-// TODO: Use `ReturnType<ClientLike['captureException']>` instead?
-
 // TODO: Used in Electron and RN
 // export function addScopeListener(callback: (scope: ScopeLike) => void): void {
 //   return getCurrentClient()?.getScope().addScopeListener(callback)

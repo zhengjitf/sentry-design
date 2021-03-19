@@ -2,7 +2,6 @@ import { CaptureContext, SentryEvent, EventProcessor, Session } from '@sentry/ty
 
 import { getCurrentClient } from './carrier';
 
-// TODO: Use `ReturnType<ClientLike['captureException']>` instead?
 export function captureException(exception: unknown, captureContext: CaptureContext = {}): string | undefined {
   try {
     throw new Error('Sentry syntheticException');
