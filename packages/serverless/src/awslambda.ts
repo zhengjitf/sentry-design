@@ -4,19 +4,12 @@ import { basename, resolve } from 'path';
 import { performance } from 'perf_hooks';
 import { types } from 'util';
 
-import {
-  captureException,
-  captureMessage,
-  flush,
-  getCurrentHub,
-  Scope,
-  startTransaction,
-  withScope,
-} from '@sentry/node';
+import { captureException, captureMessage, flush } from '@sentry/node';
 import * as Sentry from '@sentry/node';
-import { extractTraceparentData } from '@sentry/tracing';
-import { Integration, Severity } from '@sentry/types';
+import { extractTraceparentData, startTransaction } from '@sentry/tracing';
+import { IntegrationV7, ScopeLike, Severity } from '@sentry/types';
 import { isString, logger } from '@sentry/utils';
+import { getCurrentClient } from '@sentry/minimal';
 // NOTE: I have no idea how to fix this right now, and don't want to waste more time, as it builds just fine — Kamil
 // eslint-disable-next-line import/no-unresolved
 import { Context, Handler } from 'aws-lambda';
@@ -48,7 +41,10 @@ export interface WrapperOptions {
   timeoutWarningLimit: number;
 }
 
-export const defaultIntegrations: Integration[] = [...Sentry.defaultIntegrations, new AWSServices({ optional: true })];
+export const defaultIntegrations: IntegrationV7[] = [
+  ...Sentry.defaultIntegrations,
+  new AWSServices({ optional: true }),
+];
 
 /**
  * @see {@link Sentry.init}
@@ -138,7 +134,7 @@ export function tryPatchHandler(taskRoot: string, handlerPath: string): void {
  * @param context AWS Lambda context that will be used to extract some part of the data
  * @param startTime performance.now() when wrapHandler was invoked
  */
-function enhanceScopeWithEnvironmentData(scope: Scope, context: Context, startTime: number): void {
+function enhanceScopeWithEnvironmentData(scope: ScopeLike, context: Context, startTime: number): void {
   scope.setTransactionName(context.functionName);
 
   scope.setTag('server_name', process.env._AWS_XRAY_DAEMON_ADDRESS || process.env.SENTRY_NAME || hostname());
@@ -236,9 +232,11 @@ export function wrapHandler<TEvent, TResult>(
       const timeoutWarningDelay = context.getRemainingTimeInMillis() - options.timeoutWarningLimit;
 
       timeoutWarningTimer = setTimeout(() => {
-        withScope(scope => {
-          scope.setTag('timeout', humanReadableTimeout);
-          captureMessage(`Possible function timeout: ${context.functionName}`, { scope: { level: Severity.Warning } });
+        captureMessage(`Possible function timeout: ${context.functionName}`, {
+          scope: {
+            tags: { timeout: humanReadableTimeout },
+            level: Severity.Warning,
+          },
         });
       }, timeoutWarningDelay);
     }
@@ -255,23 +253,25 @@ export function wrapHandler<TEvent, TResult>(
       ...traceparentData,
     });
 
-    const hub = getCurrentHub();
-    const scope = hub.pushScope();
+    const scope = getCurrentClient()
+      ?.getScope()
+      ?.clone();
     let rv: TResult | undefined;
     try {
-      enhanceScopeWithEnvironmentData(scope, context, START_TIME);
-      // We put the transaction on the scope so users can attach children to it
-      scope.setSpan(transaction);
+      if (scope) {
+        enhanceScopeWithEnvironmentData(scope, context, START_TIME);
+        // We put the transaction on the scope so users can attach children to it
+        scope.setSpan(transaction);
+      }
       rv = await asyncHandler(event, context);
     } catch (e) {
-      captureException(e);
+      captureException(e, { scope });
       if (options.rethrowAfterCapture) {
         throw e;
       }
     } finally {
       clearTimeout(timeoutWarningTimer);
       transaction.finish();
-      hub.popScope();
       await flush(options.flushTimeout);
     }
     return rv;

@@ -1,5 +1,4 @@
-import { getSpan } from '@sentry/minimal';
-import { Integration } from '@sentry/types';
+import { ClientLike, IntegrationV7 } from '@sentry/types';
 import { dynamicRequire, fill, logger } from '@sentry/utils';
 
 interface MysqlConnection {
@@ -9,21 +8,10 @@ interface MysqlConnection {
 }
 
 /** Tracing integration for node-mysql package */
-export class Mysql implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Mysql';
+export class Mysql implements IntegrationV7 {
+  public name = this.constructor.name;
 
-  /**
-   * @inheritDoc
-   */
-  public name: string = Mysql.id;
-
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(): void {
+  public install(client: ClientLike): void {
     let connection: MysqlConnection;
 
     try {
@@ -40,7 +28,7 @@ export class Mysql implements Integration {
     //    function (options, values, callback) => void
     fill(connection.prototype, 'query', function(orig: () => void) {
       return function(this: unknown, options: unknown, values: unknown, callback: unknown) {
-        const parentSpan = getSpan();
+        const parentSpan = client.getScope()?.getSpan();
         const span = parentSpan?.startChild({
           description: typeof options === 'string' ? options : (options as { sql: string }).sql,
           op: `db`,

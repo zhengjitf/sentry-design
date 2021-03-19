@@ -1,5 +1,4 @@
-import { getCurrentHub } from '@sentry/hub';
-import { getTransaction } from '@sentry/minimal';
+import { getCurrentClient, getTransaction } from '@sentry/minimal';
 import { addInstrumentationHandler, isInstanceOf, isMatchingPattern } from '@sentry/utils';
 
 import { Span } from '../span';
@@ -144,8 +143,7 @@ export function fetchCallback(
   shouldCreateSpan: (url: string) => boolean,
   spans: Record<string, Span>,
 ): void {
-  const client = getCurrentHub().getClient();
-  const currentClientOptions = client?.options ?? {};
+  const currentClientOptions = getCurrentClient()?.options ?? {};
   if (
     !hasTracingEnabled(currentClientOptions) ||
     !(handlerData.fetchData && shouldCreateSpan(handlerData.fetchData.url))
@@ -216,8 +214,7 @@ export function xhrCallback(
   shouldCreateSpan: (url: string) => boolean,
   spans: Record<string, Span>,
 ): void {
-  const client = getCurrentHub().getClient();
-  const currentClientOptions = client?.options ?? {};
+  const currentClientOptions = getCurrentClient()?.options ?? {};
   if (
     !(currentClientOptions && hasTracingEnabled(currentClientOptions)) ||
     !(handlerData.xhr && handlerData.xhr.__sentry_xhr__ && shouldCreateSpan(handlerData.xhr.__sentry_xhr__.url)) ||

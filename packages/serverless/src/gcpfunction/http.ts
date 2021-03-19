@@ -1,5 +1,6 @@
-import { captureException, flush, getCurrentHub, Handlers, startTransaction } from '@sentry/node';
-import { extractTraceparentData } from '@sentry/tracing';
+import { getCurrentClient } from '@sentry/minimal';
+import { captureException, flush, Handlers } from '@sentry/node';
+import { extractTraceparentData, startTransaction } from '@sentry/tracing';
 import { isString, logger, stripUrlQueryAndFragment } from '@sentry/utils';
 
 import { domainify, getActiveDomain, proxyFunction } from './../utils';
@@ -61,14 +62,15 @@ function _wrapHttpFunction(fn: HttpFunction, wrapOptions: Partial<HttpFunctionWr
       ...traceparentData,
     });
 
-    // getCurrentHub() is expected to use current active domain as a carrier
+    // getScope() is expected to use current active domain as a carrier
     // since functions-framework creates a domain for each incoming request.
     // So adding of event processors every time should not lead to memory bloat.
-    getCurrentHub().configureScope(scope => {
+    const scope = getCurrentClient()?.getScope();
+    if (scope) {
       scope.addEventProcessor(event => parseRequest(event, req, options.parseRequestOptions));
       // We put the transaction on the scope so users can attach children to it
       scope.setSpan(transaction);
-    });
+    }
 
     // We also set __sentry_transaction on the response so people can grab the transaction there to add
     // spans to it later.

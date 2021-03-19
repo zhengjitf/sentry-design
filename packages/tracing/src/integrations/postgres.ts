@@ -1,5 +1,4 @@
-import { getSpan } from '@sentry/minimal';
-import { Integration } from '@sentry/types';
+import { ClientLike, IntegrationV7 } from '@sentry/types';
 import { dynamicRequire, fill, logger } from '@sentry/utils';
 
 interface PgClient {
@@ -9,26 +8,15 @@ interface PgClient {
 }
 
 /** Tracing integration for node-postgres package */
-export class Postgres implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Postgres';
+export class Postgres implements IntegrationV7 {
+  public name = this.constructor.name;
 
-  /**
-   * @inheritDoc
-   */
-  public name: string = Postgres.id;
-
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(): void {
-    let client: PgClient;
+  public install(client: ClientLike): void {
+    let pgClient: PgClient;
 
     try {
       const pgModule = dynamicRequire(module, 'pg') as { Client: PgClient };
-      client = pgModule.Client;
+      pgClient = pgModule.Client;
     } catch (e) {
       logger.error('Postgres Integration was unable to require `pg` package.');
       return;
@@ -40,9 +28,9 @@ export class Postgres implements Integration {
      * function (query) => Promise
      * function (query, params) => Promise
      */
-    fill(client.prototype, 'query', function(orig: () => void | Promise<unknown>) {
+    fill(pgClient.prototype, 'query', function(orig: () => void | Promise<unknown>) {
       return function(this: unknown, config: unknown, values: unknown, callback: unknown) {
-        const parentSpan = getSpan();
+        const parentSpan = client.getScope()?.getSpan();
         const span = parentSpan?.startChild({
           description: typeof config === 'string' ? config : (config as { text: string }).text,
           op: `db`,

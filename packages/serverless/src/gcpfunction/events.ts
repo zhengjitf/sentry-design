@@ -1,4 +1,6 @@
-import { captureException, flush, getCurrentHub, startTransaction } from '@sentry/node';
+import { getCurrentClient } from '@sentry/minimal';
+import { captureException, flush } from '@sentry/node';
+import { startTransaction } from '@sentry/tracing';
 import { logger } from '@sentry/utils';
 
 import { domainify, getActiveDomain, proxyFunction } from '../utils';
@@ -36,14 +38,15 @@ function _wrapEventFunction(
       op: 'gcp.function.event',
     });
 
-    // getCurrentHub() is expected to use current active domain as a carrier
+    // getScope() is expected to use current active domain as a carrier
     // since functions-framework creates a domain for each incoming request.
     // So adding of event processors every time should not lead to memory bloat.
-    getCurrentHub().configureScope(scope => {
+    const scope = getCurrentClient()?.getScope();
+    if (scope) {
       configureScopeWithContext(scope, context);
       // We put the transaction on the scope so users can attach children to it
       scope.setSpan(transaction);
-    });
+    }
 
     const activeDomain = getActiveDomain()!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
 

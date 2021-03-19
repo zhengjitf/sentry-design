@@ -2,7 +2,7 @@
 // When TypeScript compiler is upgraded, use `import type` syntax to explicitly assert that we don't want to load a module here.
 import * as common from '@google-cloud/common';
 import { getTransaction } from '@sentry/minimal';
-import { Integration, Span } from '@sentry/types';
+import { ClientLike, IntegrationV7, Span } from '@sentry/types';
 import { fill } from '@sentry/utils';
 
 type RequestOptions = common.DecorateRequestOptions;
@@ -13,16 +13,8 @@ interface RequestFunction extends CallableFunction {
 }
 
 /** Google Cloud Platform service requests tracking for RESTful APIs */
-export class GoogleCloudHttp implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'GoogleCloudHttp';
-
-  /**
-   * @inheritDoc
-   */
-  public name: string = GoogleCloudHttp.id;
+export class GoogleCloudHttp implements IntegrationV7 {
+  public name = this.constructor.name;
 
   private readonly _optional: boolean;
 
@@ -33,7 +25,7 @@ export class GoogleCloudHttp implements Integration {
   /**
    * @inheritDoc
    */
-  public setupOnce(): void {
+  public install(_client: ClientLike): void {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const commonModule = require('@google-cloud/common') as typeof common;
@@ -49,6 +41,7 @@ export class GoogleCloudHttp implements Integration {
 /** Returns a wrapped function that makes a request with tracing enabled */
 function wrapRequestFunction(orig: RequestFunction): RequestFunction {
   return function(this: common.Service, reqOpts: RequestOptions, callback: ResponseCallback): void {
+    // TODO: Use clients scope instead of global call
     const transaction = getTransaction();
     let span: Span | undefined;
     if (transaction) {

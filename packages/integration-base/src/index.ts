@@ -1,20 +1,18 @@
-import { getCurrentHub } from '@sentry/hub';
-import { addGlobalEventProcessor } from '@sentry/minimal';
-import { Integration, OptionsV7 } from '@sentry/types';
+import { ClientLike, IntegrationV7, OptionsV7 } from '@sentry/types';
 import { logger } from '@sentry/utils';
 
 export const installedIntegrations: string[] = [];
 
 /** Map of integrations assigned to a client */
 export interface IntegrationIndex {
-  [key: string]: Integration;
+  [key: string]: IntegrationV7;
 }
 
 /** Gets integration to install */
-export function getIntegrationsToSetup(options: OptionsV7): Integration[] {
+export function getIntegrationsToSetup(options: OptionsV7): IntegrationV7[] {
   const defaultIntegrations = (options.defaultIntegrations && [...options.defaultIntegrations]) || [];
   const userIntegrations = options.integrations;
-  let integrations: Integration[] = [];
+  let integrations: IntegrationV7[] = [];
   if (Array.isArray(userIntegrations)) {
     const userIntegrationsNames = userIntegrations.map(i => i.name);
     const pickedIntegrationsNames: string[] = [];
@@ -60,14 +58,14 @@ export function getIntegrationsToSetup(options: OptionsV7): Integration[] {
  * @param integrations array of integration instances
  * @param withDefault should enable default integrations
  */
-export function setupIntegrations<O extends OptionsV7>(options: O): IntegrationIndex {
+export function setupIntegrations(client: ClientLike): IntegrationIndex {
   const integrations: IntegrationIndex = {};
-  getIntegrationsToSetup(options).forEach(integration => {
+  getIntegrationsToSetup(client.options).forEach(integration => {
     integrations[integration.name] = integration;
     if (installedIntegrations.indexOf(integration.name) !== -1) {
       return;
     }
-    integration.setupOnce(addGlobalEventProcessor, getCurrentHub);
+    integration.install(client);
     installedIntegrations.push(integration.name);
     logger.log(`Integration installed: ${integration.name}`);
   });

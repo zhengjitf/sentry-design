@@ -1,5 +1,4 @@
-import { getSpan } from '@sentry/minimal';
-import { Integration, SpanContext } from '@sentry/types';
+import { ClientLike, IntegrationV7, SpanContext } from '@sentry/types';
 import { dynamicRequire, fill, isThenable, logger } from '@sentry/utils';
 
 // This allows us to use the same array for both defaults options and the type itself.
@@ -89,16 +88,10 @@ interface MongoOptions {
 }
 
 /** Tracing integration for mongo package */
-export class Mongo implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Mongo';
+export class Mongo implements IntegrationV7 {
+  public name = this.constructor.name;
 
-  /**
-   * @inheritDoc
-   */
-  public name: string = Mongo.id;
+  private _client!: ClientLike;
 
   private _operations: Operation[];
   private _describeOperations?: boolean | Operation[];
@@ -115,10 +108,9 @@ export class Mongo implements Integration {
     this._useMongoose = !!options.useMongoose;
   }
 
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(): void {
+  public install(client: ClientLike): void {
+    this._client = client;
+
     let collection: MongoCollection;
     const moduleName = this._useMongoose ? 'mongoose' : 'mongodb';
     try {
@@ -145,12 +137,13 @@ export class Mongo implements Integration {
   private _patchOperation(collection: MongoCollection, operation: Operation): void {
     if (!(operation in collection.prototype)) return;
 
+    const client = this._client;
     const getSpanContext = this._getSpanContextFromOperationArguments.bind(this);
 
     fill(collection.prototype, operation, function(orig: () => void | Promise<unknown>) {
       return function(this: unknown, ...args: unknown[]) {
         const lastArg = args[args.length - 1];
-        const parentSpan = getSpan();
+        const parentSpan = client.getScope()?.getSpan();
 
         // Check if the operation was passed a callback. (mapReduce requires a different check, as
         // its (non-callback) arguments can also be functions.)

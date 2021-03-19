@@ -1,4 +1,4 @@
-import { SentryEvent, EventProcessor, Hub, Integration, StackFrame } from '@sentry/types';
+import { SentryEvent, StackFrame, IntegrationV7, ClientLike } from '@sentry/types';
 
 import { patchWebAssembly } from './patchWebAssembly';
 import { getImage, getImages } from './registry';
@@ -25,30 +25,24 @@ function patchFrames(frames: Array<StackFrame>): boolean {
   return haveWasm;
 }
 
+// TODO: Make it integration?
+
 /**
  * Process WASM stack traces to support server-side symbolication.
  *
  * This also hooks the WebAssembly loading browser API so that module
  * registraitons are intercepted.
  */
-export class Wasm implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Wasm';
+export class Wasm implements IntegrationV7 {
+  public name = this.constructor.name;
 
   /**
    * @inheritDoc
    */
-  public name: string = Wasm.id;
-
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, _getCurrentHub: () => Hub): void {
+  public install(client: ClientLike): void {
     patchWebAssembly();
 
-    addGlobalEventProcessor((event: SentryEvent) => {
+    client.addEventProcessor((event: SentryEvent) => {
       let haveWasm = false;
 
       if (event.exception && event.exception.values) {

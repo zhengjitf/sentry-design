@@ -19,7 +19,21 @@ import { OnError, OnUnhandledRejection } from '@sentry/integration-browser-globa
 import { BrowserClient, BrowserOptions } from './client';
 import { injectReportDialog } from './helpers';
 
-export const defaultIntegrations = [];
+export const defaultIntegrations = [
+  new EventTargetWrap(),
+  new TimersWrap(),
+  new XHRWrap(),
+  new ConsoleBreadcrumbs(),
+  new DOMBreadcrumbs(),
+  new XHRBreadcrumbs(),
+  new FetchBreadcrumbs(),
+  new HistoryBreadcrumbs(),
+  new InboundFilters(),
+  new UserAgent(),
+  new LinkedErrors(),
+  new OnError(),
+  new OnUnhandledRejection(),
+];
 
 /**
  * The Sentry Browser SDK Client.
@@ -79,23 +93,6 @@ export const defaultIntegrations = [];
  * @see {@link BrowserOptions} for documentation on configuration options.
  */
 export function init(options: BrowserOptions = {}): void {
-  // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
-  options.fancyIntegrations = [
-    new EventTargetWrap(),
-    new TimersWrap(),
-    new XHRWrap(),
-    new ConsoleBreadcrumbs(),
-    new DOMBreadcrumbs(),
-    new XHRBreadcrumbs(),
-    new FetchBreadcrumbs(),
-    new HistoryBreadcrumbs(),
-    new InboundFilters(),
-    new UserAgent(),
-    new LinkedErrors(),
-    new OnError(),
-    new OnUnhandledRejection(),
-  ];
-
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;
   }

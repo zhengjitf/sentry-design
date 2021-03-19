@@ -1,7 +1,6 @@
 import { hostname } from 'os';
 
-import { Scope } from '@sentry/node';
-import { Context as SentryContext } from '@sentry/types';
+import { Context as SentryContext, ScopeLike } from '@sentry/types';
 import { Request, Response } from 'express'; // eslint-disable-line import/no-extraneous-dependencies
 
 export interface HttpFunction {
@@ -54,7 +53,7 @@ export interface WrapperOptions {
  * @param scope scope
  * @param context event context
  */
-export function configureScopeWithContext(scope: Scope, context: Context): void {
+export function configureScopeWithContext(scope: ScopeLike, context: Context): void {
   scope.setContext('runtime', {
     name: 'node',
     version: global.process.version,

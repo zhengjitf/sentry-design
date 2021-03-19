@@ -1,7 +1,6 @@
 import { Dsn } from './dsn';
 import { CaptureContext, SentryEvent } from './event';
 import { EventProcessor } from './eventprocessor';
-import { Integration, IntegrationClass } from './integration';
 import { OptionsV7 } from './options';
 import { ScopeLike } from './scope';
 import { Session } from './session';
@@ -23,8 +22,6 @@ export interface ClientLike<O extends OptionsV7 = OptionsV7> {
   addEventProcessor(callback: EventProcessor): void;
   // TODO: To be removed? Can be obtained from options
   getDsn(): Dsn | undefined;
-  // TODO: To be removed
-  getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null;
 
   captureException(exception: unknown, captureContext?: CaptureContext): string | undefined;
   captureMessage(message: string, captureContext?: CaptureContext): string | undefined;

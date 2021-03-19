@@ -10,7 +10,14 @@ import { ConsoleBreadcrumbs, HTTPBreadcrumbs } from '@sentry/integration-node-br
 
 import { NodeClient, NodeOptions } from './client';
 
-export const defaultIntegrations = [];
+export const defaultIntegrations = [
+  new ConsoleBreadcrumbs(),
+  new HTTPBreadcrumbs(),
+  new LinkedErrors(),
+  new InboundFilters(),
+  new OnUncaughtException(),
+  new OnUnhandledRejection(),
+];
 
 /**
  * The Sentry Node SDK Client.
@@ -68,16 +75,6 @@ export const defaultIntegrations = [];
  * @see {@link NodeOptions} for documentation on configuration options.
  */
 export function init(options: NodeOptions = {}): void {
-  // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
-  options.fancyIntegrations = [
-    new ConsoleBreadcrumbs(),
-    new HTTPBreadcrumbs(),
-    new LinkedErrors(),
-    new InboundFilters(),
-    new OnUncaughtException(),
-    new OnUnhandledRejection(),
-  ];
-
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;
   }

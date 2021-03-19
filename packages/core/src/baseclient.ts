@@ -4,8 +4,6 @@ import {
   ClientLike,
   SentryEvent,
   EventProcessor,
-  Integration,
-  IntegrationClass,
   OptionsV7,
   ScopeLike,
   SessionStatus,
@@ -98,7 +96,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     }
 
     this._transport = this._setupTransport();
-    this._integrations = setupIntegrations(options);
+    this._integrations = setupIntegrations(this);
   }
 
   public lastEventId(): string | undefined {
@@ -117,16 +115,6 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
   // TODO: To be removed? Can be obtained from options
   public getDsn(): Dsn | undefined {
     return this._dsn;
-  }
-
-  // TODO: To be removed
-  public getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null {
-    try {
-      return (this._integrations[integration.id] as T) || null;
-    } catch (_oO) {
-      logger.warn(`Cannot retrieve integration ${integration.id} from the current Client`);
-      return null;
-    }
   }
 
   /**

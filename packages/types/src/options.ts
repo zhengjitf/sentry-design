@@ -1,6 +1,6 @@
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { SentryEvent, EventHint } from './event';
-import { Integration, IntegrationV7 } from './integration';
+import { IntegrationV7 } from './integration';
 import { LogLevel } from './loglevel';
 import { SdkMetadata } from './sdkmetadata';
 import { SamplingContext } from './transaction';
@@ -31,17 +31,14 @@ export interface Options {
    * recommended default integrations.
    * TODO: We should consider changing this to `boolean | Integration[]`
    */
-  defaultIntegrations?: false | Integration[];
-
-  // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
-  fancyIntegrations?: IntegrationV7[];
+  defaultIntegrations?: false | IntegrationV7[];
 
   /**
    * List of integrations that should be installed after SDK was initialized.
    * Accepts either a list of integrations or a function that receives
    * default integrations and returns a new, updated list.
    */
-  integrations?: Integration[] | ((integrations: Integration[]) => Integration[]);
+  integrations?: IntegrationV7[] | ((integrations: IntegrationV7[]) => IntegrationV7[]);
 
   /**
    * A pattern for error messages which should not be sent to Sentry.
@@ -201,17 +198,14 @@ export interface OptionsV7 {
    * recommended default integrations.
    * TODO: We should consider changing this to `boolean | Integration[]`
    */
-  defaultIntegrations?: false | Integration[];
-
-  // TODO: Remove and rename to regular integrations. Used only to make sure new integrations compile.
-  fancyIntegrations?: IntegrationV7[];
+  defaultIntegrations?: false | IntegrationV7[];
 
   /**
    * List of integrations that should be installed after SDK was initialized.
    * Accepts either a list of integrations or a function that receives
    * default integrations and returns a new, updated list.
    */
-  integrations?: Integration[] | ((integrations: Integration[]) => Integration[]);
+  integrations?: IntegrationV7[] | ((integrations: IntegrationV7[]) => IntegrationV7[]);
 
   /**
    * A pattern for error messages which should not be sent to Sentry.

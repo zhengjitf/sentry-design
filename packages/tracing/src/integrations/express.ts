@@ -1,4 +1,4 @@
-import { Integration, Transaction } from '@sentry/types';
+import { ClientLike, IntegrationV7, Transaction } from '@sentry/types';
 import { logger } from '@sentry/utils';
 
 type Method =
@@ -49,16 +49,8 @@ interface SentryTracingResponse {
  *
  * Provides an request and error handler for Express framework as well as tracing capabilities
  */
-export class Express implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'Express';
-
-  /**
-   * @inheritDoc
-   */
-  public name: string = Express.id;
+export class Express implements IntegrationV7 {
+  public name = this.constructor.name;
 
   /**
    * Express App instance
@@ -74,10 +66,7 @@ export class Express implements Integration {
     this._methods = (Array.isArray(options.methods) ? options.methods : []).concat('use');
   }
 
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(): void {
+  public install(_client: ClientLike): void {
     if (!this._router) {
       logger.error('ExpressIntegration is missing an Express instance');
       return;

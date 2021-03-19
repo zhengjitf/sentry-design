@@ -101,21 +101,13 @@ const DEFAULT_BROWSER_TRACING_OPTIONS = {
  * The integration can be configured with a variety of options, and can be extended to use
  * any routing library. This integration uses {@see IdleTransaction} to create transactions.
  */
-export class BrowserTracing implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'BrowserTracing';
+export class BrowserTracing implements IntegrationV7 {
+  public name = this.constructor.name;
 
   /** Browser Tracing integration options */
   public options: BrowserTracingOptions;
 
-  /**
-   * @inheritDoc
-   */
-  public name: string = BrowserTracing.id;
-
-  private _getCurrentHub?: () => Hub;
+  private _client!: ClientLike;
 
   private readonly _metrics: MetricsInstrumentation = new MetricsInstrumentation();
 
@@ -142,11 +134,8 @@ export class BrowserTracing implements Integration {
     };
   }
 
-  /**
-   * @inheritDoc
-   */
-  public setupOnce(_: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void {
-    this._getCurrentHub = getCurrentHub;
+  public install(client: ClientLike): void {
+    this._client = client;
 
     if (this._emitOptionsWarning) {
       logger.warn(
@@ -184,11 +173,6 @@ export class BrowserTracing implements Integration {
 
   /** Create routing idle transaction. */
   private _createRouteTransaction(context: TransactionContext): Transaction | undefined {
-    if (!this._getCurrentHub) {
-      logger.warn(`[Tracing] Did not create ${context.op} transaction because _getCurrentHub is invalid.`);
-      return undefined;
-    }
-
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const { beforeNavigate, idleTimeout, maxTransactionDuration } = this.options;
 

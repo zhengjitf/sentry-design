@@ -1,10 +1,10 @@
 import { CarrierV7 } from './carrier';
-import { Integration } from './integration';
+import { IntegrationV7 } from './integration';
 
 export interface SentryGlobal {
   console: Console;
   Sentry?: {
-    Integrations?: Integration[];
+    Integrations?: IntegrationV7[];
   };
   SENTRY_ENVIRONMENT?: string;
   SENTRY_DSN?: string;

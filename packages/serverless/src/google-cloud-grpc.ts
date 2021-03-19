@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { Integration, Span } from '@sentry/types';
+import { ClientLike, IntegrationV7, Span } from '@sentry/types';
 import { fill } from '@sentry/utils';
 import { getTransaction } from '@sentry/minimal';
 
@@ -27,16 +27,8 @@ interface Stub {
 }
 
 /** Google Cloud Platform service requests tracking for GRPC APIs */
-export class GoogleCloudGrpc implements Integration {
-  /**
-   * @inheritDoc
-   */
-  public static id: string = 'GoogleCloudGrpc';
-
-  /**
-   * @inheritDoc
-   */
-  public name: string = GoogleCloudGrpc.id;
+export class GoogleCloudGrpc implements IntegrationV7 {
+  public name = this.constructor.name;
 
   private readonly _optional: boolean;
 
@@ -47,7 +39,7 @@ export class GoogleCloudGrpc implements Integration {
   /**
    * @inheritDoc
    */
-  public setupOnce(): void {
+  public install(_client: ClientLike): void {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const gaxModule = require('google-gax');
@@ -105,6 +97,7 @@ function fillGrpcFunction(stub: Stub, serviceIdentifier: string, methodName: str
       if (typeof ret?.on !== 'function') {
         return ret;
       }
+      // TODO: Use clients scope instead of global call
       const transaction = getTransaction();
       let span: Span | undefined;
       if (transaction) {
