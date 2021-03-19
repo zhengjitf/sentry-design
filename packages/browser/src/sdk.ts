@@ -113,7 +113,7 @@ export function init(options: BrowserOptions = {}): void {
   // TODO: Should we return client here instead of void?
 
   if (options.autoSessionTracking) {
-    startSessionTracking();
+    startSessionTracking(client);
   }
 }
 
@@ -183,7 +183,7 @@ export function wrap(fn: (...args: unknown[]) => unknown): unknown {
 /**
  * Enable automatic Session Tracking for the initial page load.
  */
-function startSessionTracking(): void {
+function startSessionTracking(_client: ClientLike): void {
   const window = getGlobalObject<Window>();
   const document = window.document;
 
@@ -192,25 +192,19 @@ function startSessionTracking(): void {
     return;
   }
 
-  const hub = getCurrentHub();
+  // TODO: Move startSesssion/captureSession to `@sentry/session` and use it correctly here
+  const startSession = (): boolean => true;
+  const captureSession = (): boolean => true;
 
-  if ('startSession' in hub) {
-    // The only way for this to be false is for there to be a version mismatch between @sentry/browser (>= 6.0.0) and
-    // @sentry/hub (< 5.27.0). In the simple case, there won't ever be such a mismatch, because the two packages are
-    // pinned at the same version in package.json, but there are edge cases where it's possible'. See
-    // https://github.com/getsentry/sentry-javascript/issues/3234 and
-    // https://github.com/getsentry/sentry-javascript/issues/3207.
+  startSession();
+  captureSession();
 
-    hub.startSession();
-    hub.captureSession();
-
-    // We want to create a session for every navigation as well
-    addInstrumentationHandler({
-      callback: () => {
-        hub.startSession();
-        hub.captureSession();
-      },
-      type: 'history',
-    });
-  }
+  // We want to create a session for every navigation as well
+  addInstrumentationHandler({
+    callback: () => {
+      startSession();
+      captureSession();
+    },
+    type: 'history',
+  });
 }

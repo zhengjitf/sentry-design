@@ -1,6 +1,6 @@
 import { showReportDialog } from '@sentry/browser';
 import { captureException, withScope } from '@sentry/minimal';
-import { Scope } from '@sentry/types';
+import { ScopeLike } from '@sentry/types';
 import { ReportDialogOptions } from '@sentry/transport-base';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import * as React from 'react';
@@ -40,7 +40,7 @@ export type ErrorBoundaryProps = {
   /** Called on componentWillUnmount() */
   onUnmount?(error: Error | null, componentStack: string | null, eventId: string | null): void;
   /** Called before the error is captured by Sentry, allows for you to add tags or context using the scope */
-  beforeCapture?(scope: Scope, error: Error | null, componentStack: string | null): void;
+  beforeCapture?(scope: ScopeLike, error: Error | null, componentStack: string | null): void;
 };
 
 type ErrorBoundaryState = {

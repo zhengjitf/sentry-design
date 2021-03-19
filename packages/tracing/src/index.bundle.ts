@@ -30,7 +30,6 @@ export {
   setTag,
   setTags,
   setUser,
-  startTransaction,
   withScope,
 } from '@sentry/browser';
 
@@ -54,7 +53,7 @@ import { Integrations as BrowserIntegrations } from '@sentry/browser';
 import { getGlobalObject } from '@sentry/utils';
 
 import { BrowserTracing } from './browser';
-import { addExtensionMethods } from './hubextensions';
+import { registerErrorInstrumentation } from './errors';
 
 export { Span } from './span';
 
@@ -74,7 +73,5 @@ const INTEGRATIONS = {
 
 export { INTEGRATIONS as Integrations };
 
-// We are patching the global object with our hub extension methods
-addExtensionMethods();
-
-export { addExtensionMethods };
+// If an error happens globally, we should make sure transaction status is set to error.
+registerErrorInstrumentation();

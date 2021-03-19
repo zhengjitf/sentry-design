@@ -44,11 +44,3 @@ export function withScope(callback: (scope: ScopeLike) => void): void {
     }
   }
 }
-
-// TODO: Restore this functionality without using extensions and remove hub from deps
-export function startTransaction(
-  context: TransactionContext,
-  customSamplingContext?: CustomSamplingContext,
-): Transaction {
-  return getCurrentHub().startTransaction({ ...context }, customSamplingContext);
-}

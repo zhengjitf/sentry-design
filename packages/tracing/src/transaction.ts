@@ -1,6 +1,12 @@
-import { getCurrentHub, Hub } from '@sentry/hub';
-import { SentryEvent, Measurements, Transaction as TransactionInterface, TransactionContext } from '@sentry/types';
-import { dropUndefinedKeys, isInstanceOf, logger } from '@sentry/utils';
+import { getCurrentClient } from '@sentry/minimal';
+import {
+  SentryEvent,
+  Measurements,
+  Transaction as TransactionInterface,
+  TransactionContext,
+  ClientLike,
+} from '@sentry/types';
+import { dropUndefinedKeys, logger } from '@sentry/utils';
 
 import { Span as SpanClass, SpanRecorder } from './span';
 
@@ -16,25 +22,23 @@ export class Transaction extends SpanClass implements TransactionInterface {
   private _measurements: Measurements = {};
 
   /**
-   * The reference to the current hub.
+   * The reference to the current client.
    */
-  private readonly _hub: Hub = (getCurrentHub() as unknown) as Hub;
+  private readonly _client?: ClientLike;
 
   private _trimEnd?: boolean;
 
   /**
    * This constructor should never be called manually. Those instrumenting tracing should use
-   * `Sentry.startTransaction()`, and internal methods should use `hub.startTransaction()`.
+   * `Sentry.startTransaction()`, and internal methods should use `startTransaction` from `@sentry/tracing`.
    * @internal
    * @hideconstructor
    * @hidden
    */
-  public constructor(transactionContext: TransactionContext, hub?: Hub) {
+  public constructor(transactionContext: TransactionContext, client?: ClientLike) {
     super(transactionContext);
 
-    if (isInstanceOf(hub, Hub)) {
-      this._hub = hub as Hub;
-    }
+    this._client = client ?? getCurrentClient();
 
     this.name = transactionContext.name || '';
 
@@ -129,7 +133,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
       transaction.measurements = this._measurements;
     }
 
-    return this._hub.captureEvent(transaction);
+    return this._client?.captureEvent(transaction);
   }
 
   /**

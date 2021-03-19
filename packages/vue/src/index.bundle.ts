@@ -40,7 +40,6 @@ export {
   setTag,
   setTags,
   setUser,
-  startTransaction,
   withScope,
   SDK_NAME,
   SDK_VERSION,

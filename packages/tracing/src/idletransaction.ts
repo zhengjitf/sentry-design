@@ -1,6 +1,6 @@
 import { Hub } from '@sentry/hub';
 import { getTransaction, setSpan } from '@sentry/minimal';
-import { TransactionContext } from '@sentry/types';
+import { ClientLike, TransactionContext } from '@sentry/types';
 import { logger, timestampWithMs } from '@sentry/utils';
 
 import { Span, SpanRecorder } from './span';
@@ -77,22 +77,22 @@ export class IdleTransaction extends Transaction {
 
   public constructor(
     transactionContext: TransactionContext,
-    _idleHub?: Hub,
+    _client?: ClientLike,
     // The time to wait in ms until the idle transaction will be finished. Default: 1000
     private readonly _idleTimeout: number = DEFAULT_IDLE_TIMEOUT,
     // If an idle transaction should be put itself on and off the scope automatically.
     private readonly _onScope: boolean = false,
   ) {
-    super(transactionContext, _idleHub);
+    super(transactionContext, _client);
 
-    if (_idleHub && _onScope) {
+    if (_client && _onScope) {
       // There should only be one active transaction on the scope
       clearActiveTransaction();
 
       // We set the transaction here on the scope so error events pick up the trace
       // context and attach it to the error.
       logger.log(`Setting idle transaction on scope. Span ID: ${this.spanId}`);
-      _idleHub.configureScope(scope => scope.setSpan(this));
+      _client.getScope()?.setSpan(this);
     }
 
     this._initTimeout = setTimeout(() => {

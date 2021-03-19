@@ -1,5 +1,5 @@
 import { BrowserTracing } from './browser';
-import { addExtensionMethods } from './hubextensions';
+import { registerErrorInstrumentation } from './errors';
 import * as TracingIntegrations from './integrations';
 
 const Integrations = { ...TracingIntegrations, BrowserTracing };
@@ -14,11 +14,8 @@ export {
 } from './browser';
 export { SpanStatus } from './spanstatus';
 export { IdleTransaction } from './idletransaction';
-export { startIdleTransaction } from './hubextensions';
-
-// We are patching the global object with our hub extension methods
-addExtensionMethods();
-
-export { addExtensionMethods };
-
+export { startTransaction, startIdleTransaction } from './start';
 export { extractTraceparentData, hasTracingEnabled, stripUrlQueryAndFragment, TRACEPARENT_REGEXP } from './utils';
+
+// If an error happens globally, we should make sure transaction status is set to error.
+registerErrorInstrumentation();

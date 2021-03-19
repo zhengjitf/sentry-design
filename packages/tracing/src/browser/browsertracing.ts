@@ -195,11 +195,10 @@ export class BrowserTracing implements IntegrationV7 {
 
     logger.log(`[Tracing] Starting ${finalContext.op} transaction on scope`);
 
-    const hub = this._getCurrentHub();
     const { location } = getGlobalObject() as WindowOrWorkerGlobalScope & { location: Location };
 
     const idleTransaction = startIdleTransaction(
-      hub,
+      this._client,
       finalContext,
       idleTimeout,
       true,

@@ -4,7 +4,6 @@ export {
   addGlobalEventProcessor,
   addBreadcrumb,
   configureScope,
-  startTransaction,
   withScope,
   setContext,
   setExtra,
