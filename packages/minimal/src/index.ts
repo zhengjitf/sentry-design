@@ -18,22 +18,24 @@ export {
 } from './scope';
 
 export function configureScope(callback: (scope: ScopeLike) => void): void {
-  const scope = getCurrentClient()?.getScope();
-  if (scope) {
-    callback(scope);
+  const client = getCurrentClient();
+  if (client) {
+    callback(client.getScope());
   }
 }
 
 export function withScope(callback: (scope: ScopeLike) => void): void {
-  const scope = getCurrentClient()
-    ?.getScope()
-    ?.clone();
+  const client = getCurrentClient();
 
-  if (scope) {
+  if (client) {
+    const currentScope = client.getScope();
+    const newScope = currentScope.clone();
     try {
-      callback(scope);
+      client.setScope(newScope);
+      callback(newScope);
     } catch (_oO) {
       // no-empty
     }
+    client.setScope(currentScope);
   }
 }

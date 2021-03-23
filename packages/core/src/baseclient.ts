@@ -127,10 +127,11 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   public captureException(exception: unknown, captureContext: CaptureContext = {}): string | undefined {
     // TODO: This is broken. a) we dont pass event_id in hint anymore, b) its sync value assigned in async callback
     let eventId = captureContext.hint?.event_id;
+    const scope = this._getEventScope(captureContext);
 
     this._process(
       this._eventFromException(exception, captureContext)
-        .then(event => this._captureEvent(event, captureContext))
+        .then(event => this._captureEvent(event, captureContext, scope))
         .then(result => {
           eventId = result;
         }),
@@ -144,6 +145,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    */
   public captureMessage(message: string, captureContext: CaptureContext = {}): string | undefined {
     let eventId = captureContext.hint?.event_id;
+    const scope = this._getEventScope(captureContext);
 
     const promisedEvent = isPrimitive(message)
       ? this._eventFromMessage(String(message), captureContext)
@@ -151,7 +153,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
     this._process(
       promisedEvent
-        .then(event => this._captureEvent(event, captureContext))
+        .then(event => this._captureEvent(event, captureContext, scope))
         .then(result => {
           eventId = result;
         }),
@@ -165,9 +167,10 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    */
   public captureEvent(event: SentryEvent, captureContext: CaptureContext = {}): string | undefined {
     let eventId = captureContext.hint?.event_id;
+    const scope = this._getEventScope(captureContext);
 
     this._process(
-      this._captureEvent(event, captureContext).then(result => {
+      this._captureEvent(event, captureContext, scope).then(result => {
         eventId = result;
       }),
     );
@@ -298,6 +301,16 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     });
   }
 
+  // We need this function to be eagerly called in `capture` calls, because whole processing pipeline is async,
+  // where withScope works in sync way
+  protected _getEventScope(captureContext: CaptureContext): ScopeLike {
+    return captureContext.scope instanceof Scope
+      ? captureContext.scope
+      : this.getScope()
+          .clone()
+          .update(captureContext.scope);
+  }
+
   /**
    * Adds common information to events.
    *
@@ -312,7 +325,11 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param scope A scope containing event metadata.
    * @returns A new event with more information.
    */
-  protected _prepareEvent(event: SentryEvent, captureContext: CaptureContext): PromiseLike<SentryEvent | null> {
+  protected _prepareEvent(
+    event: SentryEvent,
+    captureContext: CaptureContext,
+    scope: ScopeLike,
+  ): PromiseLike<SentryEvent | null> {
     const { normalizeDepth = 3 } = this.options;
     const prepared: SentryEvent = {
       ...event,
@@ -322,14 +339,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
     this._applyClientOptions(prepared);
     this._applyIntegrationsMetadata(prepared);
-
-    // TODO: We should be able to remove scope as dependency here somehow
-    const scope =
-      captureContext.scope instanceof Scope
-        ? captureContext.scope
-        : this.getScope()
-            .clone()
-            .update(captureContext.scope);
 
     return scope.applyToEvent(prepared, captureContext.hint).then(event => {
       if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
@@ -451,8 +460,12 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param hint
    * @param scope
    */
-  protected _captureEvent(event: SentryEvent, captureContext: CaptureContext): PromiseLike<string | undefined> {
-    return this._processEvent(event, captureContext).then(
+  protected _captureEvent(
+    event: SentryEvent,
+    captureContext: CaptureContext,
+    scope: ScopeLike,
+  ): PromiseLike<string | undefined> {
+    return this._processEvent(event, captureContext, scope).then(
       finalEvent => {
         // TODO: Make it configurable or move to @sentry/integration-browser-breadcrumbs
         const eventType = finalEvent.type === 'transaction' ? 'transaction' : 'event';
@@ -489,7 +502,11 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param scope A scope containing event metadata.
    * @returns A Promise that resolves with the event or rejects in case event was/will not be send.
    */
-  protected _processEvent(event: SentryEvent, captureContext: CaptureContext): PromiseLike<SentryEvent> {
+  protected _processEvent(
+    event: SentryEvent,
+    captureContext: CaptureContext,
+    scope: ScopeLike,
+  ): PromiseLike<SentryEvent> {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const { beforeSend, sampleRate } = this.options;
 
@@ -509,7 +526,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       );
     }
 
-    return this._prepareEvent(event, captureContext)
+    return this._prepareEvent(event, captureContext, scope)
       .then(prepared => {
         if (prepared === null) {
           throw new SentryError('An event processor returned null, will not send event.');
