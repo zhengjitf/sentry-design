@@ -26,47 +26,34 @@ export class TimersWrap implements Integration {
     const global = getGlobalObject();
 
     if (this._setTimeout) {
-      fill(global, 'setTimeout', this._wrapTimeFunction.bind(this));
+      fill(global, 'setTimeout', this._wrapTimerFunction.bind(this));
     }
 
     if (this._setInterval) {
-      fill(global, 'setInterval', this._wrapTimeFunction.bind(this));
+      fill(global, 'setInterval', this._wrapTimerFunction.bind(this));
     }
 
     if (this._requestAnimationFrame) {
-      fill(global, 'requestAnimationFrame', this._wrapRAF.bind(this));
+      fill(global, 'requestAnimationFrame', this._wrapTimerFunction.bind(this));
     }
   }
 
-  private _wrapTimeFunction(original: () => void): () => number {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return function(this: any, ...args: any[]): number {
-      const originalCallback = args[0];
-      args[0] = wrap(originalCallback, {
-        // TODO: Change to `handler` and add `setTimeout/setInterval` as function name.
-        data: { function: getFunctionName(original) },
-        handled: true,
-        type: 'instrument',
-      });
-      return original.apply(this, args);
-    };
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _wrapRAF(original: any): (callback: () => void) => any {
+  private _wrapTimerFunction(original: any): (callback: () => void) => any {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return function(this: any, callback: () => void): () => void {
+    return function(this: any, ...args: any[]): any {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       return original.call(
         this,
-        wrap(callback, {
+        wrap(args[0], {
           data: {
-            function: 'requestAnimationFrame',
-            handler: getFunctionName(original),
+            function: getFunctionName(original),
+            handler: getFunctionName(args[0]),
           },
           handled: true,
           type: 'instrument',
         }),
+        ...args.slice(0),
       );
     };
   }
