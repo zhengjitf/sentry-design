@@ -8,7 +8,6 @@ import {
   isError,
   isPlainObject,
   normalizeToSize,
-  SyncPromise,
 } from '@sentry/utils';
 
 import { extractStackFromError, parseError, parseStack, prepareFramesForEvent } from './parsers';
@@ -44,7 +43,7 @@ export function eventFromException(
     mechanism.synthetic = true;
   }
 
-  return new SyncPromise<SentryEvent>((resolve, reject) =>
+  return new Promise((resolve, reject) =>
     parseError(ex as Error)
       .then(event => {
         addExceptionTypeValue(event, undefined, undefined);
@@ -82,7 +81,7 @@ export function eventFromMessage(
     event.event_id = captureContext.hint?.event_id;
   }
 
-  return new SyncPromise<SentryEvent>(resolve => {
+  return new Promise(resolve => {
     if (options.attachStacktrace && captureContext.hint?.syntheticException) {
       const stack = extractStackFromError(captureContext.hint?.syntheticException);
       parseStack(stack)

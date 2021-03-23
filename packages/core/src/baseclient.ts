@@ -16,7 +16,6 @@ import {
   logger,
   normalize,
   SentryError,
-  SyncPromise,
   truncate,
   uuid4,
 } from '@sentry/utils';
@@ -276,7 +275,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
 
   /** Waits for the client to be done with processing. */
   protected _isClientProcessing(timeout?: number): PromiseLike<boolean> {
-    return new SyncPromise(resolve => {
+    return new Promise(resolve => {
       let ticked: number = 0;
       const tick: number = 1;
 
@@ -484,14 +483,14 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
    * @param event The event to send to Sentry.
    * @param hint May contain additional information about the original exception.
    * @param scope A scope containing event metadata.
-   * @returns A SyncPromise that resolves with the event or rejects in case event was/will not be send.
+   * @returns A Promise that resolves with the event or rejects in case event was/will not be send.
    */
   protected _processEvent(event: SentryEvent, captureContext: CaptureContext): PromiseLike<SentryEvent> {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const { beforeSend, sampleRate } = this.options;
 
     if (this.options.enabled === false) {
-      return SyncPromise.reject(new SentryError('SDK not enabled, will not send event.'));
+      return Promise.reject(new SentryError('SDK not enabled, will not send event.'));
     }
 
     const isTransaction = event.type === 'transaction';
@@ -499,7 +498,7 @@ export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
     // 0.0 === 0% events are sent
     // Sampling for transaction happens somewhere else
     if (!isTransaction && typeof sampleRate === 'number' && Math.random() > sampleRate) {
-      return SyncPromise.reject(
+      return Promise.reject(
         new SentryError(
           `Discarding event because it's not included in the random sample (sampling rate = ${sampleRate})`,
         ),

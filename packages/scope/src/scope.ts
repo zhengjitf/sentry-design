@@ -16,7 +16,7 @@ import {
   User,
   BreadcrumbHint,
 } from '@sentry/types';
-import { dateTimestampInSeconds, isPlainObject, isThenable, SyncPromise } from '@sentry/utils';
+import { dateTimestampInSeconds, isPlainObject, isThenable } from '@sentry/utils';
 
 import { Session } from './session';
 
@@ -441,7 +441,7 @@ export class Scope implements ScopeLike {
     hint?: EventHint,
     index: number = 0,
   ): PromiseLike<SentryEvent | null> {
-    return new SyncPromise<SentryEvent | null>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const processor = processors[index];
       if (event === null || typeof processor !== 'function') {
         resolve(event);

@@ -1,11 +1,13 @@
 import { readFile } from 'fs';
 
 import { ClientLike, Integration, StackFrame } from '@sentry/types';
-import { snipLine, SyncPromise } from '@sentry/utils';
+import { snipLine } from '@sentry/utils';
 import { LRUMap } from 'lru_map';
 
 const DEFAULT_LINES_OF_CONTEXT: number = 7;
 const FILE_CONTENT_CACHE = new LRUMap<string, string | null>(100);
+
+// TODO: Write some performance tests for LRU/Promise memory issue.
 
 /**
  * Resets the file cache. Exists for testing purposes.
@@ -91,12 +93,10 @@ function addContextToFrame(lines: string[], frame: StackFrame, linesOfContext: n
 function readSourceFiles(filenames: string[]): PromiseLike<{ [key: string]: string | null }> {
   // we're relying on filenames being de-duped already
   if (filenames.length === 0) {
-    return SyncPromise.resolve({});
+    return Promise.resolve({});
   }
 
-  return new SyncPromise<{
-    [key: string]: string | null;
-  }>(resolve => {
+  return new Promise(resolve => {
     const sourceFiles: {
       [key: string]: string | null;
     } = {};

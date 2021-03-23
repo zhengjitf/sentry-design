@@ -10,7 +10,6 @@ import {
   isErrorEvent,
   isEvent,
   isPlainObject,
-  SyncPromise,
 } from '@sentry/utils';
 
 import { eventFromPlainObject, eventFromStacktrace, prepareFramesForEvent } from './parsers';
@@ -42,7 +41,7 @@ export function eventFromException(
   }
   event.level = Severity.Error;
   event.platform = 'javascript';
-  return SyncPromise.resolve(event);
+  return Promise.resolve(event);
 }
 
 /**
@@ -63,7 +62,7 @@ export function eventFromMessage(
   }
   event.level = captureContext.scope?.level ?? Severity.Info;
   event.platform = 'javascript';
-  return SyncPromise.resolve(event);
+  return Promise.resolve(event);
 }
 
 /**

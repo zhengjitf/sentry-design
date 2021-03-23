@@ -1,5 +1,5 @@
 import { ClientLike, EventHint, Exception, ExtendedError, Integration, SentryEvent } from '@sentry/types';
-import { isInstanceOf, SyncPromise } from '@sentry/utils';
+import { isInstanceOf } from '@sentry/utils';
 import { getExceptionFromError } from '@sentry/eventbuilder-node';
 
 const DEFAULT_KEY = 'cause';
@@ -19,10 +19,10 @@ export class LinkedErrors implements Integration {
   public install(client: ClientLike): void {
     client.addEventProcessor((event: SentryEvent, hint?: EventHint) => {
       if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
-        return SyncPromise.resolve(event);
+        return Promise.resolve(event);
       }
 
-      return new SyncPromise<SentryEvent>(resolve => {
+      return new Promise(resolve => {
         this._walkErrorTree(hint.originalException as Error, this._key)
           .then((linkedErrors: Exception[]) => {
             if (event && event.exception && event.exception.values) {
@@ -39,9 +39,9 @@ export class LinkedErrors implements Integration {
 
   private _walkErrorTree(error: ExtendedError, key: string, stack: Exception[] = []): PromiseLike<Exception[]> {
     if (!isInstanceOf(error[key], Error) || stack.length + 1 >= this._limit) {
-      return SyncPromise.resolve(stack);
+      return Promise.resolve(stack);
     }
-    return new SyncPromise<Exception[]>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       getExceptionFromError(error[key])
         .then((exception: Exception) => {
           this._walkErrorTree(error[key], key, [exception, ...stack])
