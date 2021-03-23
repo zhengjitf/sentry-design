@@ -1,7 +1,6 @@
 // '@google-cloud/common' import is expected to be type-only so it's erased in the final .js file.
 // When TypeScript compiler is upgraded, use `import type` syntax to explicitly assert that we don't want to load a module here.
 import * as common from '@google-cloud/common';
-import { getTransaction } from '@sentry/minimal';
 import { ClientLike, Integration, Span } from '@sentry/types';
 import { fill } from '@sentry/utils';
 
@@ -16,6 +15,8 @@ interface RequestFunction extends CallableFunction {
 export class GoogleCloudHttp implements Integration {
   public name = this.constructor.name;
 
+  private _client!: ClientLike;
+
   private readonly _optional: boolean;
 
   public constructor(options: { optional?: boolean } = {}) {
@@ -25,39 +26,42 @@ export class GoogleCloudHttp implements Integration {
   /**
    * @inheritDoc
    */
-  public install(_client: ClientLike): void {
+  public install(client: ClientLike): void {
+    this._client = client;
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const commonModule = require('@google-cloud/common') as typeof common;
-      fill(commonModule.Service.prototype, 'request', wrapRequestFunction);
+      fill(commonModule.Service.prototype, 'request', this._wrapRequestFunction.bind(this));
     } catch (e) {
       if (!this._optional) {
         throw e;
       }
     }
   }
-}
 
-/** Returns a wrapped function that makes a request with tracing enabled */
-function wrapRequestFunction(orig: RequestFunction): RequestFunction {
-  return function(this: common.Service, reqOpts: RequestOptions, callback: ResponseCallback): void {
-    // TODO: Use clients scope instead of global call
-    const transaction = getTransaction();
-    let span: Span | undefined;
-    if (transaction) {
-      const httpMethod = reqOpts.method || 'GET';
-      span = transaction.startChild({
-        description: `${httpMethod} ${reqOpts.uri}`,
-        op: `gcloud.http.${identifyService(this.apiEndpoint)}`,
-      });
-    }
-    orig.call(this, reqOpts, (...args: Parameters<ResponseCallback>) => {
-      if (span) {
-        span.finish();
+  /** Returns a wrapped function that makes a request with tracing enabled */
+  private _wrapRequestFunction(orig: RequestFunction): RequestFunction {
+    const client = this._client;
+
+    return function(this: common.Service, reqOpts: RequestOptions, callback: ResponseCallback): void {
+      const transaction = client.getScope().getTransaction();
+      let span: Span | undefined;
+      if (transaction) {
+        const httpMethod = reqOpts.method || 'GET';
+        span = transaction.startChild({
+          description: `${httpMethod} ${reqOpts.uri}`,
+          op: `gcloud.http.${identifyService(this.apiEndpoint)}`,
+        });
       }
-      callback(...args);
-    });
-  };
+      orig.call(this, reqOpts, (...args: Parameters<ResponseCallback>) => {
+        if (span) {
+          span.finish();
+        }
+        callback(...args);
+      });
+    };
+  }
 }
 
 /** Identifies service by its base url */

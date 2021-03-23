@@ -1,4 +1,3 @@
-import { getTransaction } from '@sentry/minimal';
 import { ClientLike, Integration, Span } from '@sentry/types';
 import { fill } from '@sentry/utils';
 // 'aws-sdk/global' import is expected to be type-only so it's erased in the final .js file.
@@ -19,6 +18,8 @@ interface AWSService {
 export class AWSServices implements Integration {
   public name = this.constructor.name;
 
+  private _client!: ClientLike;
+
   private readonly _optional: boolean;
 
   public constructor(options: { optional?: boolean } = {}) {
@@ -28,47 +29,54 @@ export class AWSServices implements Integration {
   /**
    * @inheritDoc
    */
-  public install(_client: ClientLike): void {
+  public install(client: ClientLike): void {
+    this._client = client;
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const awsModule = require('aws-sdk/global') as typeof AWS;
-      fill(awsModule.Service.prototype, 'makeRequest', wrapMakeRequest);
+      fill(awsModule.Service.prototype, 'makeRequest', this._wrapMakeRequest.bind(this));
     } catch (e) {
       if (!this._optional) {
         throw e;
       }
     }
   }
-}
 
-/** */
-function wrapMakeRequest<TService extends AWSService, TResult>(
-  orig: MakeRequestFunction<GenericParams, TResult>,
-): MakeRequestFunction<GenericParams, TResult> {
-  return function(this: TService, operation: string, params?: GenericParams, callback?: MakeRequestCallback<TResult>) {
-    // TODO: Use clients scope instead of global call
-    const transaction = getTransaction();
-    let span: Span | undefined;
-    const req = orig.call(this, operation, params);
-    req.on('afterBuild', () => {
-      if (transaction) {
-        span = transaction.startChild({
-          description: describe(this, operation, params),
-          op: 'aws.request',
-        });
-      }
-    });
-    req.on('complete', () => {
-      if (span) {
-        span.finish();
-      }
-    });
+  private _wrapMakeRequest<TService extends AWSService, TResult>(
+    orig: MakeRequestFunction<GenericParams, TResult>,
+  ): MakeRequestFunction<GenericParams, TResult> {
+    const client = this._client;
 
-    if (callback) {
-      req.send(callback);
-    }
-    return req;
-  };
+    return function(
+      this: TService,
+      operation: string,
+      params?: GenericParams,
+      callback?: MakeRequestCallback<TResult>,
+    ) {
+      const transaction = client.getScope().getTransaction();
+      let span: Span | undefined;
+      const req = orig.call(this, operation, params);
+      req.on('afterBuild', () => {
+        if (transaction) {
+          span = transaction.startChild({
+            description: describe(this, operation, params),
+            op: 'aws.request',
+          });
+        }
+      });
+      req.on('complete', () => {
+        if (span) {
+          span.finish();
+        }
+      });
+
+      if (callback) {
+        req.send(callback);
+      }
+      return req;
+    };
+  }
 }
 
 /** Describes an operation on generic AWS service */

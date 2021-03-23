@@ -2,7 +2,6 @@ import { EventEmitter } from 'events';
 
 import { ClientLike, Integration, Span } from '@sentry/types';
 import { fill } from '@sentry/utils';
-import { getTransaction } from '@sentry/minimal';
 
 interface GrpcFunction extends CallableFunction {
   (...args: unknown[]): EventEmitter;
@@ -30,6 +29,8 @@ interface Stub {
 export class GoogleCloudGrpc implements Integration {
   public name = this.constructor.name;
 
+  private _client!: ClientLike;
+
   private readonly _optional: boolean;
 
   public constructor(options: { optional?: boolean } = {}) {
@@ -39,14 +40,15 @@ export class GoogleCloudGrpc implements Integration {
   /**
    * @inheritDoc
    */
-  public install(_client: ClientLike): void {
+  public install(client: ClientLike): void {
+    this._client = client;
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const gaxModule = require('google-gax');
       fill(
         gaxModule.GrpcClient.prototype, // eslint-disable-line @typescript-eslint/no-unsafe-member-access
         'createStub',
-        wrapCreateStub,
+        this._wrapCreateStub.bind(this),
       );
     } catch (e) {
       if (!this._optional) {
@@ -54,26 +56,38 @@ export class GoogleCloudGrpc implements Integration {
       }
     }
   }
-}
 
-/** Returns a wrapped function that returns a stub with tracing enabled */
-function wrapCreateStub(origCreate: CreateStubFunc): CreateStubFunc {
-  return async function(this: unknown, ...args: Parameters<CreateStubFunc>) {
-    const servicePath = args[1]?.servicePath;
-    if (servicePath == null || servicePath == undefined) {
-      return origCreate.apply(this, args);
-    }
-    const serviceIdentifier = identifyService(servicePath);
-    const stub = await origCreate.apply(this, args);
-    for (const methodName of Object.keys(Object.getPrototypeOf(stub))) {
-      fillGrpcFunction(stub, serviceIdentifier, methodName);
-    }
-    return stub;
-  };
+  /** Returns a wrapped function that returns a stub with tracing enabled */
+  private _wrapCreateStub(origCreate: CreateStubFunc): CreateStubFunc {
+    const client = this._client;
+
+    return async function(this: unknown, ...args: Parameters<CreateStubFunc>) {
+      const servicePath = args[1]?.servicePath;
+      if (servicePath == null || servicePath == undefined) {
+        return origCreate.apply(this, args);
+      }
+      const serviceIdentifier = identifyService(servicePath);
+      const stub = await origCreate.apply(this, args);
+      for (const methodName of Object.keys(Object.getPrototypeOf(stub))) {
+        fillGrpcFunction({ client, stub, serviceIdentifier, methodName });
+      }
+      return stub;
+    };
+  }
 }
 
 /** Patches the function in grpc stub to enable tracing */
-function fillGrpcFunction(stub: Stub, serviceIdentifier: string, methodName: string): void {
+function fillGrpcFunction({
+  client,
+  stub,
+  serviceIdentifier,
+  methodName,
+}: {
+  client: ClientLike;
+  stub: Stub;
+  serviceIdentifier: string;
+  methodName: string;
+}): void {
   const funcObj = stub[methodName];
   if (typeof funcObj !== 'function') {
     return;
@@ -97,8 +111,7 @@ function fillGrpcFunction(stub: Stub, serviceIdentifier: string, methodName: str
       if (typeof ret?.on !== 'function') {
         return ret;
       }
-      // TODO: Use clients scope instead of global call
-      const transaction = getTransaction();
+      const transaction = client.getScope().getTransaction();
       let span: Span | undefined;
       if (transaction) {
         span = transaction.startChild({
