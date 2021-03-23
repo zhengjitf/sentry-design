@@ -16,12 +16,11 @@ import { Session } from './session';
  */
 export interface ClientLike<O extends Options = Options> {
   options: O;
+  dsn?: Dsn;
 
   getScope(): ScopeLike;
   setScope(scope: ScopeLike): void;
   addEventProcessor(callback: EventProcessor): void;
-  // TODO: To be removed? Can be obtained from options
-  getDsn(): Dsn | undefined;
   lastEventId(): string | undefined;
 
   captureException(exception: unknown, captureContext?: CaptureContext): string | undefined;

@@ -94,10 +94,9 @@ function _createWrappedRequestMethodFactory(
       const requestArgs = normalizeRequestArgs(args);
       const requestOptions = requestArgs[0];
       const requestUrl = extractUrl(requestOptions);
-      const dsn = client.getDsn();
 
       // we don't want to record requests to Sentry as either breadcrumbs or spans, so just use the original method
-      if (!dsn || requestUrl.includes(dsn.host)) {
+      if (!client.dsn || requestUrl.includes(client.dsn?.host)) {
         return originalRequestMethod.apply(httpModule, requestArgs);
       }
 

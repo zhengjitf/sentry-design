@@ -139,7 +139,7 @@ export function showReportDialog(
   }
 
   options.eventId = options.eventId ?? client.lastEventId();
-  options.dsn = options.dsn ?? client.getDsn()?.toString();
+  options.dsn = options.dsn ?? client.options.dsn;
 
   if (client.options.enabled === false) {
     logger.error(`${errPrefix} disabled client`);

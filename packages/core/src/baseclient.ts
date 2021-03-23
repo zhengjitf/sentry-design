@@ -67,7 +67,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   public readonly options: O;
 
   /** The client Dsn, if specified in options. Without this Dsn, the SDK will be disabled. */
-  protected readonly _dsn?: Dsn;
+  public readonly dsn?: Dsn;
 
   /** Array of used integrations. */
   protected _integrations: IntegrationIndex = {};
@@ -94,7 +94,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     this.options = options;
 
     if (options.dsn) {
-      this._dsn = new Dsn(options.dsn);
+      this.dsn = new Dsn(options.dsn);
     }
 
     this._transport = this._setupTransport();
@@ -116,11 +116,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   // TODO: Run these during event processing
   public addEventProcessor(callback: EventProcessor): void {
     this._eventProcessors.push(callback);
-  }
-
-  // TODO: To be removed? Can be obtained from options
-  public getDsn(): Dsn | undefined {
-    return this._dsn;
   }
 
   /**
