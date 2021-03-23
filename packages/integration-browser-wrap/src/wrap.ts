@@ -48,9 +48,6 @@ export function wrap(fn: WrappedFunction, mechanism?: Mechanism): any {
       //       is expected behavior and NOT indicative of a bug with sentry.javascript.
       return fn.apply(this, wrappedArguments);
     } catch (ex) {
-      // TODO: Fix ignoring next error (read metadata from the ex value itself like we do with `__sentry_own_request__`?)
-      // ignoreNextOnError();
-
       withScope(scope => {
         scope.addEventProcessor((event: SentryEvent) => {
           const processedEvent = { ...event };
@@ -68,7 +65,7 @@ export function wrap(fn: WrappedFunction, mechanism?: Mechanism): any {
           return processedEvent;
         });
 
-        captureException(ex);
+        captureException(ex, { hint: { originalException: ex } });
       });
 
       throw ex;

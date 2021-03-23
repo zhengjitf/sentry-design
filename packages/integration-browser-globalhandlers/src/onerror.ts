@@ -19,11 +19,6 @@ export class OnError implements Integration {
 
     addInstrumentationHandler({
       callback: ({ msg, url, line, column, error }) => {
-        // TODO: Restore this functinality based on some error metadata
-        // if (shouldIgnoreOnError()) {
-        //   return;
-        // }
-
         if (error?.__sentry_own_request__) {
           return;
         }

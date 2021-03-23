@@ -83,6 +83,8 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
   protected _eventProcessors: EventProcessor[] = [];
 
+  protected _lastException?: unknown;
+
   /**
    * Initializes this client instance.
    *
@@ -125,6 +127,14 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @inheritDoc
    */
   public captureException(exception: unknown, captureContext: CaptureContext = {}): string | undefined {
+    // Drop two consecutive events originating from the same source (eg. browser Wrap integrations)
+    if (this._lastException && this._lastException === captureContext.hint?.originalException) {
+      delete this._lastException;
+      return;
+    } else {
+      this._lastException = captureContext.hint?.originalException;
+    }
+
     // TODO: This is broken. a) we dont pass event_id in hint anymore, b) its sync value assigned in async callback
     let eventId = captureContext.hint?.event_id;
     const scope = this._getEventScope(captureContext);
@@ -166,6 +176,14 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @inheritDoc
    */
   public captureEvent(event: SentryEvent, captureContext: CaptureContext = {}): string | undefined {
+    // Drop two consecutive events originating from the same source (eg. browser Wrap integrations)
+    if (this._lastException && this._lastException === captureContext.hint?.originalException) {
+      delete this._lastException;
+      return;
+    } else {
+      this._lastException = captureContext.hint?.originalException;
+    }
+
     let eventId = captureContext.hint?.event_id;
     const scope = this._getEventScope(captureContext);
 

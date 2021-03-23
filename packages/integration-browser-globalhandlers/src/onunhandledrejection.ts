@@ -33,11 +33,6 @@ export class OnUnhandledRejection implements Integration {
           // no-empty
         }
 
-        // TODO: Restore this functinality based on some error metadata
-        // if (shouldIgnoreOnError()) {
-        //   return;
-        // }
-
         if (error?.__sentry_own_request__) {
           return;
         }
