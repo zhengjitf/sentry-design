@@ -1,4 +1,4 @@
-import { ClientLike, Integration, ScopeContext, Severity } from '@sentry/types';
+import { ClientLike, Integration, Severity } from '@sentry/types';
 import { fill, getGlobalObject, safeJoin } from '@sentry/utils';
 
 type Level = typeof LEVELS[number];
@@ -29,30 +29,20 @@ export class CaptureConsole implements Integration {
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       fill(global.console, level, (originalConsoleLevel: () => unknown) => (...args: unknown[]): void => {
-        const scope: ScopeContext = {
-          level: Severity.fromString(level),
-          extra: {
-            arguments: args,
-          },
-        };
-
-        // TODO: Allow capture methods to accept a Scope instance so we can use things like
-        //       `const scope = client.getScope().clone();` to mimick `withScope` per-client?
-        // scope.addEventProcessor(event => {
-        //   event.logger = 'console';
-        //   return event;
-        // });
+        const scope = client.getScope().clone();
+        scope.setLevel(Severity.fromString(level));
+        scope.setExtra('arguments', args);
+        scope.addEventProcessor(event => {
+          event.logger = 'console';
+          return event;
+        });
 
         let message = safeJoin(args, ' ');
         if (level === 'assert') {
           if (args[0] === false) {
             message = `Assertion failed: ${safeJoin(args.slice(1), ' ') || 'console.assert'}`;
-            scope.extra = {
-              ...scope.extra,
-              arguments: args.slice(1),
-            };
+            scope.setExtra('arguments', args.slice(1));
             client.captureMessage(message, { scope });
           }
         } else {
