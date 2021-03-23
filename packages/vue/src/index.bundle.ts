@@ -37,7 +37,6 @@ export {
   setTags,
   setUser,
   withScope,
-  SDK_NAME,
   SDK_VERSION,
 } from '@sentry/browser';
 export { ReportDialogOptions } from '@sentry/transport-base';

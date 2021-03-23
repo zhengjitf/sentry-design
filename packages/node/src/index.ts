@@ -20,7 +20,6 @@ export { SDK_VERSION } from '@sentry/core';
 
 export { NodeClient, NodeOptions } from './client';
 export { defaultIntegrations, init } from './sdk';
-export { SDK_NAME } from './version';
 
 // TODO: Can be written as `export * as Handlers from './handlers'` but ESLint doesnt understand it for some reason. Investigate.
 import * as Handlers from './handlers';

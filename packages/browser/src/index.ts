@@ -19,7 +19,6 @@ export {
 
 export { BrowserClient, BrowserOptions } from './client';
 export { defaultIntegrations, forceLoad, init, onLoad, showReportDialog, wrap } from './sdk';
-export { SDK_NAME } from './version';
 
 import { getGlobalObject } from '@sentry/utils';
 
