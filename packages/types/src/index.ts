@@ -13,7 +13,7 @@ export { Integration } from './integration';
 export { LogLevel } from './loglevel';
 export { Mechanism } from './mechanism';
 export { ExtractedNodeRequestData, Primitive, SentryGlobal, WorkerLocation } from './misc';
-export { Options, OptionsV7 } from './options';
+export { Options } from './options';
 export { Package } from './package';
 export { Request, SentryRequest, SentryRequestType } from './request';
 export { Response } from './response';
@@ -37,6 +37,6 @@ export {
   TransactionSamplingMethod,
 } from './transaction';
 export { Thread } from './thread';
-export { Transport, TransportOptions, TransportClass } from './transport';
+export { Transport, TransportOptions } from './transport';
 export { User } from './user';
 export { WrappedFunction } from './wrappedfunction';

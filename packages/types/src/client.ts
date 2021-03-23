@@ -1,7 +1,7 @@
 import { Dsn } from './dsn';
 import { CaptureContext, SentryEvent } from './event';
 import { EventProcessor } from './eventprocessor';
-import { OptionsV7 } from './options';
+import { Options } from './options';
 import { ScopeLike } from './scope';
 import { Session } from './session';
 
@@ -14,7 +14,7 @@ import { Session } from './session';
  * there will only be one instance during runtime.
  *
  */
-export interface ClientLike<O extends OptionsV7 = OptionsV7> {
+export interface ClientLike<O extends Options = Options> {
   options: O;
 
   lastEventId(): string | undefined;

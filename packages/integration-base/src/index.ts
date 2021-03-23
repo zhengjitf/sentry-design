@@ -1,4 +1,4 @@
-import { ClientLike, Integration, OptionsV7 } from '@sentry/types';
+import { ClientLike, Integration, Options } from '@sentry/types';
 import { logger } from '@sentry/utils';
 
 export const installedIntegrations: string[] = [];
@@ -9,7 +9,7 @@ export interface IntegrationIndex {
 }
 
 /** Gets integration to install */
-export function getIntegrationsToSetup(options: OptionsV7): Integration[] {
+export function getIntegrationsToSetup(options: Options): Integration[] {
   const defaultIntegrations = (options.defaultIntegrations && [...options.defaultIntegrations]) || [];
   const userIntegrations = options.integrations;
   let integrations: Integration[] = [];

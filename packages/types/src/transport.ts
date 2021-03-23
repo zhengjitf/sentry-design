@@ -29,8 +29,6 @@ export interface Transport {
   flush(timeout: number): PromiseLike<boolean>;
 }
 
-export type TransportClass<T extends Transport> = new (options: TransportOptions) => T;
-
 export type TransportOptions = {
   dsn: string;
   bufferSize?: number;

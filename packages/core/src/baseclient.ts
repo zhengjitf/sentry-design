@@ -4,7 +4,7 @@ import {
   ClientLike,
   SentryEvent,
   EventProcessor,
-  OptionsV7,
+  Options,
   ScopeLike,
   SessionStatus,
 } from '@sentry/types';
@@ -62,7 +62,7 @@ import { IntegrationIndex, setupIntegrations } from '@sentry/integration-base';
  * }
  */
 // TODO: Allow for passing scope during construction for explicit `this._scope`
-export abstract class BaseClient<O extends OptionsV7> implements ClientLike<O> {
+export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /** Options passed to the SDK. */
   public readonly options: O;
 

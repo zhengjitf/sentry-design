@@ -1,6 +1,6 @@
 // TODO: All these functions are confusing af. They _have_ to be unified and become more descriptive in one way or another.
 
-import { CaptureContext, SentryEvent, OptionsV7, Severity } from '@sentry/types';
+import { CaptureContext, SentryEvent, Options, Severity } from '@sentry/types';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -24,7 +24,7 @@ export * from './parsers';
  * @hidden
  */
 export function eventFromException(
-  options: OptionsV7,
+  options: Options,
   exception: unknown,
   captureContext: CaptureContext,
 ): PromiseLike<SentryEvent> {
@@ -49,7 +49,7 @@ export function eventFromException(
  * @hidden
  */
 export function eventFromMessage(
-  options: OptionsV7,
+  options: Options,
   message: string,
   captureContext: CaptureContext,
 ): PromiseLike<SentryEvent> {
