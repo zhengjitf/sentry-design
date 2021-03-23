@@ -79,7 +79,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
   protected _lastEventId?: string;
 
-  protected _scope = new Scope();
+  protected _scope: ScopeLike = new Scope();
 
   protected _eventProcessors: EventProcessor[] = [];
 
@@ -105,6 +105,10 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
   public getScope(): ScopeLike {
     return this._scope;
+  }
+
+  public setScope(scope: ScopeLike): void {
+    this._scope = scope;
   }
 
   // TODO: Run these during event processing
