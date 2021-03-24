@@ -74,11 +74,11 @@ export class NodeClient extends BaseClient<NodeOptions> {
     return this._scope;
   }
 
-  protected _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<SentryEvent> {
+  protected _eventFromException(exception: unknown, captureContext: CaptureContext): SentryEvent {
     return eventFromException(this.options, exception, captureContext);
   }
 
-  protected _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<SentryEvent> {
+  protected _eventFromMessage(message: string, captureContext: CaptureContext): SentryEvent {
     return eventFromMessage(this.options, message, captureContext);
   }
 }

@@ -23,11 +23,7 @@ export * from './parsers';
  * Builds and SentryEvent from a Exception
  * @hidden
  */
-export function eventFromException(
-  options: Options,
-  exception: unknown,
-  captureContext: CaptureContext,
-): PromiseLike<SentryEvent> {
+export function eventFromException(options: Options, exception: unknown, captureContext: CaptureContext): SentryEvent {
   const syntheticException = captureContext.hint?.syntheticException;
   const event = eventFromUnknownInput(exception, syntheticException, {
     attachStacktrace: options.attachStacktrace,
@@ -41,18 +37,14 @@ export function eventFromException(
   }
   event.level = Severity.Error;
   event.platform = 'javascript';
-  return Promise.resolve(event);
+  return event;
 }
 
 /**
  * Builds and SentryEvent from a Message
  * @hidden
  */
-export function eventFromMessage(
-  options: Options,
-  message: string,
-  captureContext: CaptureContext,
-): PromiseLike<SentryEvent> {
+export function eventFromMessage(options: Options, message: string, captureContext: CaptureContext): SentryEvent {
   const syntheticException = captureContext.hint?.syntheticException;
   const event = eventFromString(message, syntheticException, {
     attachStacktrace: options.attachStacktrace,
@@ -62,7 +54,7 @@ export function eventFromMessage(
   }
   event.level = captureContext.scope?.level ?? Severity.Info;
   event.platform = 'javascript';
-  return Promise.resolve(event);
+  return event;
 }
 
 /**

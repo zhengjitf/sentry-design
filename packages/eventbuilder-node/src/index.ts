@@ -13,11 +13,7 @@ import {
 import { extractStackFromError, parseError, parseStack, prepareFramesForEvent } from './parsers';
 export { getExceptionFromError } from './parsers';
 
-export function eventFromException(
-  options: Options,
-  exception: unknown,
-  captureContext: CaptureContext,
-): PromiseLike<SentryEvent> {
+export function eventFromException(options: Options, exception: unknown, captureContext: CaptureContext): SentryEvent {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ex: any = exception;
   const mechanism: Mechanism = {
@@ -43,34 +39,25 @@ export function eventFromException(
     mechanism.synthetic = true;
   }
 
-  return new Promise((resolve, reject) =>
-    parseError(ex as Error)
-      .then(event => {
-        addExceptionTypeValue(event, undefined, undefined);
-        addExceptionMechanism(event, mechanism);
-        if (captureContext.hint?.event_id) {
-          event.event_id = captureContext.hint?.event_id;
-        }
-        event.platform = 'node';
-        // TODO: Fix options type - we dont want to have a circular dependency on @sentry/node here
-        if ((options as { serverName?: string }).serverName) {
-          event.server_name = (options as { serverName?: string }).serverName;
-        }
-        if (shouldSerializeException) {
-          event.extra = event.extra ?? {};
-          event.extra.__serialized__ = normalizeToSize(exception as Record<string, unknown>);
-        }
-        resolve(event);
-      })
-      .then(null, reject),
-  );
+  const event = parseError(ex as Error);
+  addExceptionTypeValue(event, undefined, undefined);
+  addExceptionMechanism(event, mechanism);
+  if (captureContext.hint?.event_id) {
+    event.event_id = captureContext.hint?.event_id;
+  }
+  event.platform = 'node';
+  // TODO: Fix options type - we dont want to have a circular dependency on @sentry/node here
+  if ((options as { serverName?: string }).serverName) {
+    event.server_name = (options as { serverName?: string }).serverName;
+  }
+  if (shouldSerializeException) {
+    event.extra = event.extra ?? {};
+    event.extra.__serialized__ = normalizeToSize(exception as Record<string, unknown>);
+  }
+  return event;
 }
 
-export function eventFromMessage(
-  options: Options,
-  message: string,
-  captureContext: CaptureContext,
-): PromiseLike<SentryEvent> {
+export function eventFromMessage(options: Options, message: string, captureContext: CaptureContext): SentryEvent {
   const event: SentryEvent = {
     level: captureContext.scope?.level ?? Severity.Info,
     message,
@@ -81,21 +68,14 @@ export function eventFromMessage(
     event.event_id = captureContext.hint?.event_id;
   }
 
-  return new Promise(resolve => {
-    if (options.attachStacktrace && captureContext.hint?.syntheticException) {
-      const stack = extractStackFromError(captureContext.hint?.syntheticException);
-      parseStack(stack)
-        .then(frames => {
-          event.stacktrace = {
-            frames: prepareFramesForEvent(frames),
-          };
-          resolve(event);
-        })
-        .then(null, () => {
-          resolve(event);
-        });
-    } else {
-      resolve(event);
-    }
-  });
+  if (options.attachStacktrace && captureContext.hint?.syntheticException) {
+    const stack = extractStackFromError(captureContext.hint?.syntheticException);
+    const frames = parseStack(stack);
+    event.stacktrace = {
+      frames: prepareFramesForEvent(frames),
+    };
+    return event;
+  } else {
+    return event;
+  }
 }

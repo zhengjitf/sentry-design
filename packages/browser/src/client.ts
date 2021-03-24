@@ -60,11 +60,11 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
     super(options);
   }
 
-  protected _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<SentryEvent> {
+  protected _eventFromException(exception: unknown, captureContext: CaptureContext): SentryEvent {
     return eventFromException(this.options, exception, captureContext);
   }
 
-  protected _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<SentryEvent> {
+  protected _eventFromMessage(message: string, captureContext: CaptureContext): SentryEvent {
     return eventFromMessage(this.options, message, captureContext);
   }
 }

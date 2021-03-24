@@ -16,7 +16,7 @@ import {
   User,
   BreadcrumbHint,
 } from '@sentry/types';
-import { dateTimestampInSeconds, isPlainObject, isThenable } from '@sentry/utils';
+import { dateTimestampInSeconds, isPlainObject } from '@sentry/utils';
 
 import { Session } from './session';
 
@@ -394,7 +394,7 @@ export class Scope implements ScopeLike {
    * @param hint May contain additional informartion about the original exception.
    * @hidden
    */
-  public applyToEvent(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null> {
+  public applyToEvent(event: SentryEvent, hint?: EventHint): SentryEvent | null {
     if (this.extra && Object.keys(this.extra).length) {
       event.extra = { ...this.extra, ...event.extra };
     }
@@ -429,37 +429,21 @@ export class Scope implements ScopeLike {
     event.breadcrumbs = [...(event.breadcrumbs || []), ...this.breadcrumbs];
     event.breadcrumbs = event.breadcrumbs.length > 0 ? event.breadcrumbs : undefined;
 
-    return this._notifyEventProcessors(this._eventProcessors, event, hint);
-  }
-
-  /**
-   * This will be called after {@link applyToEvent} is finished.
-   */
-  protected _notifyEventProcessors(
-    processors: EventProcessor[],
-    event: SentryEvent | null,
-    hint?: EventHint,
-    index: number = 0,
-  ): PromiseLike<SentryEvent | null> {
-    return new Promise((resolve, reject) => {
-      const processor = processors[index];
-      if (event === null || typeof processor !== 'function') {
-        resolve(event);
-      } else {
-        const result = processor({ ...event }, hint) as SentryEvent | null;
-        if (isThenable(result)) {
-          (result as PromiseLike<SentryEvent | null>)
-            .then(final => this._notifyEventProcessors(processors, final, hint, index + 1).then(resolve))
-            .then(null, reject);
-        } else {
-          this._notifyEventProcessors(processors, result, hint, index + 1)
-            .then(resolve)
-            .then(null, reject);
+    let processedEvent = event;
+    for (const processor of this._eventProcessors) {
+      if (typeof processor === 'function') {
+        const nextEvent = processor(processedEvent, hint);
+        if (nextEvent === null) {
+          return null;
         }
+        processedEvent = nextEvent;
       }
-    });
+    }
+
+    return processedEvent;
   }
 
+  // TODO: Is there no better solution to this? I know that Electron/RN(?) is using it.
   /**
    * This will be called on every set call.
    */

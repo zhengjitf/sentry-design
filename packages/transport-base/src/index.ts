@@ -96,7 +96,7 @@ export abstract class BaseTransport {
 
   // TODO: Make requestMaker an abstract method that has to be implemented by the class that extends it?
 
-  public flush(timeout: number): PromiseLike<boolean> {
+  public flush(timeout: number = 0): PromiseLike<boolean> {
     return this._asyncBuffer.drain(timeout);
   }
 }

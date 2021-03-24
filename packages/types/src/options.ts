@@ -157,7 +157,7 @@ export interface Options {
    * @param hint May contain additional information about the original exception.
    * @returns A new event that will be sent | null.
    */
-  beforeSend?(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null> | SentryEvent | null;
+  beforeSend?(event: SentryEvent, hint?: EventHint): SentryEvent | null;
 
   /**
    * A callback invoked when adding a breadcrumb, allowing to optionally modify

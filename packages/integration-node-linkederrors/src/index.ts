@@ -19,40 +19,22 @@ export class LinkedErrors implements Integration {
   public install(client: ClientLike): void {
     client.addEventProcessor((event: SentryEvent, hint?: EventHint) => {
       if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
-        return Promise.resolve(event);
+        return event;
       }
 
-      return new Promise(resolve => {
-        this._walkErrorTree(hint.originalException as Error, this._key)
-          .then((linkedErrors: Exception[]) => {
-            if (event && event.exception && event.exception.values) {
-              event.exception.values = [...linkedErrors, ...event.exception.values];
-            }
-            resolve(event);
-          })
-          .then(null, () => {
-            resolve(event);
-          });
-      });
+      const linkedErrors = this._walkErrorTree(hint.originalException as Error, this._key);
+      if (event && event.exception && event.exception.values) {
+        event.exception.values = [...linkedErrors, ...event.exception.values];
+      }
+      return event;
     });
   }
 
-  private _walkErrorTree(error: ExtendedError, key: string, stack: Exception[] = []): PromiseLike<Exception[]> {
+  private _walkErrorTree(error: ExtendedError, key: string, stack: Exception[] = []): Exception[] {
     if (!isInstanceOf(error[key], Error) || stack.length + 1 >= this._limit) {
-      return Promise.resolve(stack);
+      return stack;
     }
-    return new Promise((resolve, reject) => {
-      getExceptionFromError(error[key])
-        .then((exception: Exception) => {
-          this._walkErrorTree(error[key], key, [exception, ...stack])
-            .then(resolve)
-            .then(null, () => {
-              reject();
-            });
-        })
-        .then(null, () => {
-          reject();
-        });
-    });
+    const exception = getExceptionFromError(error[key]);
+    return this._walkErrorTree(error[key], key, [exception, ...stack]);
   }
 }

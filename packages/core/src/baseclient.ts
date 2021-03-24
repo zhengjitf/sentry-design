@@ -12,10 +12,8 @@ import {
   dateTimestampInSeconds,
   getEventDescription,
   isPrimitive,
-  isThenable,
   logger,
   normalize,
-  SentryError,
   truncate,
   uuid4,
 } from '@sentry/utils';
@@ -72,9 +70,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /** Array of used integrations. */
   protected _integrations: IntegrationIndex = {};
 
-  /** Number of call being processed */
-  protected _processing: number = 0;
-
   protected _transport: Transport;
 
   protected _lastEventId?: string;
@@ -122,49 +117,18 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @inheritDoc
    */
   public captureException(exception: unknown, captureContext: CaptureContext = {}): string | undefined {
-    // Drop two consecutive events originating from the same source (eg. browser Wrap integrations)
-    if (this._lastException && this._lastException === captureContext.hint?.originalException) {
-      delete this._lastException;
-      return;
-    } else {
-      this._lastException = captureContext.hint?.originalException;
-    }
-
-    // TODO: This is broken. a) we dont pass event_id in hint anymore, b) its sync value assigned in async callback
-    let eventId = captureContext.hint?.event_id;
-    const scope = this._getEventScope(captureContext);
-
-    this._process(
-      this._eventFromException(exception, captureContext)
-        .then(event => this._captureEvent(event, captureContext, scope))
-        .then(result => {
-          eventId = result;
-        }),
-    );
-
-    return eventId;
+    const event = this._eventFromException(exception, captureContext);
+    return this.captureEvent(event, captureContext);
   }
 
   /**
    * @inheritDoc
    */
   public captureMessage(message: string, captureContext: CaptureContext = {}): string | undefined {
-    let eventId = captureContext.hint?.event_id;
-    const scope = this._getEventScope(captureContext);
-
-    const promisedEvent = isPrimitive(message)
+    const event = isPrimitive(message)
       ? this._eventFromMessage(String(message), captureContext)
       : this._eventFromException(message, captureContext);
-
-    this._process(
-      promisedEvent
-        .then(event => this._captureEvent(event, captureContext, scope))
-        .then(result => {
-          eventId = result;
-        }),
-    );
-
-    return eventId;
+    return this.captureEvent(event, captureContext);
   }
 
   /**
@@ -179,16 +143,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       this._lastException = captureContext.hint?.originalException;
     }
 
-    let eventId = captureContext.hint?.event_id;
-    const scope = this._getEventScope(captureContext);
-
-    this._process(
-      this._captureEvent(event, captureContext, scope).then(result => {
-        eventId = result;
-      }),
-    );
-
-    return eventId;
+    return this._captureEvent(event, captureContext);
   }
 
   /**
@@ -207,17 +162,15 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /**
    * @inheritDoc
    */
-  public flush(timeout?: number): PromiseLike<boolean> {
-    return this._isClientProcessing(timeout).then(ready => {
-      return this._transport.flush(timeout ?? 0).then(transportFlushed => ready && transportFlushed);
-    });
+  public flush(timeout: number = 0): PromiseLike<boolean> {
+    return this._transport.flush(timeout);
   }
 
   /**
    * @inheritDoc
    */
-  public close(timeout?: number): PromiseLike<boolean> {
-    return this.flush(timeout).then(result => {
+  public close(timeout: number = 0): PromiseLike<boolean> {
+    return this._transport.flush(timeout).then(result => {
       this.options.enabled = false;
       return result;
     });
@@ -293,37 +246,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     this._sendRequest(sessionToTransportRequest(session));
   }
 
-  /** Waits for the client to be done with processing. */
-  protected _isClientProcessing(timeout?: number): PromiseLike<boolean> {
-    return new Promise(resolve => {
-      let ticked: number = 0;
-      const tick: number = 1;
-
-      const interval = setInterval(() => {
-        if (this._processing == 0) {
-          clearInterval(interval);
-          resolve(true);
-        } else {
-          ticked += tick;
-          if (timeout && ticked >= timeout) {
-            clearInterval(interval);
-            resolve(false);
-          }
-        }
-      }, tick);
-    });
-  }
-
-  // We need this function to be eagerly called in `capture` calls, because whole processing pipeline is async,
-  // where withScope works in sync way
-  protected _getEventScope(captureContext: CaptureContext): ScopeLike {
-    return captureContext.scope instanceof Scope
-      ? captureContext.scope
-      : this.getScope()
-          .clone()
-          .update(captureContext.scope);
-  }
-
   /**
    * Adds common information to events.
    *
@@ -335,30 +257,31 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    *
    * @param event The original event.
    * @param hint May contain additional information about the original exception.
-   * @param scope A scope containing event metadata.
    * @returns A new event with more information.
    */
-  protected _prepareEvent(
-    event: SentryEvent,
-    captureContext: CaptureContext,
-    scope: ScopeLike,
-  ): PromiseLike<SentryEvent | null> {
+  protected _prepareEvent(event: SentryEvent, captureContext: CaptureContext): SentryEvent | null {
     const { normalizeDepth = 3 } = this.options;
     const prepared: SentryEvent = {
       ...event,
-      event_id: event.event_id ?? captureContext?.hint?.event_id ?? uuid4(),
+      event_id: event.event_id ?? uuid4(),
       timestamp: event.timestamp ?? dateTimestampInSeconds(),
     };
 
     this._applyClientOptions(prepared);
     this._applyIntegrationsMetadata(prepared);
 
-    return scope.applyToEvent(prepared, captureContext.hint).then(event => {
-      if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
-        return this._normalizeEvent(event, normalizeDepth);
-      }
-      return event;
-    });
+    const scope =
+      captureContext.scope instanceof Scope
+        ? captureContext.scope
+        : this.getScope()
+            .clone()
+            .update(captureContext.scope);
+
+    const processedEvent = scope.applyToEvent(prepared, captureContext.hint);
+    if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
+      return this._normalizeEvent(processedEvent, normalizeDepth);
+    }
+    return processedEvent;
   }
 
   /**
@@ -473,33 +396,27 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param hint
    * @param scope
    */
-  protected _captureEvent(
-    event: SentryEvent,
-    captureContext: CaptureContext,
-    scope: ScopeLike,
-  ): PromiseLike<string | undefined> {
-    return this._processEvent(event, captureContext, scope).then(
-      finalEvent => {
-        // TODO: Make it configurable or move to @sentry/integration-browser-breadcrumbs
-        const eventType = finalEvent.type === 'transaction' ? 'transaction' : 'event';
-        this.getScope().addBreadcrumb(
-          {
-            category: `sentry.${eventType}`,
-            event_id: finalEvent.event_id,
-            level: finalEvent.level,
-            message: getEventDescription(finalEvent),
-          },
-          {
-            event: finalEvent,
-          },
-        );
-        return finalEvent.event_id;
+  protected _captureEvent(event: SentryEvent, captureContext: CaptureContext): string | undefined {
+    const processedEvent = this._processEvent(event, captureContext);
+
+    if (!processedEvent) {
+      return;
+    }
+
+    // TODO: Make it configurable or move to @sentry/integration-browser-breadcrumbs
+    const eventType = processedEvent.type === 'transaction' ? 'transaction' : 'event';
+    this.getScope().addBreadcrumb(
+      {
+        category: `sentry.${eventType}`,
+        event_id: processedEvent.event_id,
+        level: processedEvent.level,
+        message: getEventDescription(processedEvent),
       },
-      reason => {
-        logger.error(reason);
-        return undefined;
+      {
+        event: processedEvent,
       },
     );
+    return processedEvent.event_id;
   }
 
   /**
@@ -515,106 +432,75 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param scope A scope containing event metadata.
    * @returns A Promise that resolves with the event or rejects in case event was/will not be send.
    */
-  protected _processEvent(
-    event: SentryEvent,
-    captureContext: CaptureContext,
-    scope: ScopeLike,
-  ): PromiseLike<SentryEvent> {
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    const { beforeSend, sampleRate } = this.options;
-
+  protected _processEvent(event: SentryEvent, captureContext: CaptureContext): SentryEvent | null {
     if (this.options.enabled === false) {
-      return Promise.reject(new SentryError('SDK not enabled, will not send event.'));
+      logger.error('SDK not enabled, will not send event.');
+      return null;
     }
 
     const isTransaction = event.type === 'transaction';
     // 1.0 === 100% events are sent
     // 0.0 === 0% events are sent
     // Sampling for transaction happens somewhere else
-    if (!isTransaction && typeof sampleRate === 'number' && Math.random() > sampleRate) {
-      return Promise.reject(
-        new SentryError(
-          `Discarding event because it's not included in the random sample (sampling rate = ${sampleRate})`,
-        ),
+    if (!isTransaction && typeof this.options.sampleRate === 'number' && Math.random() > this.options.sampleRate) {
+      logger.error(
+        `Discarding event because it's not included in the random sample (sampling rate = ${this.options.sampleRate})`,
       );
+      return null;
     }
 
-    return this._prepareEvent(event, captureContext, scope)
-      .then(prepared => {
-        if (prepared === null) {
-          throw new SentryError('An event processor returned null, will not send event.');
-        }
+    try {
+      let processedEvent = this._prepareEvent(event, captureContext);
 
-        const isInternalException =
-          captureContext?.hint &&
-          captureContext?.hint?.data &&
-          (captureContext?.hint?.data as { __sentry__: boolean }).__sentry__ === true;
-        if (isInternalException || isTransaction || !beforeSend) {
-          return prepared;
-        }
+      if (processedEvent === null) {
+        logger.error('An event processor returned null, will not send event.');
+        return null;
+      }
 
-        const beforeSendResult = beforeSend(prepared, captureContext?.hint);
-        if (typeof beforeSendResult === 'undefined') {
-          throw new SentryError('`beforeSend` method has to return `null` or a valid event.');
-        } else if (isThenable(beforeSendResult)) {
-          return (beforeSendResult as PromiseLike<SentryEvent | null>).then(
-            event => event,
-            e => {
-              throw new SentryError(`beforeSend rejected with ${e}`);
-            },
-          );
-        }
-        return beforeSendResult;
-      })
-      .then(processedEvent => {
-        if (processedEvent === null) {
-          throw new SentryError('`beforeSend` returned `null`, will not send event.');
-        }
-
-        const session = this.getScope().getSession();
-        if (!isTransaction && session) {
-          this._updateSessionFromEvent(session as Session, processedEvent);
-        }
-
-        this._sendEvent(processedEvent);
+      const isInternalException =
+        captureContext?.hint &&
+        captureContext?.hint?.data &&
+        (captureContext?.hint?.data as { __sentry__: boolean }).__sentry__ === true;
+      if (isInternalException || isTransaction || !this.options.beforeSend) {
         return processedEvent;
-      })
-      .then(null, reason => {
-        if (reason instanceof SentryError) {
-          throw reason;
-        }
+      }
 
-        this.captureException(reason, {
-          hint: {
-            data: {
-              __sentry__: true,
-            },
-            originalException: reason as Error,
+      processedEvent = this.options.beforeSend(processedEvent, captureContext?.hint);
+
+      if (typeof processedEvent === 'undefined') {
+        logger.error('`beforeSend` method has to return `null` or a valid event.');
+        return null;
+      }
+
+      if (processedEvent === null) {
+        logger.error('`beforeSend` returned `null`, will not send event.');
+        return null;
+      }
+
+      const session = this.getScope().getSession();
+      if (!isTransaction && session) {
+        this._updateSessionFromEvent(session as Session, processedEvent);
+      }
+
+      this._sendEvent(processedEvent);
+
+      return processedEvent;
+    } catch (e) {
+      this.captureException(e, {
+        hint: {
+          data: {
+            __sentry__: true,
           },
-        });
-        throw new SentryError(
-          `Event processing pipeline threw an error, original event will not be sent. Details have been sent as a new event.\nReason: ${reason}`,
-        );
+          originalException: e,
+        },
       });
+      logger.error(
+        `Event processing pipeline threw an error, original event will not be sent. Details have been sent as a new event.\nReason: ${e}`,
+      );
+      return null;
+    }
   }
 
-  /**
-   * Occupies the client with processing and event
-   */
-  protected _process<T>(promise: PromiseLike<T>): void {
-    this._processing += 1;
-    promise.then(
-      value => {
-        this._processing -= 1;
-        return value;
-      },
-      reason => {
-        this._processing -= 1;
-        return reason;
-      },
-    );
-  }
-
-  protected abstract _eventFromException(exception: unknown, captureContext: CaptureContext): PromiseLike<SentryEvent>;
-  protected abstract _eventFromMessage(message: string, captureContext: CaptureContext): PromiseLike<SentryEvent>;
+  protected abstract _eventFromException(exception: unknown, captureContext: CaptureContext): SentryEvent;
+  protected abstract _eventFromMessage(message: string, captureContext: CaptureContext): SentryEvent;
 }

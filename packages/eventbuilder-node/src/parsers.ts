@@ -60,7 +60,7 @@ export function extractStackFromError(error: Error): stacktrace.StackFrame[] {
 /**
  * @hidden
  */
-export function parseStack(stack: stacktrace.StackFrame[]): PromiseLike<StackFrame[]> {
+export function parseStack(stack: stacktrace.StackFrame[]): StackFrame[] {
   const frames: StackFrame[] = stack.map(frame => {
     const parsedFrame: StackFrame = {
       colno: frame.columnNumber,
@@ -90,42 +90,35 @@ export function parseStack(stack: stacktrace.StackFrame[]): PromiseLike<StackFra
     return parsedFrame;
   });
 
-  return Promise.resolve(frames);
+  return frames;
 }
 
 /**
  * @hidden
  */
-export function getExceptionFromError(error: Error): PromiseLike<Exception> {
+export function getExceptionFromError(error: Error): Exception {
   const name = error.name || error.constructor.name;
   const stack = extractStackFromError(error);
-  return new Promise(resolve =>
-    parseStack(stack).then(frames => {
-      const result = {
-        stacktrace: {
-          frames: prepareFramesForEvent(frames),
-        },
-        type: name,
-        value: error.message,
-      };
-      resolve(result);
-    }),
-  );
+  const frames = parseStack(stack);
+  return {
+    stacktrace: {
+      frames: prepareFramesForEvent(frames),
+    },
+    type: name,
+    value: error.message,
+  };
 }
 
 /**
  * @hidden
  */
-export function parseError(error: ExtendedError): PromiseLike<SentryEvent> {
-  return new Promise(resolve =>
-    getExceptionFromError(error).then((exception: Exception) => {
-      resolve({
-        exception: {
-          values: [exception],
-        },
-      });
-    }),
-  );
+export function parseError(error: ExtendedError): SentryEvent {
+  const exception = getExceptionFromError(error);
+  return {
+    exception: {
+      values: [exception],
+    },
+  };
 }
 
 /**

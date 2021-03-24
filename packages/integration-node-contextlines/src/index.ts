@@ -1,4 +1,4 @@
-import { readFile } from 'fs';
+import { readFileSync } from 'fs';
 
 import { ClientLike, Integration, StackFrame } from '@sentry/types';
 import { snipLine } from '@sentry/utils';
@@ -21,39 +21,37 @@ export function resetFileContentCache(): void {
 export class ContextLines implements Integration {
   public name = this.constructor.name;
 
-  // private _moduleCache?: { [key: string]: string };
-
   public install(client: ClientLike): void {
     const linesOfContext =
       (client.options as { frameContextLines?: number }).frameContextLines ?? DEFAULT_LINES_OF_CONTEXT;
 
     client.addEventProcessor(event => {
-      const stacktrace = event.exception?.values?.[0].stacktrace as StackFrame[];
+      const frames = event.exception?.values?.[0].stacktrace?.frames;
 
-      if (stacktrace) {
+      if (frames) {
         const filenames: string[] = [];
 
-        for (const frame of stacktrace) {
+        for (const frame of frames) {
           if (frame.filename && !filenames.includes(frame.filename)) {
             filenames.push(frame.filename);
           }
         }
 
-        return readSourceFiles(filenames).then(sourceFiles => {
-          for (const frame of stacktrace) {
-            if (frame.filename && sourceFiles[frame.filename]) {
-              try {
-                const lines = (sourceFiles[frame.filename] as string).split('\n');
-                addContextToFrame(lines, frame, linesOfContext);
-              } catch (e) {
-                // anomaly, being defensive in case
-                // unlikely to ever happen in practice but can definitely happen in theory
-              }
+        const sourceFiles = readSourceFiles(filenames);
+
+        for (const frame of frames) {
+          if (frame.filename && sourceFiles[frame.filename]) {
+            try {
+              const lines = (sourceFiles[frame.filename] as string).split('\n');
+              addContextToFrame(lines, frame, linesOfContext);
+            } catch (e) {
+              // anomaly, being defensive in case
+              // unlikely to ever happen in practice but can definitely happen in theory
             }
           }
+        }
 
-          return event;
-        });
+        return event;
       }
 
       return event;
@@ -86,57 +84,41 @@ function addContextToFrame(lines: string[], frame: StackFrame, linesOfContext: n
 
 /**
  * This function reads file contents and caches them in a global LRU cache.
- * Returns a Promise filepath => content array for all files that we were able to read.
  *
  * @param filenames Array of filepaths to read content from.
  */
-function readSourceFiles(filenames: string[]): PromiseLike<{ [key: string]: string | null }> {
+function readSourceFiles(filenames: string[]): Record<string, string | null> {
   // we're relying on filenames being de-duped already
-  if (filenames.length === 0) {
-    return Promise.resolve({});
+  if (!filenames.length) {
+    return {};
   }
 
-  return new Promise(resolve => {
-    const sourceFiles: {
-      [key: string]: string | null;
-    } = {};
+  const sourceFiles: Record<string, string | null> = {};
 
-    let count = 0;
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let i = 0; i < filenames.length; i++) {
-      const filename = filenames[i];
-
-      const cache = FILE_CONTENT_CACHE.get(filename);
-      // We have a cache hit
-      if (cache !== undefined) {
-        // If it's not null (which means we found a file and have a content)
-        // we set the content and return it later.
-        if (cache !== null) {
-          sourceFiles[filename] = cache;
-        }
-        // eslint-disable-next-line no-plusplus
-        count++;
-        // In any case we want to skip here then since we have a content already or we couldn't
-        // read the file and don't want to try again.
-        if (count === filenames.length) {
-          resolve(sourceFiles);
-        }
+  for (const filename of filenames) {
+    const cache = FILE_CONTENT_CACHE.get(filename);
+    // We have a cache hit
+    if (cache !== undefined) {
+      // If stored value is null, it means that we already tried, but couldnt read the content of the file. Skip.
+      if (cache === null) {
         continue;
       }
 
-      readFile(filename, (err: Error | null, data: Buffer) => {
-        const content = err ? null : data.toString();
-        sourceFiles[filename] = content;
-
-        // We always want to set the cache, even to null which means there was an error reading the file.
-        // We do not want to try to read the file again.
-        FILE_CONTENT_CACHE.set(filename, content);
-        // eslint-disable-next-line no-plusplus
-        count++;
-        if (count === filenames.length) {
-          resolve(sourceFiles);
-        }
-      });
+      // Otherwise content is there, so reuse cached value.
+      sourceFiles[filename] = cache;
+      continue;
     }
-  });
+
+    let content: string | null;
+    try {
+      content = readFileSync(filename, 'utf8');
+    } catch (_e) {
+      content = null;
+    }
+
+    FILE_CONTENT_CACHE.set(filename, content);
+    sourceFiles[filename] = content;
+  }
+
+  return sourceFiles;
 }

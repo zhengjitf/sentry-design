@@ -2,8 +2,6 @@ import {
   Breadcrumb,
   BreadcrumbHint,
   Context,
-  SentryEvent,
-  EventHint,
   EventProcessor,
   Extra,
   Extras,
@@ -150,12 +148,4 @@ export function clearBreadcrumbs(): ScopeLike | undefined {
   return getCurrentClient()
     ?.getScope()
     ?.clearBreadcrumbs();
-}
-
-export function applyToEvent(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null> {
-  return (
-    getCurrentClient()
-      ?.getScope()
-      ?.applyToEvent(event, hint) || Promise.resolve(event)
-  );
 }

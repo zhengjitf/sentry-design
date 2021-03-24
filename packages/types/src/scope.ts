@@ -24,7 +24,7 @@ export type ScopeContext = {
  * called by the client before an event will be sent.
  */
 export interface ScopeLike extends ScopeContext {
-  applyToEvent(event: SentryEvent, hint?: EventHint): PromiseLike<SentryEvent | null>;
+  applyToEvent(event: SentryEvent, hint?: EventHint): SentryEvent | null;
 
   /** Add new event processor that will be called after {@link applyToEvent}. */
   addEventProcessor(callback: EventProcessor): this;
