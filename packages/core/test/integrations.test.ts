@@ -1,6 +1,6 @@
 import { Integration } from '@sentry/types';
 
-import { getIntegrationsToSetup } from '../src/index';
+import { getIntegrationsToSetup } from '../src/integrations';
 
 class MockIntegration implements Integration {
   public name: string;
@@ -9,7 +9,7 @@ class MockIntegration implements Integration {
     this.name = name;
   }
 
-  public setupOnce(): void {
+  public install(): void {
     // noop
   }
 }

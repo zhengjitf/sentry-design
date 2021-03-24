@@ -7,6 +7,7 @@ import {
   Options,
   ScopeLike,
   SessionStatus,
+  Integration,
 } from '@sentry/types';
 import {
   dateTimestampInSeconds,
@@ -26,7 +27,8 @@ import {
   TransportRequest,
   Transport,
 } from '@sentry/transport-base';
-import { IntegrationIndex, setupIntegrations } from '@sentry/integration-base';
+
+import { getIntegrationsToSetup } from './integrations';
 
 /**
  * Base implementation for all JavaScript SDK clients.
@@ -68,8 +70,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /** The client Dsn, if specified in options. Without this Dsn, the SDK will be disabled. */
   public readonly dsn?: Dsn;
 
-  /** Array of used integrations. */
-  protected _integrations: IntegrationIndex = {};
+  protected _integrations: Record<string, Integration> = {};
 
   protected _transport: Transport;
 
@@ -94,7 +95,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     }
 
     this._transport = this._setupTransport();
-    this._integrations = setupIntegrations(this);
+    this._integrations = this._setupIntegrations();
   }
 
   public lastEventId(): string | undefined {
@@ -193,6 +194,16 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       // ...(this.options.httpsProxy && { httpsProxy: this.options.httpsProxy }),
       // ...(this.options.caCerts && { caCerts: this.options.caCerts }),
     });
+  }
+
+  protected _setupIntegrations(): Record<string, Integration> {
+    const integrationsToSetup = getIntegrationsToSetup(this.options);
+    return integrationsToSetup.reduce((integrationsIndex: Record<string, Integration>, integration) => {
+      integrationsIndex[integration.name] = integration;
+      integration.install(this);
+      logger.log(`Integration installed: ${integration.name}`);
+      return integrationsIndex;
+    }, {});
   }
 
   /**

@@ -1,17 +1,9 @@
-import { ClientLike, Integration, Options } from '@sentry/types';
-import { logger } from '@sentry/utils';
+import { Integration, Options } from '@sentry/types';
 
-export const installedIntegrations: string[] = [];
-
-/** Map of integrations assigned to a client */
-export interface IntegrationIndex {
-  [key: string]: Integration;
-}
-
-/** Gets integration to install */
 export function getIntegrationsToSetup(options: Options): Integration[] {
   const defaultIntegrations = (options.defaultIntegrations && [...options.defaultIntegrations]) || [];
   const userIntegrations = options.integrations;
+
   let integrations: Integration[] = [];
   if (Array.isArray(userIntegrations)) {
     const userIntegrationsNames = userIntegrations.map(i => i.name);
@@ -42,32 +34,5 @@ export function getIntegrationsToSetup(options: Options): Integration[] {
     integrations = [...defaultIntegrations];
   }
 
-  // Make sure that if present, `Debug` integration will always run last
-  const integrationsNames = integrations.map(i => i.name);
-  const alwaysLastToRun = 'Debug';
-  if (integrationsNames.indexOf(alwaysLastToRun) !== -1) {
-    integrations.push(...integrations.splice(integrationsNames.indexOf(alwaysLastToRun), 1));
-  }
-
-  return integrations;
-}
-
-/**
- * Given a list of integration instances this installs them all. When `withDefaults` is set to `true` then all default
- * integrations are added unless they were already provided before.
- * @param integrations array of integration instances
- * @param withDefault should enable default integrations
- */
-export function setupIntegrations(client: ClientLike): IntegrationIndex {
-  const integrations: IntegrationIndex = {};
-  getIntegrationsToSetup(client.options).forEach(integration => {
-    integrations[integration.name] = integration;
-    if (installedIntegrations.indexOf(integration.name) !== -1) {
-      return;
-    }
-    integration.install(client);
-    installedIntegrations.push(integration.name);
-    logger.log(`Integration installed: ${integration.name}`);
-  });
   return integrations;
 }
