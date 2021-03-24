@@ -143,7 +143,9 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       this._lastException = captureContext.hint?.originalException;
     }
 
-    return this._captureEvent(event, captureContext);
+    const eventId = this._captureEvent(event, captureContext);
+    this._lastEventId = eventId;
+    return eventId;
   }
 
   /**
