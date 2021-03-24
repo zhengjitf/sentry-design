@@ -11,6 +11,7 @@ import {
 import {
   dateTimestampInSeconds,
   getEventDescription,
+  isPlainObject,
   isPrimitive,
   logger,
   normalize,
@@ -249,44 +250,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   }
 
   /**
-   * Adds common information to events.
-   *
-   * The information includes release and environment from `options`,
-   * breadcrumbs and context (extra, tags and user) from the scope.
-   *
-   * Information that is already present in the event is never overwritten. For
-   * nested objects, such as the context, keys are merged.
-   *
-   * @param event The original event.
-   * @param hint May contain additional information about the original exception.
-   * @returns A new event with more information.
-   */
-  protected _prepareEvent(event: SentryEvent, captureContext: CaptureContext): SentryEvent | null {
-    const { normalizeDepth = 3 } = this.options;
-    const prepared: SentryEvent = {
-      ...event,
-      event_id: event.event_id ?? uuid4(),
-      timestamp: event.timestamp ?? dateTimestampInSeconds(),
-    };
-
-    this._applyClientOptions(prepared);
-    this._applyIntegrationsMetadata(prepared);
-
-    const scope =
-      captureContext.scope instanceof Scope
-        ? captureContext.scope
-        : this.getScope()
-            .clone()
-            .update(captureContext.scope);
-
-    const processedEvent = scope.applyToEvent(prepared, captureContext.hint);
-    if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
-      return this._normalizeEvent(processedEvent, normalizeDepth);
-    }
-    return processedEvent;
-  }
-
-  /**
    * Applies `normalize` function on necessary `Event` attributes to make them safe for serialization.
    * Normalized keys:
    * - `breadcrumbs.data`
@@ -434,6 +397,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param scope A scope containing event metadata.
    * @returns A Promise that resolves with the event or rejects in case event was/will not be send.
    */
+  // eslint-disable-next-line complexity
   protected _processEvent(event: SentryEvent, captureContext: CaptureContext): SentryEvent | null {
     if (this.options.enabled === false) {
       logger.error('SDK not enabled, will not send event.');
@@ -452,24 +416,57 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     }
 
     try {
-      let processedEvent = this._prepareEvent(event, captureContext);
+      let processedEvent: SentryEvent | null = {
+        ...event,
+        event_id: event.event_id ?? uuid4(),
+        timestamp: event.timestamp ?? dateTimestampInSeconds(),
+      };
 
+      this._applyClientOptions(processedEvent);
+      this._applyIntegrationsMetadata(processedEvent);
+
+      const scope =
+        captureContext.scope instanceof Scope
+          ? captureContext.scope
+          : this.getScope()
+              .clone()
+              .update(captureContext.scope);
+
+      processedEvent = scope.applyToEvent(processedEvent, captureContext.hint);
       if (processedEvent === null) {
-        logger.error('An event processor returned null, will not send event.');
+        logger.error('A scope event processor returned null, will not send event.');
         return null;
       }
 
-      const isInternalException =
-        captureContext?.hint &&
-        captureContext?.hint?.data &&
-        (captureContext?.hint?.data as { __sentry__: boolean }).__sentry__ === true;
+      for (const processor of this._eventProcessors) {
+        if (typeof processor === 'function') {
+          const nextEvent = processor(processedEvent, captureContext.hint);
+          if (nextEvent === null) {
+            logger.error('A client event processor returned null, will not send event.');
+            return null;
+          }
+          processedEvent = nextEvent;
+        }
+      }
+
+      if (processedEvent === null) {
+        logger.error('A scope event processor returned null, will not send event.');
+        return null;
+      }
+
+      const normalizeDepth = this.options.normalizeDepth ?? 3;
+      if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
+        processedEvent = this._normalizeEvent(processedEvent, normalizeDepth);
+      }
+
+      const isInternalException = captureContext?.hint?.data?.__sentry__ === true;
       if (isInternalException || isTransaction || !this.options.beforeSend) {
         return processedEvent;
       }
 
-      processedEvent = this.options.beforeSend(processedEvent, captureContext?.hint);
+      processedEvent = this.options.beforeSend(processedEvent as SentryEvent, captureContext?.hint);
 
-      if (typeof processedEvent === 'undefined') {
+      if (!(isPlainObject(processedEvent) || processedEvent === null)) {
         logger.error('`beforeSend` method has to return `null` or a valid event.');
         return null;
       }

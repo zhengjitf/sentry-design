@@ -5,7 +5,6 @@ import { computeStackTrace, exceptionFromStacktrace } from '@sentry/eventbuilder
 const DEFAULT_KEY = 'cause';
 const DEFAULT_LIMIT = 5;
 
-// TODO: Make this (and node version) built-in (?)
 export class LinkedErrors implements Integration {
   public name = this.constructor.name;
 

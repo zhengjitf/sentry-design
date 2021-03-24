@@ -21,11 +21,8 @@ export class LinkedErrors implements Integration {
       if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
         return event;
       }
-
-      const linkedErrors = this._walkErrorTree(hint.originalException as Error, this._key);
-      if (event && event.exception && event.exception.values) {
-        event.exception.values = [...linkedErrors, ...event.exception.values];
-      }
+      const linkedErrors = this._walkErrorTree(hint.originalException as ExtendedError, this._key);
+      event.exception.values = [...linkedErrors, ...event.exception.values];
       return event;
     });
   }
