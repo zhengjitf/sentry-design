@@ -1,5 +1,5 @@
 import { ClientLike } from '@sentry/types';
-import { forget, logger } from '@sentry/utils';
+import { logger } from '@sentry/utils';
 
 const DEFAULT_SHUTDOWN_TIMEOUT = 2000;
 
@@ -12,13 +12,17 @@ export function logAndExitProcess(client: ClientLike): (error: { stack?: string 
     console.error(error && error.stack ? error.stack : error);
 
     const timeout = client.options.shutdownTimeout ?? DEFAULT_SHUTDOWN_TIMEOUT;
-    forget(
-      client.close(timeout).then((result: boolean) => {
+    client
+      .close(timeout)
+      .then((result: boolean) => {
         if (!result) {
           logger.warn('We reached the timeout for emptying the request buffer, still exiting now!');
         }
         global.process.exit(1);
-      }),
-    );
+      })
+      .then(null, e => {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      });
   };
 }

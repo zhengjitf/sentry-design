@@ -1,4 +1,3 @@
-export * from './async';
 export * from './browser';
 export * from './error';
 export * from './instrument';
