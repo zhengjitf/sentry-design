@@ -3,10 +3,8 @@ export enum Severity {
   Fatal = 'fatal',
   Error = 'error',
   Warning = 'warning',
-  Log = 'log',
   Info = 'info',
   Debug = 'debug',
-  Critical = 'critical',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-namespace, import/export
@@ -19,22 +17,18 @@ export namespace Severity {
    */
   export function fromString(level: string): Severity {
     switch (level) {
-      case 'debug':
-        return Severity.Debug;
-      case 'info':
-        return Severity.Info;
+      case 'fatal':
+        return Severity.Fatal;
       case 'warn':
       case 'warning':
         return Severity.Warning;
-      case 'error':
-        return Severity.Error;
-      case 'fatal':
-        return Severity.Fatal;
-      case 'critical':
-        return Severity.Critical;
       case 'log':
+      case 'info':
+        return Severity.Info;
+      case 'debug':
+        return Severity.Debug;
       default:
-        return Severity.Log;
+        return Severity.Error;
     }
   }
 }

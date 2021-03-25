@@ -27,24 +27,7 @@ export class ConsoleBreadcrumbs implements Integration {
  */
 function createConsoleWrapper(level: string, client: ClientLike): (originalConsoleMethod: () => void) => void {
   return function consoleWrapper(originalConsoleMethod: () => void): () => void {
-    let sentryLevel: Severity;
-
-    switch (level) {
-      case 'debug':
-        sentryLevel = Severity.Debug;
-        break;
-      case 'error':
-        sentryLevel = Severity.Error;
-        break;
-      case 'info':
-        sentryLevel = Severity.Info;
-        break;
-      case 'warn':
-        sentryLevel = Severity.Warning;
-        break;
-      default:
-        sentryLevel = Severity.Log;
-    }
+    const sentryLevel = Severity.fromString(level);
 
     return function(this: typeof console, ...args: unknown[]): void {
       client.getScope().addBreadcrumb(
