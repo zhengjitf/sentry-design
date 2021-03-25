@@ -346,6 +346,21 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     }
   }
 
+  protected _applySdkMetadata(event: SentryEvent): void {
+    if (this.options._metadata?.sdk) {
+      const { name, version, integrations, packages } = this.options._metadata?.sdk;
+
+      event.sdk = event.sdk ?? {
+        name,
+        version,
+      };
+      event.sdk.name = event.sdk.name ?? name;
+      event.sdk.version = event.sdk.version ?? version;
+      event.sdk.integrations = [...(event.sdk.integrations || []), ...(integrations || [])];
+      event.sdk.packages = [...(event.sdk.packages || []), ...(packages || [])];
+    }
+  }
+
   /**
    * This function adds all used integrations to the SDK info in the event.
    * @param event The event that will be filled with all integrations.
@@ -434,6 +449,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       };
 
       this._applyClientOptions(processedEvent);
+      this._applySdkMetadata(processedEvent);
       this._applyIntegrationsMetadata(processedEvent);
 
       const scope =
