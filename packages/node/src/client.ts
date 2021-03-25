@@ -56,7 +56,6 @@ export class NodeClient extends BaseClient<NodeOptions> {
       ],
       version: SDK_VERSION,
     };
-    options.transport = options.transport ?? HTTPTransport;
 
     super(options);
   }

@@ -1,6 +1,6 @@
 import { ClientLike } from '@sentry/types';
 import { captureException, getCarrier, getCurrentClient } from '@sentry/minimal';
-import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
+import { addInstrumentationHandler, getGlobalObject, logger, supportsFetch } from '@sentry/utils';
 import { Dsn, getReportDialogEndpoint, ReportDialogOptions } from '@sentry/transport-base';
 import { InboundFilters } from '@sentry/integration-common-inboundfilters';
 import { UserAgent } from '@sentry/integration-browser-useragent';
@@ -16,6 +16,8 @@ import { LinkedErrors } from '@sentry/integration-browser-linkederrors';
 import { OnError, OnUnhandledRejection } from '@sentry/integration-browser-globalhandlers';
 
 import { BrowserClient, BrowserOptions } from './client';
+import { FetchTransport } from '@sentry/transport-fetch';
+import { XHRTransport } from '@sentry/transport-xhr';
 
 export const defaultIntegrations = [
   new EventTargetWrap(),
@@ -91,22 +93,8 @@ export const defaultIntegrations = [
  * @see {@link BrowserOptions} for documentation on configuration options.
  */
 export function init(options: BrowserOptions = {}): ClientLike {
-  if (options.defaultIntegrations === undefined) {
-    options.defaultIntegrations = defaultIntegrations;
-  }
-  if (options.release === undefined) {
-    const window = getGlobalObject<Window>();
-    // This supports the variable that sentry-webpack-plugin injects
-    if (window.SENTRY_RELEASE && window.SENTRY_RELEASE.id) {
-      options.release = window.SENTRY_RELEASE.id;
-    }
-  }
-  if (options.autoSessionTracking === undefined) {
-    options.autoSessionTracking = true;
-  }
-
   const carrier = getCarrier();
-  const client = new BrowserClient(options);
+  const client = initClient(options);
   carrier.client = client;
 
   if (options.autoSessionTracking) {
@@ -114,6 +102,28 @@ export function init(options: BrowserOptions = {}): ClientLike {
   }
 
   return client;
+}
+
+export function initClient(options: BrowserOptions = {}): ClientLike {
+  if (options.defaultIntegrations === undefined) {
+    options.defaultIntegrations = defaultIntegrations;
+  }
+
+  if (options.release === undefined) {
+    const window = getGlobalObject<Window>();
+    // This supports the variable that sentry-webpack-plugin injects
+    if (window.SENTRY_RELEASE && window.SENTRY_RELEASE.id) {
+      options.release = window.SENTRY_RELEASE.id;
+    }
+  }
+
+  if (options.autoSessionTracking === undefined) {
+    options.autoSessionTracking = true;
+  }
+
+  options.transport = options.transport ?? (supportsFetch() ? FetchTransport : XHRTransport);
+
+  return new BrowserClient(options);
 }
 
 /**

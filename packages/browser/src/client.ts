@@ -1,8 +1,5 @@
 import { BaseClient, SDK_VERSION } from '@sentry/core';
-import { CaptureContext, SentryEvent, Options } from '@sentry/types';
-import { supportsFetch } from '@sentry/utils';
-import { FetchTransport } from '@sentry/transport-fetch';
-import { XHRTransport } from '@sentry/transport-xhr';
+import { CaptureContext, ClientConfig, SentryEvent, Options } from '@sentry/types';
 import { eventFromException, eventFromMessage } from '@sentry/eventbuilder-browser';
 
 /**
@@ -55,7 +52,6 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
       ],
       version: SDK_VERSION,
     };
-    options.transport = options.transport ?? (supportsFetch() ? FetchTransport : XHRTransport);
 
     super(options);
   }

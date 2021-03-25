@@ -7,9 +7,10 @@ import { LinkedErrors } from '@sentry/integration-node-linkederrors';
 import { ContextLines } from '@sentry/integration-node-contextlines';
 import { OnUncaughtException, OnUnhandledRejection } from '@sentry/integration-node-globalhandlers';
 import { ConsoleBreadcrumbs, HTTPBreadcrumbs } from '@sentry/integration-node-breadcrumbs';
+import { HTTPTransport } from '@sentry/transport-http';
+import { ClientLike } from '@sentry/types';
 
 import { NodeClient, NodeOptions } from './client';
-import { ClientLike } from '@sentry/types';
 
 export const defaultIntegrations = [
   new ConsoleBreadcrumbs(),
@@ -77,6 +78,15 @@ export const defaultIntegrations = [
  * @see {@link NodeOptions} for documentation on configuration options.
  */
 export function init(options: NodeOptions = {}): ClientLike {
+  // TODO: Reevaluate whether stickin it on the domain is still necessary
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+  const carrier = (domain as any).active ? getCarrier((domain as any).active) : getCarrier();
+  const client = initClient(options);
+  carrier.client = client;
+  return client;
+}
+
+export function initClient(options: NodeOptions = {}): ClientLike {
   if (options.defaultIntegrations === undefined) {
     options.defaultIntegrations = defaultIntegrations;
   }
@@ -108,10 +118,7 @@ export function init(options: NodeOptions = {}): ClientLike {
     options.environment = process.env.SENTRY_ENVIRONMENT;
   }
 
-  // TODO: Reevaluate whether stickin it on the domain is still necessary
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-  const carrier = (domain as any).active ? getCarrier((domain as any).active) : getCarrier();
-  const client = new NodeClient(options);
-  carrier.client = client;
-  return client;
+  options.transport = options.transport ?? HTTPTransport;
+
+  return new NodeClient(options);
 }
