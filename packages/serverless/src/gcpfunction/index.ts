@@ -9,8 +9,8 @@ export * from './http';
 export * from './events';
 export * from './cloud_events';
 
-export const defaultIntegrations: Integration[] = [
-  ...Sentry.defaultIntegrations,
+export const getDefaultIntegrations = (): Integration[] => [
+  ...Sentry.getDefaultIntegrations(),
   new GoogleCloudHttp({ optional: true }), // We mark this integration optional since '@google-cloud/common' module could be missing.
   new GoogleCloudGrpc({ optional: true }), // We mark this integration optional since 'google-gax' module could be missing.
 ];
@@ -19,9 +19,8 @@ export const defaultIntegrations: Integration[] = [
  * @see {@link Sentry.init}
  */
 export function init(options: Sentry.NodeOptions = {}): ClientLike {
-  if (options.defaultIntegrations === undefined) {
-    options.defaultIntegrations = defaultIntegrations;
-  }
+  options._internal = options._internal || {};
+  options._internal.defaultIntegrations = getDefaultIntegrations();
 
   options._metadata = options._metadata || {};
   options._metadata.sdk = {

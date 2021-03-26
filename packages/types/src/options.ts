@@ -27,11 +27,14 @@ export interface Options {
   dsn?: string;
 
   /**
-   * If this is set to false, default integrations will not be added, otherwise this will internally be set to the
-   * recommended default integrations.
-   * TODO: We should consider changing this to `boolean | Integration[]`
+   * If this is set to false, default integrations will not be added.
    */
-  defaultIntegrations?: false | Integration[];
+  defaultIntegrations?: boolean;
+
+  /**
+   * If this is set to false, will not try to auto-discover installed integrations.
+   */
+  discoverIntegrations?: boolean;
 
   /**
    * List of integrations that should be installed after SDK was initialized.
@@ -129,6 +132,11 @@ export interface Options {
    */
   _experiments?: {
     [key: string]: any;
+  };
+
+  _internal?: {
+    defaultIntegrations?: Integration[];
+    discoveredIntegrations?: Integration[];
   };
 
   /**

@@ -33,7 +33,7 @@ export { BrowserOptions } from '@sentry/browser';
 export { BrowserClient } from '@sentry/browser';
 export { ReportDialogOptions } from '@sentry/transport-base';
 export {
-  defaultIntegrations,
+  getDefaultIntegrations,
   forceLoad,
   init,
   lastEventId,

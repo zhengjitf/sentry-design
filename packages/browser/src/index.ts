@@ -18,7 +18,7 @@ export {
 } from '@sentry/minimal';
 
 export { BrowserClient, BrowserOptions } from './client';
-export { defaultIntegrations, forceLoad, init, onLoad, showReportDialog, wrap } from './sdk';
+export { getDefaultIntegrations, forceLoad, init, initClient, onLoad, showReportDialog, wrap } from './sdk';
 
 import { getGlobalObject } from '@sentry/utils';
 

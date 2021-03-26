@@ -16,7 +16,7 @@ export {
 export {
   BrowserClient,
   BrowserOptions,
-  defaultIntegrations,
+  getDefaultIntegrations,
   forceLoad,
   lastEventId,
   onLoad,

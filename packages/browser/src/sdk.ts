@@ -1,4 +1,4 @@
-import { ClientLike } from '@sentry/types';
+import { ClientLike, Integration } from '@sentry/types';
 import { captureException, getCarrier, getCurrentClient } from '@sentry/minimal';
 import { addInstrumentationHandler, getGlobalObject, logger, supportsFetch } from '@sentry/utils';
 import { Dsn, getReportDialogEndpoint, ReportDialogOptions } from '@sentry/transport-base';
@@ -14,12 +14,37 @@ import {
 } from '@sentry/integration-browser-breadcrumbs';
 import { LinkedErrors } from '@sentry/integration-browser-linkederrors';
 import { OnError, OnUnhandledRejection } from '@sentry/integration-browser-globalhandlers';
-
-import { BrowserClient, BrowserOptions } from './client';
 import { FetchTransport } from '@sentry/transport-fetch';
 import { XHRTransport } from '@sentry/transport-xhr';
 
-export const defaultIntegrations = [
+import { BrowserClient, BrowserOptions } from './client';
+
+export function init(options: BrowserOptions = {}): ClientLike {
+  const carrier = getCarrier();
+  const client = initClient(options);
+  carrier.client = client;
+  if (options.autoSessionTracking) {
+    startSessionTracking(client);
+  }
+  return client;
+}
+
+export function initClient(options: BrowserOptions = {}): ClientLike {
+  // Injected by sentry-webpack-plugin
+  options.release = options.release ?? getGlobalObject<Window>().SENTRY_RELEASE?.id;
+  options.autoSessionTracking = options.autoSessionTracking ?? true;
+  options.transport = options.transport ?? (supportsFetch() ? FetchTransport : XHRTransport);
+
+  options._internal = options._internal || {};
+  options._internal.defaultIntegrations = options.defaultIntegrations
+    ? options._internal.defaultIntegrations || getDefaultIntegrations()
+    : [];
+  options._internal.discoveredIntegrations = options.discoverIntegrations ? discoverIntegrations() : [];
+
+  return new BrowserClient(options);
+}
+
+export const getDefaultIntegrations = (): Integration[] => [
   new EventTargetWrap(),
   new TimersWrap(),
   new XHRWrap(),
@@ -35,95 +60,8 @@ export const defaultIntegrations = [
   new OnUnhandledRejection(),
 ];
 
-/**
- * The Sentry Browser SDK Client.
- *
- * To use this SDK, call the {@link init} function as early as possible when
- * loading the web page. To set context information or send manual events, use
- * the provided methods.
- *
- * @example
- *
- * ```
- *
- * import { init } from '@sentry/browser';
- *
- * init({
- *   dsn: '__DSN__',
- *   // ...
- * });
- * ```
- *
- * @example
- * ```
- *
- * import { configureScope } from '@sentry/browser';
- * configureScope((scope: Scope) => {
- *   scope.setExtra({ battery: 0.7 });
- *   scope.setTag({ user_mode: 'admin' });
- *   scope.setUser({ id: '4711' });
- * });
- * ```
- *
- * @example
- * ```
- *
- * import { addBreadcrumb } from '@sentry/browser';
- * addBreadcrumb({
- *   message: 'My Breadcrumb',
- *   // ...
- * });
- * ```
- *
- * @example
- *
- * ```
- *
- * import * as Sentry from '@sentry/browser';
- * Sentry.captureMessage('Hello, world!');
- * Sentry.captureException(new Error('Good bye'));
- * Sentry.captureEvent({
- *   message: 'Manual',
- *   stacktrace: [
- *     // ...
- *   ],
- * });
- * ```
- *
- * @see {@link BrowserOptions} for documentation on configuration options.
- */
-export function init(options: BrowserOptions = {}): ClientLike {
-  const carrier = getCarrier();
-  const client = initClient(options);
-  carrier.client = client;
-
-  if (options.autoSessionTracking) {
-    startSessionTracking(client);
-  }
-
-  return client;
-}
-
-export function initClient(options: BrowserOptions = {}): ClientLike {
-  if (options.defaultIntegrations === undefined) {
-    options.defaultIntegrations = defaultIntegrations;
-  }
-
-  if (options.release === undefined) {
-    const window = getGlobalObject<Window>();
-    // This supports the variable that sentry-webpack-plugin injects
-    if (window.SENTRY_RELEASE && window.SENTRY_RELEASE.id) {
-      options.release = window.SENTRY_RELEASE.id;
-    }
-  }
-
-  if (options.autoSessionTracking === undefined) {
-    options.autoSessionTracking = true;
-  }
-
-  options.transport = options.transport ?? (supportsFetch() ? FetchTransport : XHRTransport);
-
-  return new BrowserClient(options);
+function discoverIntegrations(): Integration[] {
+  return [];
 }
 
 /**

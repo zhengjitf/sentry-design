@@ -1,6 +1,7 @@
 import { BaseClient, SDK_VERSION } from '@sentry/core';
-import { CaptureContext, ClientConfig, SentryEvent, Options } from '@sentry/types';
+import { CaptureContext, SentryEvent, Options } from '@sentry/types';
 import { eventFromException, eventFromMessage } from '@sentry/eventbuilder-browser';
+import { getGlobalObject } from '@sentry/utils';
 
 /**
  * Configuration options for the Sentry Browser SDK.

@@ -41,15 +41,17 @@ export interface WrapperOptions {
   timeoutWarningLimit: number;
 }
 
-export const defaultIntegrations: Integration[] = [...Sentry.defaultIntegrations, new AWSServices({ optional: true })];
+export const getDefaultIntegrations = (): Integration[] => [
+  ...Sentry.getDefaultIntegrations(),
+  new AWSServices({ optional: true }),
+];
 
 /**
  * @see {@link Sentry.init}
  */
 export function init(options: Sentry.NodeOptions = {}): ClientLike {
-  if (options.defaultIntegrations === undefined) {
-    options.defaultIntegrations = defaultIntegrations;
-  }
+  options._internal = options._internal || {};
+  options._internal.defaultIntegrations = getDefaultIntegrations();
 
   options._metadata = options._metadata || {};
   options._metadata.sdk = {

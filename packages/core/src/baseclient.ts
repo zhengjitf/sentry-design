@@ -28,7 +28,7 @@ import {
   Transport,
 } from '@sentry/transport-base';
 
-import { getIntegrationsToSetup } from './integrations';
+import { collectIntegrations } from './integrations';
 
 /**
  * Base implementation for all JavaScript SDK clients.
@@ -197,8 +197,13 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   }
 
   protected _setupIntegrations(): Record<string, Integration> {
-    const integrationsToSetup = getIntegrationsToSetup(this.options);
-    return integrationsToSetup.reduce((integrationsIndex: Record<string, Integration>, integration) => {
+    const integrations = collectIntegrations({
+      defaultIntegrations: this.options.defaultIntegrations ? this.options._internal?.defaultIntegrations : [],
+      discoveredIntegrations: this.options.discoverIntegrations ? this.options._internal?.discoveredIntegrations : [],
+      userIntegrations: this.options.integrations ? this.options.integrations : [],
+    });
+
+    return integrations.reduce((integrationsIndex: Record<string, Integration>, integration) => {
       integrationsIndex[integration.name] = integration;
       integration.install(this);
       logger.log(`Integration installed: ${integration.name}`);

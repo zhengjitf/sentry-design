@@ -2,7 +2,6 @@ import * as domain from 'domain';
 
 import { BaseClient, SDK_VERSION } from '@sentry/core';
 import { CaptureContext, SentryEvent, Options, ScopeLike, SentryGlobal } from '@sentry/types';
-import { HTTPTransport } from '@sentry/transport-http';
 import { getCarrier } from '@sentry/minimal';
 import { eventFromException, eventFromMessage } from '@sentry/eventbuilder-node';
 
