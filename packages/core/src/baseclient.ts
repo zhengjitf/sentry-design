@@ -352,8 +352,8 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   }
 
   protected _applySdkMetadata(event: SentryEvent): void {
-    if (this.options._metadata?.sdk) {
-      const { name, version, integrations, packages } = this.options._metadata?.sdk;
+    if (this.options._internal?.sdk) {
+      const { name, version, integrations, packages } = this.options._internal?.sdk;
 
       event.sdk = event.sdk ?? {
         name,

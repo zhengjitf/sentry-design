@@ -2,7 +2,7 @@ import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { SentryEvent, EventHint } from './event';
 import { Integration } from './integration';
 import { LogLevel } from './loglevel';
-import { SdkMetadata } from './sdkmetadata';
+import { SdkInfo } from './sdkinfo';
 import { SamplingContext } from './transaction';
 import { Transport, TransportOptions } from './transport';
 
@@ -122,12 +122,6 @@ export interface Options {
   tracesSampleRate?: number;
 
   /**
-   * Set of metadata about the SDK that can be internally used to enhance envelopes and events,
-   * and provide additional data about every request.
-   * */
-  _metadata?: SdkMetadata;
-
-  /**
    * Options which are in beta, or otherwise not guaranteed to be stable.
    */
   _experiments?: {
@@ -135,6 +129,7 @@ export interface Options {
   };
 
   _internal?: {
+    sdk?: SdkInfo;
     defaultIntegrations?: Integration[];
     discoveredIntegrations?: Integration[];
   };

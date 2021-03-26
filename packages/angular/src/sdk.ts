@@ -5,8 +5,8 @@ import { ClientLike } from '@sentry/types';
  * Inits the Angular SDK
  */
 export function init(options: BrowserOptions): ClientLike {
-  options._metadata = options._metadata || {};
-  options._metadata.sdk = {
+  options._internal = options._internal || {};
+  options._internal.sdk = {
     name: 'sentry.javascript.angular',
     packages: [
       {

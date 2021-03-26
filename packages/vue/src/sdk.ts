@@ -141,8 +141,8 @@ export function init(
     },
   } as VueOptions;
 
-  finalOptions._metadata = finalOptions._metadata || {};
-  finalOptions._metadata.sdk = {
+  finalOptions._internal = finalOptions._internal || {};
+  finalOptions._internal.sdk = {
     name: 'sentry.javascript.vue',
     packages: [
       {

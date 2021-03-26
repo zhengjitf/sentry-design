@@ -52,9 +52,7 @@ export const getDefaultIntegrations = (): Integration[] => [
 export function init(options: Sentry.NodeOptions = {}): ClientLike {
   options._internal = options._internal || {};
   options._internal.defaultIntegrations = getDefaultIntegrations();
-
-  options._metadata = options._metadata || {};
-  options._metadata.sdk = {
+  options._internal.sdk = {
     name: 'sentry.javascript.serverless',
     integrations: ['AWSLambda'],
     packages: [
