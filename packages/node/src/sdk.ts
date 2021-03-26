@@ -8,6 +8,7 @@ import { OnUncaughtException, OnUnhandledRejection } from '@sentry/integration-n
 import { ConsoleBreadcrumbs, HTTPBreadcrumbs } from '@sentry/integration-node-breadcrumbs';
 import { HTTPTransport } from '@sentry/transport-http';
 import { ClientLike, Integration } from '@sentry/types';
+import { sync as readPkgUp } from 'read-pkg-up';
 
 import { NodeClient, NodeOptions } from './client';
 
@@ -21,26 +22,33 @@ export function init(options: NodeOptions = {}): ClientLike {
 }
 
 export function initClient(options: NodeOptions = {}): ClientLike {
-  options.dsn = options.dsn ?? process.env.SENTRY_DSN;
-  options.release = options.release ?? process.env.SENTRY_RELEASE;
-  options.environment = options.environment ?? process.env.SENTRY_ENVIRONMENT;
+  const opts: NodeOptions = {
+    dsn: process.env.SENTRY_DSN,
+    release: process.env.SENTRY_RELEASE,
+    environment: process.env.SENTRY_ENVIRONMENT,
+    transport: HTTPTransport,
+    defaultIntegrations: true,
+    discoverIntegrations: true,
+    ...options,
+    _internal: {
+      defaultIntegrations:
+        options.defaultIntegrations === false ? [] : options._internal?.defaultIntegrations || getDefaultIntegrations(),
+      discoveredIntegrations:
+        options.discoverIntegrations === false
+          ? []
+          : options._internal?.discoveredIntegrations || discoverIntegrations(),
+      ...options._internal,
+    },
+  };
 
-  if (options.tracesSampleRate === undefined && process.env.SENTRY_TRACES_SAMPLE_RATE) {
+  if (!('tracesSampleRate' in opts) && process.env.SENTRY_TRACES_SAMPLE_RATE) {
     const tracesSampleRate = parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE);
     if (isFinite(tracesSampleRate)) {
-      options.tracesSampleRate = tracesSampleRate;
+      opts.tracesSampleRate = tracesSampleRate;
     }
   }
 
-  options.transport = options.transport ?? HTTPTransport;
-
-  options._internal = options._internal || {};
-  options._internal.defaultIntegrations = options.defaultIntegrations
-    ? options._internal.defaultIntegrations || getDefaultIntegrations()
-    : [];
-  options._internal.discoveredIntegrations = options.discoverIntegrations ? discoverIntegrations() : [];
-
-  return new NodeClient(options);
+  return new NodeClient(opts);
 }
 
 export const getDefaultIntegrations = (): Integration[] => [
@@ -54,5 +62,25 @@ export const getDefaultIntegrations = (): Integration[] => [
 ];
 
 function discoverIntegrations(): Integration[] {
-  return [];
+  const pkg = readPkgUp();
+
+  if (!pkg) {
+    return [];
+  }
+
+  return Object.keys({
+    ...pkg.packageJson.dependencies,
+    ...pkg.packageJson.devDependencies,
+  })
+    .filter(name => {
+      return /^@sentry\/integration-(common|node)-[a-z]/.test(name);
+    })
+    .map(name => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const mod = require(name);
+      return Object.values(mod) as { new (): Integration }[];
+    })
+    .reduce((acc, integrations) => {
+      return acc.concat(integrations.map(Integration => new Integration()));
+    }, [] as Integration[]);
 }

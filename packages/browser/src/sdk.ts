@@ -30,18 +30,26 @@ export function init(options: BrowserOptions = {}): ClientLike {
 }
 
 export function initClient(options: BrowserOptions = {}): ClientLike {
-  // Injected by sentry-webpack-plugin
-  options.release = options.release ?? getGlobalObject<Window>().SENTRY_RELEASE?.id;
-  options.autoSessionTracking = options.autoSessionTracking ?? true;
-  options.transport = options.transport ?? (supportsFetch() ? FetchTransport : XHRTransport);
+  const opts: BrowserOptions = {
+    // Injected by sentry-webpack-plugin
+    release: getGlobalObject<Window>().SENTRY_RELEASE?.id,
+    transport: supportsFetch() ? FetchTransport : XHRTransport,
+    autoSessionTracking: true,
+    defaultIntegrations: true,
+    discoverIntegrations: true,
+    ...options,
+    _internal: {
+      defaultIntegrations:
+        options.defaultIntegrations === false ? [] : options._internal?.defaultIntegrations || getDefaultIntegrations(),
+      discoveredIntegrations:
+        options.discoverIntegrations === false
+          ? []
+          : options._internal?.discoveredIntegrations || discoverIntegrations(),
+      ...options._internal,
+    },
+  };
 
-  options._internal = options._internal || {};
-  options._internal.defaultIntegrations = options.defaultIntegrations
-    ? options._internal.defaultIntegrations || getDefaultIntegrations()
-    : [];
-  options._internal.discoveredIntegrations = options.discoverIntegrations ? discoverIntegrations() : [];
-
-  return new BrowserClient(options);
+  return new BrowserClient(opts);
 }
 
 export const getDefaultIntegrations = (): Integration[] => [
@@ -61,6 +69,7 @@ export const getDefaultIntegrations = (): Integration[] => [
 ];
 
 function discoverIntegrations(): Integration[] {
+  // TODO: Discover integrations from window.__SENTRY_V7_INTEGRATIONS__?
   return [];
 }
 
