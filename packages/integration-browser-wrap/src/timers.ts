@@ -12,28 +12,29 @@ type TimersWrapOptions = {
 export class TimersWrap implements Integration {
   public name = this.constructor.name;
 
-  private _setTimeout: boolean;
-  private _setInterval: boolean;
-  private _requestAnimationFrame: boolean;
+  private _options: TimersWrapOptions;
 
-  public constructor({ setTimeout, setInterval, requestAnimationFrame }: TimersWrapOptions = {}) {
-    this._setTimeout = setTimeout ?? true;
-    this._setInterval = setInterval ?? true;
-    this._requestAnimationFrame = requestAnimationFrame ?? true;
+  public constructor(options: TimersWrapOptions = {}) {
+    this._options = {
+      setTimeout: true,
+      setInterval: true,
+      requestAnimationFrame: true,
+      ...options,
+    };
   }
 
   public install(): void {
     const global = getGlobalObject();
 
-    if (this._setTimeout) {
+    if (this._options.setTimeout) {
       fill(global, 'setTimeout', this._wrapTimerFunction.bind(this));
     }
 
-    if (this._setInterval) {
+    if (this._options.setInterval) {
       fill(global, 'setInterval', this._wrapTimerFunction.bind(this));
     }
 
-    if (this._requestAnimationFrame) {
+    if (this._options.requestAnimationFrame) {
       fill(global, 'requestAnimationFrame', this._wrapTimerFunction.bind(this));
     }
   }

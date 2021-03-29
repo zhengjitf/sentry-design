@@ -20,18 +20,6 @@ import { dateTimestampInSeconds, isPlainObject } from '@sentry/utils';
 
 import { Session } from './session';
 
-/**
- * Default maximum number of breadcrumbs added to an event. Can be overwritten
- * with {@link Options.maxBreadcrumbs}.
- */
-const DEFAULT_BREADCRUMBS = 100;
-
-/**
- * Absolute maximum number of breadcrumbs added to an event. The
- * `maxBreadcrumbs` option cannot be higher than this value.
- */
-const MAX_BREADCRUMBS = 100;
-
 type ScopeOptions = {
   maxBreadcrumbs?: number;
   beforeBreadcrumb?(breadcrumb: Breadcrumb, hint?: BreadcrumbHint): Breadcrumb | null;
@@ -85,8 +73,8 @@ export class Scope implements ScopeLike {
   private _beforeBreadcrumb: (breadcrumb: Breadcrumb, hint?: BreadcrumbHint) => Breadcrumb | null;
 
   public constructor({ maxBreadcrumbs, beforeBreadcrumb }: ScopeOptions = {}) {
-    this._maxBreadcrumbs = maxBreadcrumbs ?? DEFAULT_BREADCRUMBS;
-    this._beforeBreadcrumb = beforeBreadcrumb ?? (breadcrumb => breadcrumb);
+    this._maxBreadcrumbs = maxBreadcrumbs ?? 100;
+    this._beforeBreadcrumb = beforeBreadcrumb || (breadcrumb => breadcrumb);
   }
 
   /**
@@ -369,7 +357,8 @@ export class Scope implements ScopeLike {
     preparedBreadcrumb = this._beforeBreadcrumb(preparedBreadcrumb, hint);
 
     if (preparedBreadcrumb !== null) {
-      const maxBreadcrumbs = Math.min(this._maxBreadcrumbs, MAX_BREADCRUMBS);
+      // Absolute maximum number of breadcrumbs added to an event. The `maxBreadcrumbs` option cannot be higher than this value.
+      const maxBreadcrumbs = Math.min(this._maxBreadcrumbs, 100);
       this.breadcrumbs = [...this.breadcrumbs, preparedBreadcrumb].slice(-maxBreadcrumbs);
       this._notifyScopeListeners();
     }

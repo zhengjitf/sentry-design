@@ -12,8 +12,8 @@ export class HistoryBreadcrumbs implements Integration {
         let from = handlerData.from;
         let to = handlerData.to;
         const parsedLoc = parseUrl(global.location.href);
-        let parsedFrom = parseUrl(from ?? '');
-        const parsedTo = parseUrl(to ?? '');
+        let parsedFrom = parseUrl(from || '');
+        const parsedTo = parseUrl(to || '');
 
         // Initial pushState doesn't provide `from` information
         if (!parsedFrom.path) {

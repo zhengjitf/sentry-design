@@ -27,7 +27,7 @@ export class OnUnhandledRejection implements Integration {
     client: ClientLike,
   ): (reason: { stack?: string }, promise: PromiseRejectionWithDomainContext) => void {
     return (reason: { stack?: string }, promise: PromiseRejectionWithDomainContext): void => {
-      const context = promise.domain?.sentryContext ?? {};
+      const context = promise.domain?.sentryContext || {};
 
       const scope: ScopeContext = { extra: { unhandledPromiseRejection: true } };
 
@@ -60,13 +60,13 @@ export class OnUnhandledRejection implements Integration {
       'or by rejecting a promise which was not handled with .catch().' +
       ' The promise rejected with the reason:';
 
-    const mode = this._options.mode ?? DEFAULT_REJECTION_MODE;
+    const mode = this._options.mode || DEFAULT_REJECTION_MODE;
 
     /* eslint-disable no-console */
     if (mode === 'warn') {
       consoleSandbox(() => {
         console.warn(rejectionWarning);
-        console.error(reason?.stack ?? reason);
+        console.error(reason?.stack || reason);
       });
     } else if (mode === 'strict') {
       consoleSandbox(() => {

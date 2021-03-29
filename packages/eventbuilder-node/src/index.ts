@@ -51,7 +51,7 @@ export function eventFromException(options: Options, exception: unknown, capture
     event.server_name = (options as { serverName?: string }).serverName;
   }
   if (shouldSerializeException) {
-    event.extra = event.extra ?? {};
+    event.extra = event.extra || {};
     event.extra.__serialized__ = normalizeToSize(exception as Record<string, unknown>);
   }
   return event;
@@ -59,7 +59,7 @@ export function eventFromException(options: Options, exception: unknown, capture
 
 export function eventFromMessage(options: Options, message: string, captureContext: CaptureContext): SentryEvent {
   const event: SentryEvent = {
-    level: captureContext.scope?.level ?? Severity.Info,
+    level: captureContext.scope?.level || Severity.Info,
     message,
     platform: 'node',
   };

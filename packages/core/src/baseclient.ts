@@ -85,7 +85,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param options Options for the client.
    */
   protected constructor(options: O) {
-    this.options = options ?? {};
+    this.options = options || {};
     this.logger.enabled = !!this.options.debug;
 
     if (this.options.dsn) {
@@ -343,12 +343,12 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     if (this.options._internal?.sdk) {
       const { name, version, integrations, packages } = this.options._internal?.sdk;
 
-      event.sdk = event.sdk ?? {
+      event.sdk = event.sdk || {
         name,
         version,
       };
-      event.sdk.name = event.sdk.name ?? name;
-      event.sdk.version = event.sdk.version ?? version;
+      event.sdk.name = event.sdk.name || name;
+      event.sdk.version = event.sdk.version || version;
       event.sdk.integrations = [...(event.sdk.integrations || []), ...(integrations || [])];
       event.sdk.packages = [...(event.sdk.packages || []), ...(packages || [])];
     }
@@ -438,8 +438,8 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     try {
       let processedEvent: SentryEvent | null = {
         ...event,
-        event_id: event.event_id ?? uuid4(),
-        timestamp: event.timestamp ?? dateTimestampInSeconds(),
+        event_id: event.event_id || uuid4(),
+        timestamp: event.timestamp || dateTimestampInSeconds(),
       };
 
       this._applyClientOptions(processedEvent);
@@ -476,7 +476,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       }
 
       const normalizeDepth = this.options.normalizeDepth ?? 3;
-      if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
+      if (normalizeDepth > 0) {
         processedEvent = this._normalizeEvent(processedEvent, normalizeDepth);
       }
 

@@ -51,7 +51,7 @@ export function eventFromMessage(options: Options, message: string, captureConte
   if (captureContext.hint?.event_id) {
     event.event_id = captureContext.hint?.event_id;
   }
-  event.level = captureContext.scope?.level ?? Severity.Info;
+  event.level = captureContext.scope?.level || Severity.Info;
   event.platform = 'javascript';
   return event;
 }

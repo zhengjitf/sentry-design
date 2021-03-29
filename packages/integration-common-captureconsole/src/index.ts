@@ -14,7 +14,7 @@ export class CaptureConsole implements Integration {
   private _levels: Level[];
 
   public constructor(options: CaptoreConsoleOptions = {}) {
-    this._levels = options.levels ?? ((LEVELS as unknown) as Level[]);
+    this._levels = options.levels || ((LEVELS as unknown) as Level[]);
   }
 
   public install(client: ClientLike): void {

@@ -6,7 +6,7 @@ export function captureException(exception: unknown, captureContext: CaptureCont
   try {
     throw new Error('Sentry syntheticException');
   } catch (syntheticException) {
-    captureContext.hint = captureContext.hint ?? {};
+    captureContext.hint = captureContext.hint || {};
     captureContext.hint.originalException = exception;
     captureContext.hint.syntheticException = syntheticException as Error;
   }
@@ -18,7 +18,7 @@ export function captureMessage(message: string, captureContext: CaptureContext =
   try {
     throw new Error(message);
   } catch (syntheticException) {
-    captureContext.hint = captureContext.hint ?? {};
+    captureContext.hint = captureContext.hint || {};
     captureContext.hint.syntheticException = syntheticException as Error;
   }
 

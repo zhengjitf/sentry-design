@@ -48,7 +48,7 @@ export abstract class BaseTransport {
             return Promise.resolve({ status });
           }
 
-          return Promise.reject(new Error(body ?? reason ?? 'Unknown transport error'));
+          return Promise.reject(new Error(body || reason || 'Unknown transport error'));
         },
       );
     };

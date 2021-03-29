@@ -145,7 +145,7 @@ export function startTransaction(
   customSamplingContext?: CustomSamplingContext,
   client: ClientLike | undefined = getCurrentClient(),
 ): Transaction {
-  const options = client?.options ?? {};
+  const options = client?.options || {};
   let transaction = new Transaction(transactionContext, client);
   transaction = sample(transaction, options, {
     parentSampled: transactionContext.parentSampled,
@@ -168,7 +168,7 @@ export function startIdleTransaction(
   onScope?: boolean,
   customSamplingContext?: CustomSamplingContext,
 ): IdleTransaction {
-  const options = client.options ?? {};
+  const options = client.options || {};
 
   let transaction = new IdleTransaction(transactionContext, client, idleTimeout, onScope);
   transaction = sample(transaction, options, {

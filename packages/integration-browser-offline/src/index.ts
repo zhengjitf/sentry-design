@@ -33,7 +33,7 @@ export class Offline implements Integration {
    * @inheritDoc
    */
   public constructor(options: OfflineOptions = {}) {
-    this.maxStoredEvents = options.maxStoredEvents ?? 30; // set a reasonable default
+    this.maxStoredEvents = options.maxStoredEvents ?? 30;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     this.offlineEventStore = localForage.createInstance({
       name: 'sentry/offlineEventStore',

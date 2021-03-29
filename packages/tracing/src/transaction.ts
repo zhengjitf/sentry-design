@@ -35,7 +35,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
   public constructor(transactionContext: TransactionContext, client?: ClientLike) {
     super(transactionContext);
 
-    this.client = client ?? getCurrentClient();
+    this.client = client || getCurrentClient();
 
     this.name = transactionContext.name || '';
 
@@ -155,8 +155,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
   public updateWithContext(transactionContext: TransactionContext): this {
     super.updateWithContext(transactionContext);
 
-    this.name = transactionContext.name ?? '';
-
+    this.name = transactionContext.name || '';
     this._trimEnd = transactionContext.trimEnd;
 
     return this;

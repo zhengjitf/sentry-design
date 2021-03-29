@@ -90,13 +90,13 @@ export function showReportDialog(
     return;
   }
 
-  const client = customClient ?? getCurrentClient();
+  const client = customClient || getCurrentClient();
   if (!client) {
     return;
   }
 
-  options.eventId = options.eventId ?? client.lastEventId();
-  options.dsn = options.dsn ?? client.options.dsn;
+  options.eventId = options.eventId || client.lastEventId();
+  options.dsn = options.dsn || client.options.dsn;
 
   if (client.options.enabled === false) {
     client.logger.error(`${errPrefix} disabled client`);

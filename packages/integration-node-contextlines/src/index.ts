@@ -4,7 +4,6 @@ import { ClientLike, Integration, StackFrame } from '@sentry/types';
 import { snipLine } from '@sentry/utils';
 import { LRUMap } from 'lru_map';
 
-const DEFAULT_LINES_OF_CONTEXT: number = 7;
 const FILE_CONTENT_CACHE = new LRUMap<string, string | null>(100);
 
 // TODO: Write some performance tests for LRU/Promise memory issue.
@@ -22,8 +21,7 @@ export class ContextLines implements Integration {
   public name = this.constructor.name;
 
   public install(client: ClientLike): void {
-    const linesOfContext =
-      (client.options as { frameContextLines?: number }).frameContextLines ?? DEFAULT_LINES_OF_CONTEXT;
+    const linesOfContext = (client.options as { frameContextLines?: number }).frameContextLines ?? 7;
 
     client.addEventProcessor(event => {
       const frames = event.exception?.values?.[0].stacktrace?.frames;
@@ -66,7 +64,7 @@ export class ContextLines implements Integration {
  * @param frame StackFrame that will be mutated
  * @param linesOfContext number of context lines we want to add pre/post
  */
-function addContextToFrame(lines: string[], frame: StackFrame, linesOfContext: number = 5): void {
+function addContextToFrame(lines: string[], frame: StackFrame, linesOfContext: number): void {
   const lineno = frame.lineno || 0;
   const maxLines = lines.length;
   const sourceLine = Math.max(Math.min(maxLines, lineno - 1), 0);
