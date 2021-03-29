@@ -1,8 +1,7 @@
 export interface Mechanism {
-  type: string;
-  handled: boolean;
-  data?: {
-    [key: string]: string | boolean;
-  };
+  [key: string]: unknown;
+  type?: string;
+  handled?: boolean;
   synthetic?: boolean;
+  data?: Record<string, unknown>;
 }

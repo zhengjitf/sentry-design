@@ -10,6 +10,7 @@ import {
   Integration,
   TransportRequest,
   Transport,
+  EventType,
 } from '@sentry/types';
 import {
   dateTimestampInSeconds,
@@ -388,7 +389,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     }
 
     // TODO: Make it configurable or move to @sentry/integration-browser-breadcrumbs
-    const eventType = processedEvent.type === 'transaction' ? 'transaction' : 'event';
+    const eventType = processedEvent.type === EventType.Transaction ? 'transaction' : 'event';
     this.getScope().addBreadcrumb(
       {
         category: `sentry.${eventType}`,

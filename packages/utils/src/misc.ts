@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SentryEvent, SentryGlobal, WrappedFunction } from '@sentry/types';
+import { Mechanism, SentryEvent, SentryGlobal, WrappedFunction } from '@sentry/types';
 
 import { isNodeEnv } from './node';
 
@@ -182,22 +182,19 @@ export function addExceptionTypeValue(event: SentryEvent, value?: string, type?:
  * @param mechanism Mechanism of the mechanism.
  * @hidden
  */
-export function addExceptionMechanism(
-  event: SentryEvent,
-  mechanism: {
-    [key: string]: any;
-  } = {},
-): void {
-  // TODO: Use real type with `keyof Mechanism` thingy and maybe make it better?
+export function addExceptionMechanism(event: SentryEvent, mechanism: Mechanism): void {
   try {
-    // @ts-ignore Type 'Mechanism | {}' is not assignable to type 'Mechanism | undefined'
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    event.exception!.values![0].mechanism = event.exception!.values![0].mechanism || {};
-    Object.keys(mechanism).forEach(key => {
-      // @ts-ignore Mechanism has no index signature
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      event.exception!.values![0].mechanism[key] = mechanism[key];
-    });
+    const exception = event.exception?.values?.[0];
+
+    if (exception) {
+      exception.mechanism = exception.mechanism || {
+        type: mechanism.type,
+      };
+
+      for (const [key, value] of Object.entries(mechanism)) {
+        exception.mechanism[key] = value;
+      }
+    }
   } catch (_oO) {
     // no-empty
   }

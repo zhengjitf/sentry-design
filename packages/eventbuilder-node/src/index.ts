@@ -13,7 +13,11 @@ import {
 import { extractStackFromError, parseError, parseStack, prepareFramesForEvent } from './parsers';
 export { getExceptionFromError } from './parsers';
 
-export function eventFromException(options: Options, exception: unknown, captureContext: CaptureContext): SentryEvent {
+export function eventFromException(
+  options: Options & { serverName?: string },
+  exception: unknown,
+  captureContext: CaptureContext,
+): SentryEvent {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ex: any = exception;
   const mechanism: Mechanism = {
@@ -46,9 +50,8 @@ export function eventFromException(options: Options, exception: unknown, capture
     event.event_id = captureContext.hint?.event_id;
   }
   event.platform = 'node';
-  // TODO: Fix options type - we dont want to have a circular dependency on @sentry/node here
-  if ((options as { serverName?: string }).serverName) {
-    event.server_name = (options as { serverName?: string }).serverName;
+  if (options.serverName) {
+    event.server_name = options.serverName;
   }
   if (shouldSerializeException) {
     event.extra = event.extra || {};
