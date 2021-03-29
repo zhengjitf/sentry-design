@@ -25,8 +25,6 @@ function patchFrames(frames: Array<StackFrame>): boolean {
   return haveWasm;
 }
 
-// TODO: Make it integration?
-
 /**
  * Process WASM stack traces to support server-side symbolication.
  *
