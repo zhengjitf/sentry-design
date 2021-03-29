@@ -94,9 +94,9 @@ export class InboundFilters implements Integration {
       return false;
     }
 
+    const { ignoreErrors } = options;
     return this._getPossibleEventMessages(event).some(message =>
-      // Not sure why TypeScript complains here...
-      (options.ignoreErrors as Array<RegExp | string>).some(pattern => isMatchingPattern(message, pattern)),
+      ignoreErrors.some(pattern => isMatchingPattern(message, pattern)),
     );
   }
 

@@ -62,7 +62,6 @@ import { collectIntegrations } from './integrations';
  *   // ...
  * }
  */
-// TODO: Allow for passing scope during construction for explicit `this._scope`
 export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /** Options passed to the SDK. */
   public readonly options: O;
@@ -79,7 +78,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
   protected _lastEventId?: string;
 
-  protected _scope: ScopeLike = new Scope();
+  protected _scope: ScopeLike;
 
   protected _eventProcessors: EventProcessor[] = [];
 
@@ -101,6 +100,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       this.logger.enabled = true;
     }
 
+    this._scope = this.options._internal?.scope || new Scope();
     this._transport = this._setupTransport();
     this._integrations = this._setupIntegrations();
   }

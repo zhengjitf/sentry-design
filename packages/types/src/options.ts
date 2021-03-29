@@ -2,6 +2,7 @@ import { Breadcrumb, BreadcrumbHint } from './breadcrumb';
 import { SentryEvent, EventHint } from './event';
 import { Integration } from './integration';
 import { LogLevel } from './loglevel';
+import { ScopeLike } from './scope';
 import { SdkInfo } from './sdkinfo';
 import { SamplingContext } from './transaction';
 import { Transport, TransportOptions } from './transport';
@@ -130,6 +131,7 @@ export interface Options {
 
   _internal?: {
     sdk?: SdkInfo;
+    scope?: ScopeLike;
     defaultIntegrations?: Integration[];
     discoveredIntegrations?: Integration[];
   };
