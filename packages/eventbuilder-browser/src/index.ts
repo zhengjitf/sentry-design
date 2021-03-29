@@ -15,9 +15,8 @@ import {
 import { eventFromPlainObject, eventFromStacktrace, prepareFramesForEvent } from './parsers';
 import { computeStackTrace } from './tracekit';
 
-// TODO: Export only necessary thing. Or nothing at all directly from parsers/tracekit.
-export * from './tracekit';
-export * from './parsers';
+export { exceptionFromStacktrace } from './parsers';
+export { computeStackTrace } from './tracekit';
 
 /**
  * Builds and SentryEvent from a Exception

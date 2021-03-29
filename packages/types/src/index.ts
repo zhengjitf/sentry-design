@@ -5,7 +5,7 @@ export { Context, Contexts } from './context';
 export { Dsn, DsnComponents, DsnLike, DsnProtocol } from './dsn';
 export { DebugImage, DebugImageType, DebugMeta } from './debugMeta';
 export { ExtendedError } from './error';
-export { CaptureContext, SentryEvent, EventHint } from './event';
+export { CaptureContext, SentryEvent, EventHint, EventType } from './event';
 export { EventProcessor } from './eventprocessor';
 export { Exception } from './exception';
 export { Extra, Extras } from './extra';
@@ -36,6 +36,14 @@ export {
   TransactionSamplingMethod,
 } from './transaction';
 export { Thread } from './thread';
-export { Transport, TransportOptions } from './transport';
+export {
+  ResponseStatus,
+  Transport,
+  TransportOptions,
+  TransportRequest,
+  TransportRequestMaker,
+  TransportResponse,
+  TransportMakerResponse,
+} from './transport';
 export { User } from './user';
 export { WrappedFunction } from './wrappedfunction';

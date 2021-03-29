@@ -5,6 +5,7 @@ import {
   Transaction as TransactionInterface,
   TransactionContext,
   ClientLike,
+  EventType,
 } from '@sentry/types';
 import { dropUndefinedKeys } from '@sentry/utils';
 
@@ -118,7 +119,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
       tags: this.tags,
       timestamp: this.endTimestamp,
       transaction: this.name,
-      type: 'transaction',
+      type: EventType.Transaction,
       debug_meta: this._metadata,
     };
 

@@ -45,7 +45,11 @@ export interface SentryEvent {
   debug_meta?: DebugMeta;
 }
 
-export type EventType = 'transaction';
+export enum EventType {
+  Error = 'error',
+  Session = 'session',
+  Transaction = 'transaction',
+}
 
 export type EventHint = {
   event_id?: string;

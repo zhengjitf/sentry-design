@@ -1,28 +1,16 @@
 import * as http from 'http';
 import * as https from 'https';
-// import { readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { URL } from 'url';
 
-import {
-  BaseTransport,
-  Transport,
-  TransportOptions,
-  TransportRequest,
-  TransportRequestMaker,
-  TransportResponse,
-} from '@sentry/transport-base';
-
-// TODO: Unify all transports options
-type HTTPTransportOptions = TransportOptions & {
-  requestOptions?: https.RequestOptions;
-  proxy?: string;
-  caCerts?: string;
-};
+import { BaseTransport } from '@sentry/transport-base';
+import { Transport, TransportOptions, TransportRequest, TransportRequestMaker, TransportResponse } from '@sentry/types';
 
 // TODO: `x-sentry-error` header?
-
 export class HTTPTransport extends BaseTransport implements Transport {
-  constructor(private readonly _options: HTTPTransportOptions) {
+  private _certs?: Buffer;
+
+  constructor(private readonly _options: TransportOptions) {
     super(_options);
   }
 
@@ -47,12 +35,21 @@ export class HTTPTransport extends BaseTransport implements Transport {
             ...this._options.headers,
             ...this._dsn.getEnvelopeEndpointAuthHeaders(),
           },
-          // ...this._options.requestOptions,
-          // TODO: Handle and cache CA certs?
-          // ...(this._options.caCerts && {
-          //   ca: readFileSync(this._options.caCerts),
-          // }),
         };
+
+        if (this._options.caCerts) {
+          if (!this._certs) {
+            try {
+              this._certs = readFileSync(this._options.caCerts);
+            } catch (_oO) {
+              // no-empty
+            }
+          }
+
+          if (this._certs) {
+            requestOptions.ca = this._certs;
+          }
+        }
 
         // TODO: Add gzip compresison
         const req = httpModule.request(requestOptions, (res: http.IncomingMessage) => {

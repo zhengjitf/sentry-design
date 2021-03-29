@@ -1,17 +1,8 @@
-import {
-  BaseTransport,
-  Transport,
-  TransportOptions,
-  TransportRequest,
-  TransportRequestMaker,
-  TransportResponse,
-} from '@sentry/transport-base';
-
-// TODO: Unify all transports options
-type XHRTransportOptions = TransportOptions;
+import { BaseTransport } from '@sentry/transport-base';
+import { Transport, TransportOptions, TransportRequest, TransportRequestMaker, TransportResponse } from '@sentry/types';
 
 export class XHRTransport extends BaseTransport implements Transport {
-  constructor(private readonly _options: XHRTransportOptions) {
+  constructor(private readonly _options: TransportOptions) {
     super(_options);
   }
 

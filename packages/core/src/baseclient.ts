@@ -8,6 +8,8 @@ import {
   ScopeLike,
   SessionStatus,
   Integration,
+  TransportRequest,
+  Transport,
 } from '@sentry/types';
 import {
   dateTimestampInSeconds,
@@ -19,14 +21,7 @@ import {
   truncate,
   uuid4,
 } from '@sentry/utils';
-import {
-  Dsn,
-  eventToTransportRequest,
-  NoopTransport,
-  sessionToTransportRequest,
-  TransportRequest,
-  Transport,
-} from '@sentry/transport-base';
+import { Dsn, eventToTransportRequest, NoopTransport, sessionToTransportRequest } from '@sentry/transport-base';
 
 import { collectIntegrations } from './integrations';
 
@@ -91,17 +86,20 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    */
   protected constructor(options: O) {
     this.options = options ?? {};
+    this.logger.enabled = !!this.options.debug;
 
     if (this.options.dsn) {
       this.dsn = new Dsn(this.options.dsn);
     }
 
-    if (this.options.debug) {
-      this.logger.enabled = true;
-    }
-
     this._scope = this.options._internal?.scope || new Scope();
-    this._transport = this._setupTransport();
+    this._transport =
+      !this.options.dsn || !this.options.transport
+        ? new NoopTransport()
+        : new this.options.transport({
+            dsn: this.options.dsn,
+            ...this.options.transportOptions,
+          });
     this._integrations = this._setupIntegrations();
   }
 
@@ -117,7 +115,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     this._scope = scope;
   }
 
-  // TODO: Run these during event processing
   public addEventProcessor(callback: EventProcessor): void {
     this._eventProcessors.push(callback);
   }
@@ -184,22 +181,6 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     return this._transport.flush(timeout).then(result => {
       this.options.enabled = false;
       return result;
-    });
-  }
-
-  protected _setupTransport(): Transport {
-    // TODO: This whole function should be unnecessary and moved to client construction
-    if (!this.options.dsn || !this.options.transport) {
-      return new NoopTransport();
-    }
-
-    return new this.options.transport({
-      dsn: this.options.dsn,
-      ...this.options.transportOptions,
-      // TODO: Deprecate these options and move to `transportOptions`
-      // ...(this.options.httpProxy && { httpProxy: this.options.httpProxy }),
-      // ...(this.options.httpsProxy && { httpsProxy: this.options.httpsProxy }),
-      // ...(this.options.caCerts && { caCerts: this.options.caCerts }),
     });
   }
 
@@ -419,6 +400,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
         event: processedEvent,
       },
     );
+
     return processedEvent.event_id;
   }
 

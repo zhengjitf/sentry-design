@@ -101,7 +101,6 @@ export class InboundFilters implements Integration {
   }
 
   private _isDeniedUrl(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
-    // TODO: Use Glob instead?
     if (!options.denyUrls || !options.denyUrls.length) {
       return false;
     }
@@ -110,7 +109,6 @@ export class InboundFilters implements Integration {
   }
 
   private _isAllowedUrl(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
-    // TODO: Use Glob instead?
     if (!options.allowUrls || !options.allowUrls.length) {
       return true;
     }
@@ -127,7 +125,6 @@ export class InboundFilters implements Integration {
         ...(clientOptions.ignoreErrors || []),
         ...DEFAULT_IGNORE_ERRORS,
       ],
-      // TODO: Do we ever used it? Like ever? - https://github.com/getsentry/sentry-javascript/search?q=ignoreInternal
       ignoreInternal: typeof this._options.ignoreInternal !== 'undefined' ? this._options.ignoreInternal : true,
     };
   }

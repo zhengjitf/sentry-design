@@ -16,15 +16,6 @@ export interface NodeOptions extends Options {
   /** Maximum time in milliseconds to wait to drain the request queue, before the process is allowed to exit. */
   shutdownTimeout?: number;
 
-  /** Set a HTTP proxy that should be used for outbound requests. */
-  httpProxy?: string;
-
-  /** Set a HTTPS proxy that should be used for outbound requests. */
-  httpsProxy?: string;
-
-  /** HTTPS proxy certificates path */
-  caCerts?: string;
-
   /** Sets the number of context lines for each frame when loading a file. */
   frameContextLines?: number;
 

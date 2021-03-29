@@ -1,19 +1,8 @@
-import {
-  BaseTransport,
-  Transport,
-  TransportOptions,
-  TransportRequest,
-  TransportRequestMaker,
-  TransportResponse,
-} from '@sentry/transport-base';
-
-// TODO: Unify all transports options
-type FetchTransportOptions = TransportOptions & {
-  requestOptions?: RequestInit;
-};
+import { BaseTransport } from '@sentry/transport-base';
+import { Transport, TransportOptions, TransportRequest, TransportRequestMaker, TransportResponse } from '@sentry/types';
 
 export class FetchTransport extends BaseTransport implements Transport {
-  constructor(private readonly _options: FetchTransportOptions) {
+  constructor(private readonly _options: TransportOptions) {
     super(_options);
   }
 
@@ -25,8 +14,11 @@ export class FetchTransport extends BaseTransport implements Transport {
         method: 'POST',
         referrerPolicy: 'origin',
         headers: this._options.headers,
-        ...this._options.requestOptions,
       };
+
+      if (this._options.credentials) {
+        requestOptions.credentials = this._options.credentials as RequestCredentials;
+      }
 
       return fetch(this._dsn.getEnvelopeEndpoint(), requestOptions).then(async response => {
         return {

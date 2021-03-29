@@ -1,31 +1,4 @@
-import { SentryEvent, Session } from '@sentry/types';
-
-import { ResponseStatus } from './responseStatus';
-
-export type TransportRequest<T> = {
-  body: T;
-  type: EventType;
-};
-
-export type TransportResponse = {
-  status: ResponseStatus;
-  reason?: string;
-};
-
-export type TransportMakerResponse = {
-  body?: string;
-  headers?: Record<string, string | null>;
-  reason?: string;
-  statusCode: number;
-};
-
-export type TransportRequestMaker<T> = (request: TransportRequest<T>) => PromiseLike<TransportMakerResponse>;
-
-export enum EventType {
-  Error = 'error',
-  Session = 'session',
-  Transaction = 'transaction',
-}
+import { EventType, SentryEvent, Session, TransportRequest } from '@sentry/types';
 
 /**
  * Apply SdkInfo (name, version, packages, integrations) to the corresponding event key.
