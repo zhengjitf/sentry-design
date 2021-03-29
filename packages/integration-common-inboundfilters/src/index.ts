@@ -9,7 +9,6 @@ interface InboundFiltersOptions {
   allowUrls: Array<string | RegExp>;
   denyUrls: Array<string | RegExp>;
   ignoreErrors: Array<string | RegExp>;
-  ignoreInternal: boolean;
 }
 
 /** Inbound filters configurable by the user */
@@ -35,13 +34,6 @@ export class InboundFilters implements Integration {
   }
 
   private _shouldDropEvent(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
-    if (this._isSentryError(event, options)) {
-      this._client.logger.warn(
-        `Event dropped due to being internal Sentry Error.\nEvent: ${getEventDescription(event)}`,
-      );
-      return true;
-    }
-
     if (this._isIgnoredError(event, options)) {
       this._client.logger.warn(
         `Event dropped due to being matched by \`ignoreErrors\` option.\nEvent: ${getEventDescription(event)}`,
@@ -68,25 +60,6 @@ export class InboundFilters implements Integration {
     }
 
     return false;
-  }
-
-  private _isSentryError(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
-    if (!options.ignoreInternal) {
-      return false;
-    }
-
-    try {
-      return (
-        (event &&
-          event.exception &&
-          event.exception.values &&
-          event.exception.values[0] &&
-          event.exception.values[0].type === 'SentryError') ||
-        false
-      );
-    } catch (_oO) {
-      return false;
-    }
   }
 
   private _isIgnoredError(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
@@ -125,7 +98,6 @@ export class InboundFilters implements Integration {
         ...(clientOptions.ignoreErrors || []),
         ...DEFAULT_IGNORE_ERRORS,
       ],
-      ignoreInternal: typeof this._options.ignoreInternal !== 'undefined' ? this._options.ignoreInternal : true,
     };
   }
 

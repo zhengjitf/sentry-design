@@ -72,7 +72,6 @@ export class Dsn {
     const dsnMatch = DSN_REGEX.exec(url);
 
     if (!dsnMatch) {
-      // TODO: Use SentryError
       throw new Error(INVALID_DSN);
     }
 
@@ -97,12 +96,10 @@ export class Dsn {
     }
 
     if (protocol !== 'http' && protocol !== 'https') {
-      // TODO: Use SentryError
       throw new Error(`${INVALID_DSN} protocol: ${protocol}`);
     }
 
     if (!projectId.match(/^\d+$/)) {
-      // TODO: Use SentryError
       throw new Error(`${INVALID_DSN} projectId: ${projectId}`);
     }
 

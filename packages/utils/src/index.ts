@@ -1,5 +1,4 @@
 export * from './browser';
-export * from './error';
 export * from './instrument';
 export * from './is';
 export * from './logger';

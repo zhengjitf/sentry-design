@@ -12,7 +12,6 @@ export abstract class BaseTransport {
 
   public constructor(public options: TransportOptions) {
     this._dsn = new Dsn(this.options.dsn);
-    // this._dsn = typeof this.options.dsn === 'string' ? new Dsn(this.options.dsn) : this.options.dsn;
     this._asyncBuffer = new AsyncBuffer(this.options.bufferSize ?? 30);
   }
 
@@ -21,7 +20,6 @@ export abstract class BaseTransport {
     requestMaker: TransportRequestMaker<T>,
   ): PromiseLike<TransportResponse> {
     if (isRateLimited(this._rateLimits, request.type)) {
-      // TODO: Use SentryError
       return Promise.reject(
         new Error(
           `Transport for \`${request.type}\` locked till ${disabledUntil(
@@ -50,7 +48,6 @@ export abstract class BaseTransport {
             return Promise.resolve({ status });
           }
 
-          // TODO: Use SentryError
           return Promise.reject(new Error(body ?? reason ?? 'Unknown transport error'));
         },
       );

@@ -14,7 +14,6 @@ export class AsyncBuffer<T> {
 
   public add(task: Task<T>): PromiseLike<T> {
     if (this.length >= this._limit) {
-      // TODO: Use SentryError
       return Promise.reject(new Error('Not adding task due to buffer limit reached.'));
     }
 

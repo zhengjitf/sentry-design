@@ -1,5 +1,3 @@
-import { SentryError } from './error';
-
 /** A simple queue that holds promises. */
 export class PromiseBuffer<T> {
   /** Internal set of queued Promises */
@@ -22,7 +20,7 @@ export class PromiseBuffer<T> {
    */
   public add(task: PromiseLike<T>): PromiseLike<T> {
     if (!this.isReady()) {
-      return Promise.reject(new SentryError('Not adding Promise due to buffer limit reached.'));
+      return Promise.reject(new Error('Not adding Promise due to buffer limit reached.'));
     }
     if (this._buffer.indexOf(task) === -1) {
       this._buffer.push(task);
