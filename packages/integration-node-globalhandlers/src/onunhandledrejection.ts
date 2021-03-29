@@ -1,4 +1,4 @@
-import { ClientLike, Integration, ScopeContext } from '@sentry/types';
+import { ClientLike, Integration } from '@sentry/types';
 import { consoleSandbox } from '@sentry/utils';
 
 import { logAndExitProcess } from './exit';
@@ -7,10 +7,6 @@ type UnhandledRejectionMode = 'none' | 'warn' | 'strict';
 type OnUncaughtExceptionOptions = {
   mode?: UnhandledRejectionMode;
 };
-type PromiseRejectionWithDomainContext = {
-  domain?: { sentryContext?: ScopeContext };
-};
-
 const DEFAULT_REJECTION_MODE = 'warn';
 
 export class OnUnhandledRejection implements Integration {
@@ -23,31 +19,12 @@ export class OnUnhandledRejection implements Integration {
     global.process.on('unhandledRejection', handler);
   }
 
-  public _makeRejectionHandler(
-    client: ClientLike,
-  ): (reason: { stack?: string }, promise: PromiseRejectionWithDomainContext) => void {
-    return (reason: { stack?: string }, promise: PromiseRejectionWithDomainContext): void => {
-      const context = promise.domain?.sentryContext || {};
-
-      const scope: ScopeContext = { extra: { unhandledPromiseRejection: true } };
-
-      // TODO: Validate whether its still necessary to keep it
-      // Preserve backwards compatibility with raven-node for now
-      if (context.user) {
-        scope.user = context.user;
-      }
-      if (context.tags) {
-        scope.tags = context.tags;
-      }
-      if (context.extra) {
-        scope.extra = {
-          ...scope.extra,
-          ...context.extra,
-        };
-      }
-
-      client.captureException(reason, { hint: { originalException: promise }, scope });
-
+  public _makeRejectionHandler(client: ClientLike): (reason: { stack?: string }, promise: unknown) => void {
+    return (reason: { stack?: string }, promise: unknown): void => {
+      client.captureException(reason, {
+        hint: { originalException: promise },
+        scope: { extra: { unhandledPromiseRejection: true } },
+      });
       this._handleRejection(client, reason);
     };
   }
