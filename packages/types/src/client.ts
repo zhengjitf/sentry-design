@@ -16,6 +16,7 @@ import { Session } from './session';
  */
 export interface ClientLike<O extends Options = Options> {
   options: O;
+  logger: Logger;
   dsn?: Dsn;
 
   getScope(): ScopeLike;
@@ -30,4 +31,10 @@ export interface ClientLike<O extends Options = Options> {
 
   flush(timeout?: number): PromiseLike<boolean>;
   close(timeout?: number): PromiseLike<boolean>;
+}
+
+interface Logger {
+  log(...args: unknown[]): void;
+  warn(...args: unknown[]): void;
+  error(...args: unknown[]): void;
 }

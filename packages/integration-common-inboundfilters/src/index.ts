@@ -1,5 +1,5 @@
 import { ClientLike, SentryEvent, Integration } from '@sentry/types';
-import { getEventDescription, isMatchingPattern, logger } from '@sentry/utils';
+import { getEventDescription, isMatchingPattern } from '@sentry/utils';
 
 // "Script error." is hard coded into browsers for errors that it can't read.
 // this is the result of a script being pulled in from an external domain and CORS.
@@ -16,15 +16,17 @@ interface InboundFiltersOptions {
 export class InboundFilters implements Integration {
   public name = this.constructor.name;
 
+  private _client!: ClientLike;
+
   public constructor(private readonly _options: Partial<InboundFiltersOptions> = {}) {}
 
   /**
    * @inheritDoc
    */
   public install(client: ClientLike): void {
+    this._client = client;
     client.addEventProcessor((event: SentryEvent) => {
-      const clientOptions = client?.options ?? {};
-      const options = this._mergeOptions(clientOptions);
+      const options = this._mergeOptions(client.options);
       if (this._shouldDropEvent(event, options)) {
         return null;
       }
@@ -34,19 +36,21 @@ export class InboundFilters implements Integration {
 
   private _shouldDropEvent(event: SentryEvent, options: Partial<InboundFiltersOptions>): boolean {
     if (this._isSentryError(event, options)) {
-      logger.warn(`Event dropped due to being internal Sentry Error.\nEvent: ${getEventDescription(event)}`);
+      this._client.logger.warn(
+        `Event dropped due to being internal Sentry Error.\nEvent: ${getEventDescription(event)}`,
+      );
       return true;
     }
 
     if (this._isIgnoredError(event, options)) {
-      logger.warn(
+      this._client.logger.warn(
         `Event dropped due to being matched by \`ignoreErrors\` option.\nEvent: ${getEventDescription(event)}`,
       );
       return true;
     }
 
     if (this._isDeniedUrl(event, options)) {
-      logger.warn(
+      this._client.logger.warn(
         `Event dropped due to being matched by \`denyUrls\` option.\nEvent: ${getEventDescription(
           event,
         )}.\nUrl: ${this._getEventFilterUrl(event)}`,
@@ -55,7 +59,7 @@ export class InboundFilters implements Integration {
     }
 
     if (!this._isAllowedUrl(event, options)) {
-      logger.warn(
+      this._client.logger.warn(
         `Event dropped due to not being matched by \`allowUrls\` option.\nEvent: ${getEventDescription(
           event,
         )}.\nUrl: ${this._getEventFilterUrl(event)}`,
@@ -137,7 +141,7 @@ export class InboundFilters implements Integration {
         const { type = '', value = '' } = (event.exception.values && event.exception.values[0]) || {};
         return [`${value}`, `${type}: ${value}`];
       } catch (oO) {
-        logger.error(`Cannot extract message for event ${getEventDescription(event)}`);
+        this._client.logger.error(`Cannot extract message for event ${getEventDescription(event)}`);
         return [];
       }
     }
@@ -157,7 +161,7 @@ export class InboundFilters implements Integration {
       }
       return null;
     } catch (oO) {
-      logger.error(`Cannot extract url for event ${getEventDescription(event)}`);
+      this._client.logger.error(`Cannot extract url for event ${getEventDescription(event)}`);
       return null;
     }
   }

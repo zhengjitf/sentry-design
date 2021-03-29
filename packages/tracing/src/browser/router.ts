@@ -1,5 +1,6 @@
+import { getCurrentClient } from '@sentry/minimal';
 import { Transaction, TransactionContext } from '@sentry/types';
-import { addInstrumentationHandler, getGlobalObject, logger } from '@sentry/utils';
+import { addInstrumentationHandler, getGlobalObject } from '@sentry/utils';
 
 const global = getGlobalObject<Window>();
 
@@ -11,8 +12,10 @@ export function defaultRoutingInstrumentation<T extends Transaction>(
   startTransactionOnPageLoad: boolean = true,
   startTransactionOnLocationChange: boolean = true,
 ): void {
+  // TODO: Whole tracing should be reworked to support multiple-clients, so one should be injected here
+  const client = getCurrentClient();
   if (!global || !global.location) {
-    logger.warn('Could not initialize routing instrumentation due to invalid location');
+    client?.logger.warn('Could not initialize routing instrumentation due to invalid location');
     return;
   }
 
@@ -43,7 +46,7 @@ export function defaultRoutingInstrumentation<T extends Transaction>(
         if (from !== to) {
           startingUrl = undefined;
           if (activeTransaction) {
-            logger.log(`[Tracing] Finishing current transaction with op: ${activeTransaction.op}`);
+            client?.logger.log(`[Tracing] Finishing current transaction with op: ${activeTransaction.op}`);
             // If there's an open transaction on the scope, we need to finish it before creating an new one.
             activeTransaction.finish();
           }

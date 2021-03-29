@@ -1,5 +1,5 @@
 import { ClientLike, Integration } from '@sentry/types';
-import { dynamicRequire, fill, logger } from '@sentry/utils';
+import { dynamicRequire, fill } from '@sentry/utils';
 
 interface PgClient {
   prototype: {
@@ -18,7 +18,7 @@ export class Postgres implements Integration {
       const pgModule = dynamicRequire(module, 'pg') as { Client: PgClient };
       pgClient = pgModule.Client;
     } catch (e) {
-      logger.error('Postgres Integration was unable to require `pg` package.');
+      client.logger.error('Postgres Integration was unable to require `pg` package.');
       return;
     }
 

@@ -1,5 +1,4 @@
 import { ClientLike, Integration, Transaction } from '@sentry/types';
-import { logger } from '@sentry/utils';
 
 type Method =
   | 'all'
@@ -66,9 +65,9 @@ export class Express implements Integration {
     this._methods = (Array.isArray(options.methods) ? options.methods : []).concat('use');
   }
 
-  public install(_client: ClientLike): void {
+  public install(client: ClientLike): void {
     if (!this._router) {
-      logger.error('ExpressIntegration is missing an Express instance');
+      client.logger.error('ExpressIntegration is missing an Express instance');
       return;
     }
     instrumentMiddlewares(this._router, this._methods);

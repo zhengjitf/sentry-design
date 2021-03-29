@@ -1,6 +1,6 @@
 import { ClientLike, Integration } from '@sentry/types';
 import { captureException, getCarrier, getCurrentClient } from '@sentry/minimal';
-import { addInstrumentationHandler, getGlobalObject, logger, supportsFetch } from '@sentry/utils';
+import { addInstrumentationHandler, getGlobalObject, supportsFetch } from '@sentry/utils';
 import { Dsn, getReportDialogEndpoint, ReportDialogOptions } from '@sentry/transport-base';
 import { InboundFilters } from '@sentry/integration-common-inboundfilters';
 import { UserAgent } from '@sentry/integration-browser-useragent';
@@ -99,17 +99,17 @@ export function showReportDialog(
   options.dsn = options.dsn ?? client.options.dsn;
 
   if (client.options.enabled === false) {
-    logger.error(`${errPrefix} disabled client`);
+    client.logger.error(`${errPrefix} disabled client`);
     return;
   }
 
   if (!options.eventId) {
-    logger.error(`${errPrefix} missing EventID`);
+    client.logger.error(`${errPrefix} missing EventID`);
     return;
   }
 
   if (!options.dsn) {
-    logger.error(`${errPrefix} missing DSN`);
+    client.logger.error(`${errPrefix} missing DSN`);
     return;
   }
 
@@ -161,12 +161,12 @@ export function wrap(fn: (...args: unknown[]) => unknown): unknown {
 /**
  * Enable automatic Session Tracking for the initial page load.
  */
-function startSessionTracking(_client: ClientLike): void {
+function startSessionTracking(client: ClientLike): void {
   const window = getGlobalObject<Window>();
   const document = window.document;
 
   if (typeof document === 'undefined') {
-    logger.warn('Session tracking in non-browser environment with @sentry/browser is not supported.');
+    client.logger.warn('Session tracking in non-browser environment with @sentry/browser is not supported.');
     return;
   }
 

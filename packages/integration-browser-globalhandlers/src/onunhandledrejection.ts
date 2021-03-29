@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ClientLike, SentryEvent, Integration, Primitive, Severity } from '@sentry/types';
-import { addExceptionMechanism, addInstrumentationHandler, isPrimitive, logger } from '@sentry/utils';
+import { addExceptionMechanism, addInstrumentationHandler, isPrimitive } from '@sentry/utils';
 import { eventFromUnknownInput } from '@sentry/eventbuilder-browser';
 
 export class OnUnhandledRejection implements Integration {
@@ -60,7 +60,7 @@ export class OnUnhandledRejection implements Integration {
       type: 'unhandledrejection',
     });
 
-    logger.log('Global Handler attached: onunhandledrejection');
+    client.logger.log('Global Handler attached: onunhandledrejection');
   }
 
   /**

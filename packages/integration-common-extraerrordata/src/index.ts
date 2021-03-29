@@ -1,5 +1,5 @@
 import { SentryEvent, EventHint, ExtendedError, ClientLike, Integration } from '@sentry/types';
-import { isError, isPlainObject, logger, normalize } from '@sentry/utils';
+import { isError, isPlainObject, normalize } from '@sentry/utils';
 
 interface ExtraErrorDataOptions {
   depth?: number;
@@ -8,12 +8,15 @@ interface ExtraErrorDataOptions {
 export class ExtraErrorData implements Integration {
   public name = this.constructor.name;
 
+  private _client!: ClientLike;
+
   public constructor(private readonly _options: ExtraErrorDataOptions = { depth: 3 }) {}
 
   /**
    * @inheritDoc
    */
   public install(client: ClientLike): void {
+    this._client = client;
     client.addEventProcessor((event: SentryEvent, hint?: EventHint) => this.enhanceEventWithErrorData(event, hint));
   }
 
@@ -75,7 +78,7 @@ export class ExtraErrorData implements Integration {
         result = extraErrorInfo;
       }
     } catch (oO) {
-      logger.error('Unable to extract extra data from the Error object:', oO);
+      this._client.logger.error('Unable to extract extra data from the Error object:', oO);
     }
 
     return result;

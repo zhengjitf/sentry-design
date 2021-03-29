@@ -1,7 +1,7 @@
 import { getCurrentClient } from '@sentry/minimal';
 import { captureException, flush, Handlers } from '@sentry/node';
 import { extractTraceparentData, startTransaction } from '@sentry/tracing';
-import { isString, logger, stripUrlQueryAndFragment } from '@sentry/utils';
+import { isString, stripUrlQueryAndFragment } from '@sentry/utils';
 
 import { domainify, getActiveDomain, proxyFunction } from './../utils';
 import { HttpFunction, WrapperOptions } from './general';
@@ -65,7 +65,8 @@ function _wrapHttpFunction(fn: HttpFunction, wrapOptions: Partial<HttpFunctionWr
     // getScope() is expected to use current active domain as a carrier
     // since functions-framework creates a domain for each incoming request.
     // So adding of event processors every time should not lead to memory bloat.
-    const scope = getCurrentClient()?.getScope();
+    const client = getCurrentClient();
+    const scope = client?.getScope();
     if (scope) {
       scope.addEventProcessor(event => parseRequest(event, req, options.parseRequestOptions));
       // We put the transaction on the scope so users can attach children to it
@@ -96,7 +97,7 @@ function _wrapHttpFunction(fn: HttpFunction, wrapOptions: Partial<HttpFunctionWr
           _end.call(this, chunk, encoding, cb);
         })
         .then(null, e => {
-          logger.error(e);
+          client?.logger.error(e);
         });
     };
 

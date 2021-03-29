@@ -1,5 +1,4 @@
 import { ClientLike, Integration, Severity } from '@sentry/types';
-import { logger } from '@sentry/utils';
 
 import { logAndExitProcess } from './exit';
 
@@ -49,7 +48,9 @@ export class OnUncaughtException implements Integration {
         }
       } else if (calledFatalError) {
         // we hit an error *after* calling onFatalError - pretty boned at this point, just shut it down
-        logger.warn('uncaught exception after calling fatal error shutdown callback - this is bad! forcing shutdown');
+        client.logger.warn(
+          'uncaught exception after calling fatal error shutdown callback - this is bad! forcing shutdown',
+        );
         logAndExit(error);
       } else if (!caughtSecondError) {
         // two cases for how we can hit this branch:

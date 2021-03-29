@@ -7,7 +7,7 @@ import * as url from 'url';
 import { captureException, flush, getCurrentClient, withScope } from '@sentry/minimal';
 import { extractTraceparentData, Span, startTransaction } from '@sentry/tracing';
 import { SentryEvent, ExtractedNodeRequestData, Transaction } from '@sentry/types';
-import { isPlainObject, isString, logger, normalize, stripUrlQueryAndFragment } from '@sentry/utils';
+import { isPlainObject, isString, normalize, stripUrlQueryAndFragment } from '@sentry/utils';
 import * as cookie from 'cookie';
 
 export interface ExpressRequest {
@@ -371,6 +371,7 @@ export function requestHandler(
     res: http.ServerResponse,
     next: (error?: any) => void,
   ): void {
+    const client = getCurrentClient();
     if (options && options.flushTimeout && options.flushTimeout > 0) {
       // eslint-disable-next-line @typescript-eslint/unbound-method
       const _end = res.end;
@@ -380,7 +381,7 @@ export function requestHandler(
             _end.call(this, chunk, encoding, cb);
           })
           .then(null, (e: unknown) => {
-            logger.error(e);
+            client?.logger.error(e);
           });
       };
     }
@@ -390,9 +391,7 @@ export function requestHandler(
     local.on('error', next);
     local.run(() => {
       // We put the transaction on the scope so users can attach children to it
-      getCurrentClient()
-        ?.getScope()
-        ?.addEventProcessor((event: SentryEvent) => parseRequest(event, req, options));
+      client?.getScope()?.addEventProcessor((event: SentryEvent) => parseRequest(event, req, options));
 
       next();
     });

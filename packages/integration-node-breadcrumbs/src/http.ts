@@ -4,7 +4,7 @@ import { URL } from 'url';
 
 import { getSpan } from '@sentry/minimal';
 import { ClientLike, Integration, Span } from '@sentry/types';
-import { fill, logger, parseSemver } from '@sentry/utils';
+import { fill, parseSemver } from '@sentry/utils';
 
 const NODE_VERSION = parseSemver(process.versions.node);
 
@@ -111,7 +111,7 @@ function _createWrappedRequestMethodFactory(
           });
 
           const sentryTraceHeader = span.toTraceparent();
-          logger.log(`[Tracing] Adding sentry-trace header to outgoing request: ${sentryTraceHeader}`);
+          client.logger.log(`[Tracing] Adding sentry-trace header to outgoing request: ${sentryTraceHeader}`);
           requestOptions.headers = { ...requestOptions.headers, 'sentry-trace': sentryTraceHeader };
         }
       }

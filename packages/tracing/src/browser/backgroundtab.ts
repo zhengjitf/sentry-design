@@ -1,5 +1,5 @@
-import { getTransaction } from '@sentry/minimal';
-import { getGlobalObject, logger } from '@sentry/utils';
+import { ClientLike } from '@sentry/types';
+import { getGlobalObject } from '@sentry/utils';
 
 import { IdleTransaction } from '../idletransaction';
 import { SpanStatus } from '../spanstatus';
@@ -10,12 +10,12 @@ const global = getGlobalObject<Window>();
  * Add a listener that cancels and finishes a transaction when the global
  * document is hidden.
  */
-export function registerBackgroundTabDetection(): void {
+export function registerBackgroundTabDetection(client: ClientLike): void {
   if (global && global.document) {
     global.document.addEventListener('visibilitychange', () => {
-      const activeTransaction = getTransaction() as IdleTransaction;
+      const activeTransaction = client.getScope().getTransaction() as IdleTransaction;
       if (global.document.hidden && activeTransaction) {
-        logger.log(
+        client.logger.log(
           `[Tracing] Transaction: ${SpanStatus.Cancelled} -> since tab moved to the background, op: ${activeTransaction.op}`,
         );
         // We should not set status if it is already set, this prevent important statuses like
@@ -28,6 +28,6 @@ export function registerBackgroundTabDetection(): void {
       }
     });
   } else {
-    logger.warn('[Tracing] Could not set up background tab detection due to lack of global document');
+    client.logger.warn('[Tracing] Could not set up background tab detection due to lack of global document');
   }
 }

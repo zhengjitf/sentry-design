@@ -6,7 +6,7 @@ import {
   TransactionContext,
   ClientLike,
 } from '@sentry/types';
-import { dropUndefinedKeys, logger } from '@sentry/utils';
+import { dropUndefinedKeys } from '@sentry/utils';
 
 import { Span as SpanClass, SpanRecorder } from './span';
 
@@ -17,15 +17,11 @@ interface TransactionMetadata {
 export class Transaction extends SpanClass implements TransactionInterface {
   public name: string;
 
+  // TODO: Making this reference isnt the best choice, but we need an access to client in start.ts for logging
+  public client?: ClientLike;
+
   private _metadata: TransactionMetadata = {};
-
   private _measurements: Measurements = {};
-
-  /**
-   * The reference to the current client.
-   */
-  private readonly _client?: ClientLike;
-
   private _trimEnd?: boolean;
 
   /**
@@ -38,7 +34,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
   public constructor(transactionContext: TransactionContext, client?: ClientLike) {
     super(transactionContext);
 
-    this._client = client ?? getCurrentClient();
+    this.client = client ?? getCurrentClient();
 
     this.name = transactionContext.name || '';
 
@@ -89,7 +85,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
     }
 
     if (!this.name) {
-      logger.warn('Transaction has no name, falling back to `<unlabeled transaction>`.');
+      this.client?.logger.warn('Transaction has no name, falling back to `<unlabeled transaction>`.');
       this.name = '<unlabeled transaction>';
     }
 
@@ -98,7 +94,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
 
     if (this.sampled !== true) {
       // At this point if `sampled !== true` we want to discard the transaction.
-      logger.log('[Tracing] Discarding transaction because its trace was not chosen to be sampled.');
+      this.client?.logger.log('[Tracing] Discarding transaction because its trace was not chosen to be sampled.');
       return undefined;
     }
 
@@ -129,11 +125,14 @@ export class Transaction extends SpanClass implements TransactionInterface {
     const hasMeasurements = Object.keys(this._measurements).length > 0;
 
     if (hasMeasurements) {
-      logger.log('[Measurements] Adding measurements to transaction', JSON.stringify(this._measurements, undefined, 2));
+      this.client?.logger.log(
+        '[Measurements] Adding measurements to transaction',
+        JSON.stringify(this._measurements, undefined, 2),
+      );
       transaction.measurements = this._measurements;
     }
 
-    return this._client?.captureEvent(transaction);
+    return this.client?.captureEvent(transaction);
   }
 
   /**

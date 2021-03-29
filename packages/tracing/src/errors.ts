@@ -1,5 +1,5 @@
-import { getTransaction } from '@sentry/minimal';
-import { addInstrumentationHandler, logger } from '@sentry/utils';
+import { getCurrentClient } from '@sentry/minimal';
+import { addInstrumentationHandler } from '@sentry/utils';
 
 import { SpanStatus } from './spanstatus';
 
@@ -21,9 +21,10 @@ export function registerErrorInstrumentation(): void {
  * If an error or unhandled promise occurs, we mark the active transaction as failed
  */
 function errorCallback(): void {
-  const activeTransaction = getTransaction();
+  const client = getCurrentClient();
+  const activeTransaction = client?.getScope().getTransaction();
   if (activeTransaction) {
-    logger.log(`[Tracing] Transaction: ${SpanStatus.InternalError} -> Global error occured`);
+    client?.logger.log(`[Tracing] Transaction: ${SpanStatus.InternalError} -> Global error occured`);
     activeTransaction.setStatus(SpanStatus.InternalError);
   }
 }

@@ -1,7 +1,6 @@
 import { getCurrentClient } from '@sentry/minimal';
 import { captureException, flush } from '@sentry/node';
 import { startTransaction } from '@sentry/tracing';
-import { logger } from '@sentry/utils';
 
 import { domainify, getActiveDomain, proxyFunction } from '../utils';
 
@@ -46,7 +45,8 @@ function _wrapCloudEventFunction(
     // getScope() is expected to use current active domain as a carrier
     // since functions-framework creates a domain for each incoming request.
     // So adding of event processors every time should not lead to memory bloat.
-    const scope = getCurrentClient()?.getScope();
+    const client = getCurrentClient();
+    const scope = client?.getScope();
     if (scope) {
       configureScopeWithContext(scope, context);
       // We put the transaction on the scope so users can attach children to it
@@ -68,7 +68,7 @@ function _wrapCloudEventFunction(
           callback(...args);
         })
         .then(null, e => {
-          logger.error(e);
+          client?.logger.error(e);
         });
     });
 

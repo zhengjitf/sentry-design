@@ -7,7 +7,6 @@ import {
   TransactionContext,
   TransactionSamplingMethod,
 } from '@sentry/types';
-import { logger } from '@sentry/utils';
 
 import { IdleTransaction } from './idletransaction';
 import { Transaction } from './transaction';
@@ -70,15 +69,15 @@ function sample<T extends Transaction>(transaction: T, options: Options, samplin
 
   // Since this is coming from the user (or from a function provided by the user), who knows what we might get. (The
   // only valid values are booleans or numbers between 0 and 1.)
-  if (!isValidSampleRate(sampleRate)) {
-    logger.warn(`[Tracing] Discarding transaction because of invalid sample rate.`);
+  if (!isValidSampleRate(sampleRate, transaction.client)) {
+    transaction.client?.logger.warn(`[Tracing] Discarding transaction because of invalid sample rate.`);
     transaction.sampled = false;
     return transaction;
   }
 
   // if the function returned 0 (or false), or if `tracesSampleRate` is 0, it's a sign the transaction should be dropped
   if (!sampleRate) {
-    logger.log(
+    transaction.client?.logger.log(
       `[Tracing] Discarding transaction because ${
         typeof options.tracesSampler === 'function'
           ? 'tracesSampler returned 0 or false'
@@ -95,7 +94,7 @@ function sample<T extends Transaction>(transaction: T, options: Options, samplin
 
   // if we're not going to keep it, we're done
   if (!transaction.sampled) {
-    logger.log(
+    transaction.client?.logger.log(
       `[Tracing] Discarding transaction because it's not included in the random sample (sampling rate = ${Number(
         sampleRate,
       )})`,
@@ -103,18 +102,18 @@ function sample<T extends Transaction>(transaction: T, options: Options, samplin
     return transaction;
   }
 
-  logger.log(`[Tracing] starting ${transaction.op} transaction - ${transaction.name}`);
+  transaction.client?.logger.log(`[Tracing] starting ${transaction.op} transaction - ${transaction.name}`);
   return transaction;
 }
 
 /**
  * Checks the given sample rate to make sure it is valid type and value (a boolean, or a number between 0 and 1).
  */
-function isValidSampleRate(rate: unknown): boolean {
+function isValidSampleRate(rate: unknown, client?: ClientLike): boolean {
   // we need to check NaN explicitly because it's of type 'number' and therefore wouldn't get caught by this typecheck
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (isNaN(rate as any) || !(typeof rate === 'number' || typeof rate === 'boolean')) {
-    logger.warn(
+    client?.logger.warn(
       `[Tracing] Given sample rate is invalid. Sample rate must be a boolean or a number between 0 and 1. Got ${JSON.stringify(
         rate,
       )} of type ${JSON.stringify(typeof rate)}.`,
@@ -124,7 +123,7 @@ function isValidSampleRate(rate: unknown): boolean {
 
   // in case sampleRate is a boolean, it will get automatically cast to 1 if it's true and 0 if it's false
   if (rate < 0 || rate > 1) {
-    logger.warn(`[Tracing] Given sample rate is invalid. Sample rate must be between 0 and 1. Got ${rate}.`);
+    client?.logger.warn(`[Tracing] Given sample rate is invalid. Sample rate must be between 0 and 1. Got ${rate}.`);
     return false;
   }
   return true;

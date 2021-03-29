@@ -1,57 +1,32 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { consoleSandbox, getGlobalObject } from './misc';
 
-// TODO: Implement different loggers for different environments
-const global = getGlobalObject<Window | NodeJS.Global>();
-
-/** Prefix for logging strings */
-const PREFIX = 'Sentry Logger ';
-
 class Logger {
-  private _enabled: boolean;
+  public enabled = false;
+  private _global = getGlobalObject();
 
-  public constructor() {
-    this._enabled = false;
-  }
+  constructor(private readonly _name: string = 'Global') {}
 
-  public disable(): void {
-    this._enabled = false;
-  }
-
-  public enable(): void {
-    this._enabled = true;
-  }
-
-  public log(...args: any[]): void {
-    if (!this._enabled) {
-      return;
+  public log(...args: unknown[]): void {
+    if (!this.enabled) {
+      consoleSandbox(() => this._global.console.log(`Sentry ${this._name} [Log]: ${args.join(' ')}`));
     }
-    consoleSandbox(() => {
-      global.console.log(`${PREFIX}[Log]: ${args.join(' ')}`);
-    });
   }
 
-  public warn(...args: any[]): void {
-    if (!this._enabled) {
-      return;
+  public warn(...args: unknown[]): void {
+    if (!this.enabled) {
+      consoleSandbox(() => this._global.console.warn(`Sentry ${this._name} [Warn]: ${args.join(' ')}`));
     }
-    consoleSandbox(() => {
-      global.console.warn(`${PREFIX}[Warn]: ${args.join(' ')}`);
-    });
   }
 
-  public error(...args: any[]): void {
-    if (!this._enabled) {
-      return;
+  public error(...args: unknown[]): void {
+    if (!this.enabled) {
+      consoleSandbox(() => this._global.console.error(`Sentry ${this._name} [Error]: ${args.join(' ')}`));
     }
-    consoleSandbox(() => {
-      global.console.error(`${PREFIX}[Error]: ${args.join(' ')}`);
-    });
   }
 }
 
-// Ensure we only have a single logger instance, even if multiple versions of @sentry/utils are being used
-global.__SENTRY__ = global.__SENTRY__ || {};
-const logger = (global.__SENTRY__.logger as Logger) || (global.__SENTRY__.logger = new Logger());
+// Global instance of the logger that's used in places that are client-independent
+const logger = new Logger();
+logger.enabled = true;
 
-export { logger };
+export { Logger, logger };

@@ -6,8 +6,8 @@ if (lambdaTaskRoot) {
   if (!handlerString) {
     throw Error(`LAMBDA_TASK_ROOT is non-empty(${lambdaTaskRoot}) but _HANDLER is not set`);
   }
-  Sentry.AWSLambda.init();
-  Sentry.AWSLambda.tryPatchHandler(lambdaTaskRoot, handlerString);
+  const client = Sentry.AWSLambda.init();
+  Sentry.AWSLambda.tryPatchHandler(lambdaTaskRoot, handlerString, client);
 } else {
   throw Error('LAMBDA_TASK_ROOT environment variable is not set');
 }

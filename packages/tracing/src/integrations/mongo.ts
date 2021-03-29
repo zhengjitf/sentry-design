@@ -1,5 +1,5 @@
 import { ClientLike, Integration, SpanContext } from '@sentry/types';
-import { dynamicRequire, fill, isThenable, logger } from '@sentry/utils';
+import { dynamicRequire, fill, isThenable } from '@sentry/utils';
 
 // This allows us to use the same array for both defaults options and the type itself.
 // (note `as const` at the end to make it a union of string literal types (i.e. "a" | "b" | ... )
@@ -117,7 +117,7 @@ export class Mongo implements Integration {
       const mongodbModule = dynamicRequire(module, moduleName) as { Collection: MongoCollection };
       collection = mongodbModule.Collection;
     } catch (e) {
-      logger.error(`Mongo Integration was unable to require \`${moduleName}\` package.`);
+      this._client.logger.error(`Mongo Integration was unable to require \`${moduleName}\` package.`);
       return;
     }
 

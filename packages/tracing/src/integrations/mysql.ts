@@ -1,5 +1,5 @@
 import { ClientLike, Integration } from '@sentry/types';
-import { dynamicRequire, fill, logger } from '@sentry/utils';
+import { dynamicRequire, fill } from '@sentry/utils';
 
 interface MysqlConnection {
   prototype: {
@@ -18,7 +18,7 @@ export class Mysql implements Integration {
       // Unfortunatelly mysql is using some custom loading system and `Connection` is not exported directly.
       connection = dynamicRequire(module, 'mysql/lib/Connection.js');
     } catch (e) {
-      logger.error('Mysql Integration was unable to require `mysql` package.');
+      client.logger.error('Mysql Integration was unable to require `mysql` package.');
       return;
     }
 

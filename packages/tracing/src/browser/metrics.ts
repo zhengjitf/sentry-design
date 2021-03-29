@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Measurements, SpanContext } from '@sentry/types';
-import { browserPerformanceTimeOrigin, getGlobalObject, logger } from '@sentry/utils';
+import { ClientLike, Measurements, SpanContext } from '@sentry/types';
+import { browserPerformanceTimeOrigin, getGlobalObject } from '@sentry/utils';
 
 import { Span } from '../span';
 import { Transaction } from '../transaction';
@@ -17,11 +17,14 @@ const global = getGlobalObject<Window>();
 
 /** Class tracking metrics  */
 export class MetricsInstrumentation {
+  private _client: ClientLike;
   private _measurements: Measurements = {};
 
   private _performanceCursor: number = 0;
 
-  public constructor() {
+  public constructor(client: ClientLike) {
+    this._client = client;
+
     if (global && global.performance) {
       if (global.performance.mark) {
         global.performance.mark('sentry-tracing-init');
@@ -41,7 +44,7 @@ export class MetricsInstrumentation {
       return;
     }
 
-    logger.log('[Tracing] Adding & adjusting spans using Performance API');
+    this._client.logger.log('[Tracing] Adding & adjusting spans using Performance API');
 
     const timeOrigin = msToSec(browserPerformanceTimeOrigin);
     let entryScriptSrc: string | undefined;
@@ -92,13 +95,13 @@ export class MetricsInstrumentation {
             const shouldRecord = entry.startTime < firstHidden.timeStamp;
 
             if (entry.name === 'first-paint' && shouldRecord) {
-              logger.log('[Measurements] Adding FP');
+              this._client.logger.log('[Measurements] Adding FP');
               this._measurements['fp'] = { value: entry.startTime };
               this._measurements['mark.fp'] = { value: startTimestamp };
             }
 
             if (entry.name === 'first-contentful-paint' && shouldRecord) {
-              logger.log('[Measurements] Adding FCP');
+              this._client.logger.log('[Measurements] Adding FCP');
               this._measurements['fcp'] = { value: entry.startTime };
               this._measurements['mark.fcp'] = { value: startTimestamp };
             }
@@ -153,7 +156,7 @@ export class MetricsInstrumentation {
         const normalizedValue = Math.abs((measurementTimestamp - transaction.startTimestamp) * 1000);
 
         const delta = normalizedValue - oldValue;
-        logger.log(`[Measurements] Normalized ${name} from ${oldValue} to ${normalizedValue} (${delta})`);
+        this._client.logger.log(`[Measurements] Normalized ${name} from ${oldValue} to ${normalizedValue} (${delta})`);
 
         this._measurements[name].value = normalizedValue;
       });
@@ -182,7 +185,7 @@ export class MetricsInstrumentation {
         return;
       }
 
-      logger.log('[Measurements] Adding CLS');
+      this._client.logger.log('[Measurements] Adding CLS');
       this._measurements['cls'] = { value: metric.value };
     });
   }
@@ -238,7 +241,7 @@ export class MetricsInstrumentation {
 
       const timeOrigin = msToSec(performance.timeOrigin);
       const startTime = msToSec(entry.startTime as number);
-      logger.log('[Measurements] Adding LCP');
+      this._client.logger.log('[Measurements] Adding LCP');
       this._measurements['lcp'] = { value: metric.value };
       this._measurements['mark.lcp'] = { value: timeOrigin + startTime };
     });
@@ -255,7 +258,7 @@ export class MetricsInstrumentation {
 
       const timeOrigin = msToSec(performance.timeOrigin);
       const startTime = msToSec(entry.startTime as number);
-      logger.log('[Measurements] Adding FID');
+      this._client.logger.log('[Measurements] Adding FID');
       this._measurements['fid'] = { value: metric.value };
       this._measurements['mark.fid'] = { value: timeOrigin + startTime };
     });
@@ -270,7 +273,7 @@ export class MetricsInstrumentation {
         return;
       }
 
-      logger.log('[Measurements] Adding TTFB');
+      this._client.logger.log('[Measurements] Adding TTFB');
       this._measurements['ttfb'] = { value: metric.value };
 
       // Capture the time spent making the request and receiving the first byte of the response

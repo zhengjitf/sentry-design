@@ -1,6 +1,5 @@
 import { SentryEvent, ClientLike, Integration } from '@sentry/types';
-import { getGlobalObject, logger, normalize, uuid4 } from '@sentry/utils';
-
+import { getGlobalObject, normalize, uuid4 } from '@sentry/utils';
 import * as localForageType from 'localforage';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -16,8 +15,7 @@ export class Offline implements Integration {
   /**
    * the global instance
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public global: any;
+  public global = getGlobalObject<Window>();
 
   /**
    * maximum number of events to store while offline
@@ -35,8 +33,6 @@ export class Offline implements Integration {
    * @inheritDoc
    */
   public constructor(options: OfflineOptions = {}) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.global = getGlobalObject<any>();
     this.maxStoredEvents = options.maxStoredEvents ?? 30; // set a reasonable default
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     this.offlineEventStore = localForage.createInstance({
@@ -53,7 +49,7 @@ export class Offline implements Integration {
     if ('addEventListener' in this.global) {
       this.global.addEventListener('online', () => {
         this._sendEvents().catch(() => {
-          logger.warn('could not send cached events');
+          this._client.logger.warn('could not send cached events');
         });
       });
     }
@@ -64,7 +60,7 @@ export class Offline implements Integration {
         this._cacheEvent(event)
           .then((_event: SentryEvent): Promise<void> => this._enforceMaxEvents())
           .catch((_error): void => {
-            logger.warn('could not cache event while offline');
+            this._client.logger.warn('could not cache event while offline');
           });
 
         // return null on success or failure, because being offline will still result in an error
@@ -77,7 +73,7 @@ export class Offline implements Integration {
     // if online now, send any events stored in a previous offline session
     if ('navigator' in this.global && 'onLine' in this.global.navigator && this.global.navigator.onLine) {
       this._sendEvents().catch(() => {
-        logger.warn('could not send cached events');
+        this._client.logger.warn('could not send cached events');
       });
     }
   }
@@ -113,7 +109,7 @@ export class Offline implements Integration {
           ),
       )
       .catch((_error): void => {
-        logger.warn('could not enforce max events');
+        this._client.logger.warn('could not enforce max events');
       });
   }
 
@@ -141,7 +137,7 @@ export class Offline implements Integration {
         this._client.captureEvent(event);
 
         this._purgeEvent(cacheKey).catch((_error): void => {
-          logger.warn('could not purge event from cache');
+          this._client.logger.warn('could not purge event from cache');
         });
       },
     );

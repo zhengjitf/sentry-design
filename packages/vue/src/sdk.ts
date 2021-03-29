@@ -2,7 +2,7 @@
 import { BrowserOptions, init as browserInit, SDK_VERSION } from '@sentry/browser';
 import { captureException, getTransaction } from '@sentry/minimal';
 import { ClientLike, Span } from '@sentry/types';
-import { basename, getGlobalObject, logger, timestampWithMs } from '@sentry/utils';
+import { basename, getGlobalObject, timestampWithMs } from '@sentry/utils';
 
 export interface VueOptions extends BrowserOptions {
   /** Vue instance to be used inside the integration */
@@ -156,10 +156,10 @@ export function init(
   const client = browserInit(finalOptions);
 
   if (finalOptions.Vue === undefined) {
-    logger.warn('No Vue instance was provided. Also there is no Vue instance on the `window` object.');
-    logger.warn('We will only capture global unhandled errors.');
+    client.logger.warn('No Vue instance was provided. Also there is no Vue instance on the `window` object.');
+    client.logger.warn('We will only capture global unhandled errors.');
   } else {
-    const vueHelper = new VueHelper(finalOptions);
+    const vueHelper = new VueHelper(finalOptions, client);
     vueHelper.setup();
   }
 
@@ -174,11 +174,13 @@ class VueHelper {
   private _rootSpan?: Span;
   private _rootSpanTimer?: ReturnType<typeof setTimeout>;
   private _options: Omit<VueOptions, 'Vue'> & { Vue: VueInstance };
+  private _client: ClientLike;
 
   /**
    * @inheritDoc
    */
-  public constructor(options: VueOptions) {
+  public constructor(options: VueOptions, client: ClientLike) {
+    this._client = client;
     this._options = options as Omit<VueOptions, 'Vue'> & { Vue: VueInstance };
   }
 
@@ -311,7 +313,7 @@ class VueHelper {
       const internalHooks = HOOKS[operation];
 
       if (!internalHooks) {
-        logger.warn(`Unknown hook: ${operation}`);
+        this._client.logger.warn(`Unknown hook: ${operation}`);
         return;
       }
 
@@ -351,7 +353,7 @@ class VueHelper {
   private _startTracing(): void {
     const applyTracingHooks = this._applyTracingHooks;
     const appliedTracingHooks = setTimeout(() => {
-      logger.warn("Didn't apply tracing hooks, make sure you call Sentry.init before initialzing Vue!");
+      this._client.logger.warn("Didn't apply tracing hooks, make sure you call Sentry.init before initialzing Vue!");
     }, 500);
     this._options.Vue.mixin({
       beforeCreate(this: ViewModel): void {
@@ -377,7 +379,7 @@ class VueHelper {
             metadata.propsData = vm.$options.propsData;
           }
         } catch (_oO) {
-          logger.warn('Unable to extract metadata from Vue component.');
+          this._client.logger.warn('Unable to extract metadata from Vue component.');
         }
       }
 
@@ -404,8 +406,7 @@ class VueHelper {
         if (this._options.Vue.util) {
           this._options.Vue.util.warn(`Error in ${info}: "${error && error.toString()}"`, vm);
         }
-        // eslint-disable-next-line no-console
-        console.error(error);
+        console.error(error); // eslint-disable-line no-console
       }
     };
   }

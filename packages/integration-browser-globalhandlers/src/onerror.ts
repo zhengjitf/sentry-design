@@ -7,7 +7,6 @@ import {
   isErrorEvent,
   isPrimitive,
   isString,
-  logger,
 } from '@sentry/utils';
 import { eventFromUnknownInput } from '@sentry/eventbuilder-browser';
 
@@ -45,7 +44,7 @@ export class OnError implements Integration {
       type: 'error',
     });
 
-    logger.log('Global Handler attached: onerror');
+    client.logger.log('Global Handler attached: onerror');
   }
 
   /**

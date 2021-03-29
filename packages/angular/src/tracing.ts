@@ -1,8 +1,8 @@
 import { AfterViewInit, Directive, Injectable, Input, OnInit } from '@angular/core';
 import { Event, NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { getTransaction } from '@sentry/minimal';
+import { getCurrentClient, getTransaction } from '@sentry/minimal';
 import { Span, Transaction, TransactionContext } from '@sentry/types';
-import { logger, stripUrlQueryAndFragment, timestampWithMs } from '@sentry/utils';
+import { stripUrlQueryAndFragment, timestampWithMs } from '@sentry/utils';
 import { Observable } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 
@@ -39,14 +39,15 @@ export class TraceService {
   public navStart$: Observable<Event> = this._router.events.pipe(
     filter(event => event instanceof NavigationStart),
     tap(event => {
+      const client = getCurrentClient();
       if (!instrumentationInitialized) {
-        logger.error('Angular integration has tracing enabled, but Tracing integration is not configured');
+        client?.logger.error('Angular integration has tracing enabled, but Tracing integration is not configured');
         return;
       }
 
       const navigationEvent = event as NavigationStart;
       const strippedUrl = stripUrlQueryAndFragment(navigationEvent.url);
-      let activeTransaction = getTransaction();
+      let activeTransaction = client?.getScope().getTransaction();
 
       if (!activeTransaction && stashedStartTransactionOnLocationChange) {
         activeTransaction = stashedStartTransaction({

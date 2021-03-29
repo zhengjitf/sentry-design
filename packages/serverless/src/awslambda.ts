@@ -8,7 +8,7 @@ import { captureException, captureMessage, flush } from '@sentry/node';
 import * as Sentry from '@sentry/node';
 import { extractTraceparentData, startTransaction } from '@sentry/tracing';
 import { ClientLike, Integration, ScopeLike, Severity } from '@sentry/types';
-import { isString, logger } from '@sentry/utils';
+import { isString } from '@sentry/utils';
 import { getCurrentClient } from '@sentry/minimal';
 // NOTE: I have no idea how to fix this right now, and don't want to waste more time, as it builds just fine — Kamil
 // eslint-disable-next-line import/no-unresolved
@@ -81,7 +81,7 @@ function tryRequire<T>(taskRoot: string, subdir: string, mod: string): T {
 }
 
 /** */
-export function tryPatchHandler(taskRoot: string, handlerPath: string): void {
+export function tryPatchHandler(taskRoot: string, handlerPath: string, client: ClientLike): void {
   type HandlerBag = HandlerModule | Handler | null | undefined;
   interface HandlerModule {
     [key: string]: HandlerBag;
@@ -90,7 +90,7 @@ export function tryPatchHandler(taskRoot: string, handlerPath: string): void {
   const handlerDesc = basename(handlerPath);
   const match = handlerDesc.match(/^([^.]*)\.(.*)$/);
   if (!match) {
-    logger.error(`Bad handler ${handlerDesc}`);
+    client.logger.error(`Bad handler ${handlerDesc}`);
     return;
   }
 
@@ -101,7 +101,7 @@ export function tryPatchHandler(taskRoot: string, handlerPath: string): void {
     const handlerDir = handlerPath.substring(0, handlerPath.indexOf(handlerDesc));
     obj = tryRequire(taskRoot, handlerDir, handlerMod);
   } catch (e) {
-    logger.error(`Cannot require ${handlerPath} in ${taskRoot}`, e);
+    client.logger.error(`Cannot require ${handlerPath} in ${taskRoot}`, e);
     return;
   }
 
@@ -113,11 +113,11 @@ export function tryPatchHandler(taskRoot: string, handlerPath: string): void {
     functionName = name;
   });
   if (!obj) {
-    logger.error(`${handlerPath} is undefined or not exported`);
+    client.logger.error(`${handlerPath} is undefined or not exported`);
     return;
   }
   if (typeof obj !== 'function') {
-    logger.error(`${handlerPath} is not a function`);
+    client.logger.error(`${handlerPath} is not a function`);
     return;
   }
 

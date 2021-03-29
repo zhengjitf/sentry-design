@@ -12,9 +12,9 @@ import {
 import {
   dateTimestampInSeconds,
   getEventDescription,
+  Logger,
   isPlainObject,
   isPrimitive,
-  logger,
   normalize,
   truncate,
   uuid4,
@@ -67,6 +67,9 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   /** Options passed to the SDK. */
   public readonly options: O;
 
+  /** Logger used for debug mode */
+  public readonly logger = new Logger('Client');
+
   /** The client Dsn, if specified in options. Without this Dsn, the SDK will be disabled. */
   public readonly dsn?: Dsn;
 
@@ -88,10 +91,14 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    * @param options Options for the client.
    */
   protected constructor(options: O) {
-    this.options = options;
+    this.options = options ?? {};
 
-    if (options.dsn) {
-      this.dsn = new Dsn(options.dsn);
+    if (this.options.dsn) {
+      this.dsn = new Dsn(this.options.dsn);
+    }
+
+    if (this.options.debug) {
+      this.logger.enabled = true;
     }
 
     this._transport = this._setupTransport();
@@ -155,7 +162,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
    */
   public captureSession(session: Session): void {
     if (!session.release) {
-      logger.warn('Discarded session because of missing release');
+      this.logger.warn('Discarded session because of missing release');
     } else {
       this._sendSession(session);
       // After sending, we set init false to inidcate it's not the first occurence
@@ -206,7 +213,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     return integrations.reduce((integrationsIndex: Record<string, Integration>, integration) => {
       integrationsIndex[integration.name] = integration;
       integration.install(this);
-      logger.log(`Integration installed: ${integration.name}`);
+      this.logger.log(`Integration installed: ${integration.name}`);
       return integrationsIndex;
     }, {});
   }
@@ -217,7 +224,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   // TODO: Do we need generic here?
   protected _sendRequest<T>(request: TransportRequest<T>): void {
     this._transport.sendRequest(request).then(null, reason => {
-      logger.error(`Failed sending request: ${reason}`);
+      this.logger.error(`Failed sending request: ${reason}`);
     });
   }
 
@@ -431,7 +438,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
   // eslint-disable-next-line complexity
   protected _processEvent(event: SentryEvent, captureContext: CaptureContext): SentryEvent | null {
     if (this.options.enabled === false) {
-      logger.error('SDK not enabled, will not send event.');
+      this.logger.error('SDK not enabled, will not send event.');
       return null;
     }
 
@@ -440,7 +447,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
     // 0.0 === 0% events are sent
     // Sampling for transaction happens somewhere else
     if (!isTransaction && typeof this.options.sampleRate === 'number' && Math.random() > this.options.sampleRate) {
-      logger.error(
+      this.logger.error(
         `Discarding event because it's not included in the random sample (sampling rate = ${this.options.sampleRate})`,
       );
       return null;
@@ -466,7 +473,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
 
       processedEvent = scope.applyToEvent(processedEvent, captureContext.hint);
       if (processedEvent === null) {
-        logger.error('A scope event processor returned null, will not send event.');
+        this.logger.error('A scope event processor returned null, will not send event.');
         return null;
       }
 
@@ -474,7 +481,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
         if (typeof processor === 'function') {
           const nextEvent = processor(processedEvent, captureContext.hint);
           if (nextEvent === null) {
-            logger.error('A client event processor returned null, will not send event.');
+            this.logger.error('A client event processor returned null, will not send event.');
             return null;
           }
           processedEvent = nextEvent;
@@ -482,7 +489,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       }
 
       if (processedEvent === null) {
-        logger.error('A scope event processor returned null, will not send event.');
+        this.logger.error('A scope event processor returned null, will not send event.');
         return null;
       }
 
@@ -499,12 +506,12 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
       processedEvent = this.options.beforeSend(processedEvent as SentryEvent, captureContext?.hint);
 
       if (!(isPlainObject(processedEvent) || processedEvent === null)) {
-        logger.error('`beforeSend` method has to return `null` or a valid event.');
+        this.logger.error('`beforeSend` method has to return `null` or a valid event.');
         return null;
       }
 
       if (processedEvent === null) {
-        logger.error('`beforeSend` returned `null`, will not send event.');
+        this.logger.error('`beforeSend` returned `null`, will not send event.');
         return null;
       }
 
@@ -525,7 +532,7 @@ export abstract class BaseClient<O extends Options> implements ClientLike<O> {
           originalException: e,
         },
       });
-      logger.error(
+      this.logger.error(
         `Event processing pipeline threw an error, original event will not be sent. Details have been sent as a new event.\nReason: ${e}`,
       );
       return null;

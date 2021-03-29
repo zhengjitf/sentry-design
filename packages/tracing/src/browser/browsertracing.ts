@@ -1,5 +1,5 @@
 import { ClientLike, Integration, Transaction, TransactionContext } from '@sentry/types';
-import { getGlobalObject, logger } from '@sentry/utils';
+import { getGlobalObject } from '@sentry/utils';
 
 import { startIdleTransaction } from '../start';
 import { DEFAULT_IDLE_TIMEOUT, IdleTransaction } from '../idletransaction';
@@ -108,13 +108,12 @@ export class BrowserTracing implements Integration {
 
   private _client!: ClientLike;
 
-  private readonly _metrics: MetricsInstrumentation = new MetricsInstrumentation();
+  private _metrics!: MetricsInstrumentation;
 
   private readonly _emitOptionsWarning: boolean = false;
 
   public constructor(_options?: Partial<BrowserTracingOptions>) {
     let tracingOrigins = defaultRequestInstrumentationOptions.tracingOrigins;
-    // NOTE: Logger doesn't work in constructors, as it's initialized after integrations instances
     if (
       _options &&
       _options.tracingOrigins &&
@@ -135,12 +134,13 @@ export class BrowserTracing implements Integration {
 
   public install(client: ClientLike): void {
     this._client = client;
+    this._metrics = new MetricsInstrumentation(client);
 
     if (this._emitOptionsWarning) {
-      logger.warn(
+      this._client.logger.warn(
         '[Tracing] You need to define `tracingOrigins` in the options. Set an array of urls or patterns to trace.',
       );
-      logger.warn(
+      this._client.logger.warn(
         `[Tracing] We added a reasonable default for you: ${defaultRequestInstrumentationOptions.tracingOrigins}`,
       );
     }
@@ -164,7 +164,7 @@ export class BrowserTracing implements Integration {
     );
 
     if (markBackgroundTransactions) {
-      registerBackgroundTabDetection();
+      registerBackgroundTabDetection(client);
     }
 
     registerRequestInstrumentation({ traceFetch, traceXHR, tracingOrigins, shouldCreateSpanForRequest });
@@ -189,10 +189,10 @@ export class BrowserTracing implements Integration {
     const finalContext = modifiedContext === undefined ? { ...expandedContext, sampled: false } : modifiedContext;
 
     if (finalContext.sampled === false) {
-      logger.log(`[Tracing] Will not send ${finalContext.op} transaction because of beforeNavigate.`);
+      this._client.logger.log(`[Tracing] Will not send ${finalContext.op} transaction because of beforeNavigate.`);
     }
 
-    logger.log(`[Tracing] Starting ${finalContext.op} transaction on scope`);
+    this._client.logger.log(`[Tracing] Starting ${finalContext.op} transaction on scope`);
 
     const { location } = getGlobalObject() as WindowOrWorkerGlobalScope & { location: Location };
 
