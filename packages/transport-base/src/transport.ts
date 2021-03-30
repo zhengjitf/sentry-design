@@ -1,4 +1,10 @@
-import { Transport, TransportOptions, TransportResponse, TransportRequest, TransportRequestMaker } from '@sentry/types';
+import {
+  Transport,
+  TransportOptions,
+  TransportResponse,
+  TransportRequest,
+  TransportMakeRequestResponse,
+} from '@sentry/types';
 
 import { Dsn } from './dsn';
 import { isRateLimited, updateRateLimits, RateLimits, disabledUntil } from './rateLimit';
@@ -10,15 +16,12 @@ export abstract class BaseTransport {
   protected readonly _asyncBuffer: AsyncBuffer<TransportResponse>;
   protected _rateLimits: RateLimits = {};
 
-  public constructor(public options: TransportOptions) {
-    this._dsn = new Dsn(this.options.dsn);
-    this._asyncBuffer = new AsyncBuffer(this.options.bufferSize ?? 30);
+  public constructor(protected readonly _options: TransportOptions) {
+    this._dsn = new Dsn(this._options.dsn);
+    this._asyncBuffer = new AsyncBuffer(this._options.bufferSize ?? 30);
   }
 
-  public sendRequest<T>(
-    request: TransportRequest<T>,
-    requestMaker: TransportRequestMaker<T>,
-  ): PromiseLike<TransportResponse> {
+  public sendRequest<T>(request: TransportRequest<T>): PromiseLike<TransportResponse> {
     if (isRateLimited(this._rateLimits, request.type)) {
       return Promise.reject(
         new Error(
@@ -36,7 +39,7 @@ export abstract class BaseTransport {
      * and they are not making any network calls when the buffer is full.
      */
     const sendRequestTask = (): PromiseLike<TransportResponse> => {
-      return requestMaker(request).then(
+      return this._makeRequest<T>(request).then(
         ({ body, headers, statusCode, reason }): PromiseLike<TransportResponse> => {
           if (headers) {
             this._rateLimits = updateRateLimits(this._rateLimits, headers);
@@ -59,6 +62,8 @@ export abstract class BaseTransport {
   public flush(timeout: number = 0): PromiseLike<boolean> {
     return this._asyncBuffer.drain(timeout);
   }
+
+  protected abstract _makeRequest<T>(request: TransportRequest<T>): PromiseLike<TransportMakeRequestResponse>;
 }
 
 export class NoopTransport implements Transport {

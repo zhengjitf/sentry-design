@@ -41,9 +41,8 @@ export {
   Transport,
   TransportOptions,
   TransportRequest,
-  TransportRequestMaker,
   TransportResponse,
-  TransportMakerResponse,
+  TransportMakeRequestResponse,
 } from './transport';
 export { User } from './user';
 export { WrappedFunction } from './wrappedfunction';

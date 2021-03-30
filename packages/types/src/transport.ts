@@ -14,14 +14,12 @@ export type TransportRequest<T> = {
   type: EventType;
 };
 
-export type TransportMakerResponse = {
+export type TransportMakeRequestResponse = {
   body?: string;
   headers?: Record<string, string | null>;
   reason?: string;
   statusCode: number;
 };
-
-export type TransportRequestMaker<T> = (request: TransportRequest<T>) => PromiseLike<TransportMakerResponse>;
 
 export type TransportResponse = {
   status: ResponseStatus;
