@@ -4,6 +4,7 @@ Sentry.init({ dsn: 'https://public@app.getsentry.com/12345' });
 
 const util = require('util');
 const http = require('http');
+
 const nock = require('nock');
 
 // have to call this for each request :/ ref https://github.com/node-nock/nock#read-this---about-interceptors
@@ -38,7 +39,7 @@ app.use(Sentry.Handlers.requestHandler());
 app.use((req, res, next) => {
   if (!hitBefore[req.url]) {
     hitBefore[req.url] = true;
-    process._rawDebug('hit ' + req.url + ' for first time');
+    process._rawDebug(`hit ${req.url} for first time`);
   }
   next();
 });
@@ -143,7 +144,7 @@ app.use((req, res, next) => {
 app.use(Sentry.Handlers.errorHandler());
 
 app.use((err, req, res, next) => {
-  return res.status(500).send('oh no there was an error: ' + err.message);
+  return res.status(500).send(`oh no there was an error: ${err.message}`);
 });
 
 const server = app.listen(3000, () => {

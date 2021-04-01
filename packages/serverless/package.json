@@ -1,6 +1,6 @@
 {
   "name": "@sentry/serverless",
-  "version": "6.2.3",
+  "version": "7.0.0-alpha.0",
   "description": "Offical Sentry SDK for various serverless solutions",
   "repository": "git://github.com/getsentry/sentry-javascript.git",
   "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/serverless",
@@ -9,19 +9,19 @@
   "engines": {
     "node": ">=10"
   },
-  "main": "dist/index.js",
+  "main": "cjs/index.js",
   "module": "esm/index.js",
-  "types": "dist/index.d.ts",
+  "types": "types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@sentry/minimal": "6.2.3",
-    "@sentry/node": "6.2.3",
+    "@sentry/minimal": "7.0.0-alpha.0",
+    "@sentry/node": "7.0.0-alpha.0",
     "@sentry/scope": "7.0.0-alpha.0",
-    "@sentry/tracing": "6.2.3",
-    "@sentry/types": "6.2.3",
-    "@sentry/utils": "6.2.3",
+    "@sentry/tracing": "7.0.0-alpha.0",
+    "@sentry/types": "7.0.0-alpha.0",
+    "@sentry/utils": "7.0.0-alpha.0",
     "@types/aws-lambda": "^8.10.62",
     "@types/express": "^4.17.2"
   },
@@ -30,7 +30,6 @@
     "@google-cloud/common": "^3.4.1",
     "@google-cloud/functions-framework": "^1.7.1",
     "@google-cloud/pubsub": "^2.5.0",
-    "@types/node": "^14.6.4",
     "aws-sdk": "^2.765.0",
     "find-up": "^5.0.0",
     "google-gax": "^2.9.0",
@@ -39,25 +38,19 @@
     "read-pkg": "^5.2.0"
   },
   "scripts": {
-    "build": "run-s build:es build:awslambda-layer",
-    "build:es": "run-p build:es5 build:esm",
-    "build:es5": "tsc -p tsconfig.build.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:awslambda-layer": "node scripts/build-awslambda-layer.js",
-    "build:watch": "run-p build:watch:es5 build:watch:esm",
-    "build:watch:es5": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
-    "build:watch:esm": "tsc -p tsconfig.esm.json -w --preserveWatchOutput",
-    "clean": "rimraf dist dist-awslambda-layer coverage build esm",
-    "link:yarn": "yarn link",
-    "lint": "run-s lint:prettier lint:eslint",
-    "lint:prettier": "prettier --check \"{src,test}/**/*.ts\"",
-    "lint:eslint": "eslint .",
-    "fix": "run-s fix:eslint fix:prettier",
-    "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
-    "fix:eslint": "eslint . --fix",
+    "build": "yarn build:dev",
+    "build:watch": "yarn build --watch",
+    "build:dev": "rollup -c ../../rollup.config.dev.js",
+    "build:prod": "rollup -c ../../rollup.config.prod.js",
+    "clean": "rimraf cjs dist esm types coverage",
+    "lint": "yarn lint:prettier & yarn lint:eslint",
+    "lint:prettier": "prettier --write \"src/**\" \"test/**\"",
+    "lint:eslint": "eslint --fix \"src/**\" \"test/**\"",
     "test": "jest -c ../../jest.config.js",
-    "test:watch": "npm run test -- --watch",
-    "pack": "npm pack"
+    "test:watch": "yarn test --watch",
+
+    "TODO:": "Restore lambda-layer build",
+    "build:awslambda-layer": "node scripts/build-awslambda-layer.js"
   },
   "volta": {
     "extends": "../../package.json"

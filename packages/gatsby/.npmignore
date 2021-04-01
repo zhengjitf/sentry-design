@@ -1,0 +1,5 @@
+*
+!/dist/**/*
+!/esm/**/*
+!gatsby-browser.js
+!gatsby-node.js

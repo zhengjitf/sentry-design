@@ -4,7 +4,7 @@
 
 import { expect } from 'chai';
 import { fakeServer, SinonFakeServer, stub } from 'sinon';
-import { SentryEvent, Status } from '@sentry/types';
+import { EventType, SentryEvent, Status } from '@sentry/types';
 import { eventToTransportRequest } from '@sentry/transport-base';
 
 import { XHRTransport } from '../src/index';
@@ -17,7 +17,7 @@ const eventPayload: SentryEvent = {
 };
 const transactionPayload: SentryEvent = {
   event_id: '42',
-  type: 'transaction',
+  type: EventType.Transaction,
 };
 
 let server: SinonFakeServer;

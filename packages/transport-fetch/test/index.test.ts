@@ -4,7 +4,7 @@
 
 import { expect } from 'chai';
 import { SinonStub, stub } from 'sinon';
-import { SentryEvent, Status } from '@sentry/types';
+import { EventType, SentryEvent, Status } from '@sentry/types';
 import { eventToTransportRequest } from '@sentry/transport-base';
 
 import { FetchTransport } from '../src/index';
@@ -16,7 +16,7 @@ const eventPayload: SentryEvent = {
 };
 const transactionPayload: SentryEvent = {
   event_id: '42',
-  type: 'transaction',
+  type: EventType.Transaction,
 };
 
 let fetch: SinonStub;
@@ -113,9 +113,7 @@ describe.skip('FetchTransport', () => {
     it('passes in fetch parameters', async () => {
       transport = new FetchTransport({
         dsn: testDsn,
-        requestOptions: {
-          credentials: 'include',
-        },
+        credentials: 'include',
       });
       const response = { status: 200, headers: new Headers() };
 

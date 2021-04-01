@@ -3,7 +3,7 @@
 function run(n) {
   if (n == null) return run(1000);
   if (n === 0) throw new Error('we did it!');
-  console.log('run ' + n);
+  console.log(`run ${n}`);
   return run(n - 1);
 }
 

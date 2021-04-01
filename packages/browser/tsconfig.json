@@ -1,9 +1,8 @@
 {
-  "extends": "./tsconfig.build.json",
+  "extends": "../../tsconfig.json",
   "include": ["src/**/*", "test/**/*"],
-  "exclude": ["dist"],
   "compilerOptions": {
-    "rootDir": ".",
-    "types": ["node", "mocha", "chai", "sinon"]
+    "lib": ["es6", "dom"]
+    // "types": ["node", "mocha", "chai", "sinon"]
   }
 }

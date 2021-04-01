@@ -9,30 +9,23 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "dist/index.js",
+  "main": "cjs/index.js",
   "module": "esm/index.js",
-  "types": "dist/index.d.ts",
+  "types": "types/index.d.ts",
   "dependencies": {
-    "@sentry/types": "6.2.3"
+    "@sentry/types": "7.0.0-alpha.0"
   },
   "scripts": {
-    "build": "run-p build:es5 build:esm",
-    "build:es5": "tsc -p tsconfig.build.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:watch": "run-p build:watch:es5 build:watch:esm",
-    "build:watch:es5": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
-    "build:watch:esm": "tsc -p tsconfig.esm.json -w --preserveWatchOutput",
-    "clean": "rimraf dist coverage",
-    "link:yarn": "yarn link",
-    "lint": "run-s lint:prettier lint:eslint",
-    "lint:prettier": "prettier --check \"{src,test}/**/*.ts\"",
-    "lint:eslint": "eslint .",
-    "fix": "run-s fix:eslint fix:prettier",
-    "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
-    "fix:eslint": "eslint . --fix",
+    "build": "yarn build:dev",
+    "build:watch": "yarn build --watch",
+    "build:dev": "rollup -c ../../rollup.config.dev.js",
+    "build:prod": "rollup -c ../../rollup.config.prod.js",
+    "clean": "rimraf cjs dist esm types coverage",
+    "lint": "yarn lint:prettier & yarn lint:eslint",
+    "lint:prettier": "prettier --write \"src/**\" \"test/**\"",
+    "lint:eslint": "eslint --fix \"src/**\" \"test/**\"",
     "test": "jest -c ../../jest.config.js",
-    "test:watch": "npm run test -- --watch",
-    "pack": "npm pack"
+    "test:watch": "yarn test --watch"
   },
   "volta": {
     "extends": "../../package.json"

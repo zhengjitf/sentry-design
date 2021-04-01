@@ -1,6 +1,6 @@
 {
   "name": "@sentry/ember",
-  "version": "6.2.3",
+  "version": "7.0.0-alpha.0",
   "description": "Offical Sentry SDK for Ember.js",
   "repository": "git://github.com/getsentry/sentry-javascript.git",
   "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/ember",
@@ -17,9 +17,10 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "ember build --environment=production",
+    "build": "ember build --suppress-sizes=true",
+    "build:prod": "ember build --environment=production --suppress-sizes=true",
     "link:yarn": "yarn link",
-    "lint": "npm-run-all --aggregate-output --continue-on-error --parallel lint:*",
+    "lint": "yarn lint:hbs & yarn lint:js",
     "lint:hbs": "ember-template-lint .",
     "lint:js": "eslint .",
     "start": "ember serve",
@@ -27,16 +28,15 @@
     "test:ember": "ember test",
     "test:ember-compatibility": "ember try:each",
     "prepublishOnly": "ember ts:precompile",
-    "postpublish": "ember ts:clean",
-    "pack": "npm pack"
+    "postpublish": "ember ts:clean"
   },
   "dependencies": {
     "@embroider/macros": ">=0.25.0",
     "@embroider/test-setup": "^0.35.1",
-    "@sentry/browser": "6.2.3",
-    "@sentry/tracing": "6.2.3",
-    "@sentry/types": "6.2.3",
-    "@sentry/utils": "6.2.3",
+    "@sentry/browser": "7.0.0-alpha.0",
+    "@sentry/tracing": "7.0.0-alpha.0",
+    "@sentry/types": "7.0.0-alpha.0",
+    "@sentry/utils": "7.0.0-alpha.0",
     "ember-auto-import": "^1.6.0",
     "ember-cli-babel": "^7.20.5",
     "ember-cli-htmlbars": "^5.1.2",

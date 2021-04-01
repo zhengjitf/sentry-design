@@ -1,33 +1,24 @@
 {
+  // Based on https://github.com/tsconfig/bases/blob/master/bases/recommended.json
   "compilerOptions": {
-    "alwaysStrict": false,
-    "baseUrl": "packages",
-    "declaration": true,
-    "declarationMap": true,
-    "downlevelIteration": true,
+    "baseUrl": "src",
+    "esModuleInterop": true,
     "importHelpers": true,
-    "inlineSources": true,
-    "lib": ["es6", "dom"],
-    "module": "commonjs",
+    "lib": ["es6"],
     "moduleResolution": "node",
     "noEmitHelpers": true,
-    "noErrorTruncation": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
     "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noImplicitUseStrict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
       "@sentry/*": ["*/src"]
     },
-    "pretty": true,
-    "sourceMap": true,
+    "rootDir": "./",
+    "skipLibCheck": true,
     "strict": true,
     "strictBindCallApply": false,
-    "target": "es5",
-    // TODO: Set per package
-    "types": ["node"]
+    "target": "es6",
+    "types": [] // Explicitly cleared to make compilation faster and prevent types confusion
   }
 }

@@ -1,9 +1,6 @@
 import { SentryEvent, ClientLike, Integration } from '@sentry/types';
 import { getGlobalObject, normalize, uuid4 } from '@sentry/utils';
-import * as localForageType from 'localforage';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const localForage = require('localforage');
+import localForage from 'localforage';
 
 type OfflineOptions = {
   maxStoredEvents?: number;
@@ -25,7 +22,7 @@ export class Offline implements Integration {
   /**
    * event cache
    */
-  public offlineEventStore: typeof localForageType; // type imported from localforage
+  public offlineEventStore: typeof localForage;
 
   private _client!: ClientLike;
 
@@ -34,7 +31,6 @@ export class Offline implements Integration {
    */
   public constructor(options: OfflineOptions = {}) {
     this.maxStoredEvents = options.maxStoredEvents ?? 30;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     this.offlineEventStore = localForage.createInstance({
       name: 'sentry/offlineEventStore',
     });

@@ -11,15 +11,11 @@
   ],
   "scripts": {
     "build": "lerna run build",
-    "build:es5": "lerna run build:es5",
-    "build:esm": "lerna run build:esm",
+    "build:prod": "lerna run build:prod",
     "build:watch": "lerna run build:watch",
     "clean": "lerna run clean && lerna clean --yes",
-    "fix": "lerna run --parallel fix",
-    "link:yarn": "lerna run --parallel link:yarn",
     "lint": "lerna run --parallel lint",
     "test": "lerna run --parallel test",
-    "codecov": "codecov",
     "pack:changed": "lerna run pack --since",
     "postpublish": "make publish-docs"
   },
@@ -55,12 +51,12 @@
     "lerna": "4.0.0",
     "lint-staged": "^10.5.4",
     "mocha": "^6.1.4",
-    "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
     "replace-in-file": "^4.0.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.39.0",
-    "rollup-plugin-dts": "^2.0.1",
+    "rollup-plugin-dts": "^3.0.1",
+    "rollup-plugin-terser": "^7.0.2",
     "sinon": "^7.3.2",
     "size-limit": "^4.5.5",
     "ts-jest": "26.5.1",
@@ -79,5 +75,9 @@
       "prettier --write"
     ],
     "*.{json,md}": "prettier --write"
+  },
+  "dependencies": {
+    "@rollup/plugin-json": "^4.1.0",
+    "rollup-plugin-delete": "^2.0.0"
   }
 }

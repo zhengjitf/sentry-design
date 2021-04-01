@@ -1,63 +1,48 @@
 {
   "name": "@sentry/vue",
-  "version": "6.2.3",
+  "version": "7.0.0-alpha.0",
   "description": "Offical Sentry SDK for Vue.js",
   "repository": "git://github.com/getsentry/sentry-javascript.git",
   "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/vue",
   "author": "Sentry",
   "license": "MIT",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
-  "main": "dist/index.js",
+  "main": "cjs/index.js",
   "module": "esm/index.js",
-  "types": "dist/index.d.ts",
+  "types": "types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@sentry/browser": "6.2.3",
-    "@sentry/core": "6.2.3",
-    "@sentry/minimal": "6.2.3",
+    "@sentry/browser": "7.0.0-alpha.0",
+    "@sentry/core": "7.0.0-alpha.0",
+    "@sentry/minimal": "7.0.0-alpha.0",
     "@sentry/scope": "7.0.0-alpha.0",
     "@sentry/transport-base": "7.0.0-alpha.0",
-    "@sentry/types": "6.2.3",
-    "@sentry/utils": "6.2.3"
+    "@sentry/types": "7.0.0-alpha.0",
+    "@sentry/utils": "7.0.0-alpha.0"
   },
   "peerDependencies": {
     "vue": "2.x",
     "vue-router": "3.x"
   },
   "devDependencies": {
-    "jsdom": "^16.2.2",
-    "rollup": "^1.10.1",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-license": "^0.8.1",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-terser": "^4.0.4",
-    "rollup-plugin-typescript2": "^0.21.0",
-    "typescript": "4.1.5",
     "vue": "^2.6",
     "vue-router": "^3.0.1"
   },
   "scripts": {
-    "build": "run-p build:es5 build:esm build:bundle",
-    "build:bundle": "rollup --config",
-    "build:bundle:watch": "rollup --config --watch",
-    "build:es5": "tsc -p tsconfig.build.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:watch": "run-p build:watch:es5 build:watch:esm",
-    "build:watch:es5": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
-    "build:watch:esm": "tsc -p tsconfig.esm.json -w --preserveWatchOutput",
-    "clean": "rimraf dist coverage build esm",
-    "link:yarn": "yarn link",
-    "lint": "run-s lint:prettier lint:eslint",
-    "lint:prettier": "prettier --check \"{src,test}/**/*.ts\"",
-    "lint:eslint": "eslint .",
-    "fix": "run-s fix:eslint fix:prettier",
-    "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
-    "fix:eslint": "eslint . --fix",
-    "pack": "npm pack"
+    "build": "yarn build:dev",
+    "build:watch": "yarn build --watch",
+    "build:dev": "rollup -c ../../rollup.config.dev.js",
+    "build:prod": "rollup -c ../../rollup.config.prod.js",
+    "clean": "rimraf cjs dist esm types coverage",
+    "lint": "yarn lint:prettier & yarn lint:eslint",
+    "lint:prettier": "prettier --write \"src/**\" \"test/**\"",
+    "lint:eslint": "eslint --fix \"src/**\" \"test/**\"",
+    "test": "jest -c ../../jest.config.js",
+    "test:watch": "yarn test --watch"
   },
   "volta": {
     "extends": "../../package.json"

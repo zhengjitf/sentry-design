@@ -1,9 +1,7 @@
 {
-  "extends": "./tsconfig.build.json",
-  "include": ["src/**/*.ts", "test/**/*.ts", "test/integration.test.tsx", "src/**/*.tsx", "test/**/*.tsx"],
-  "exclude": ["dist"],
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*", "test/**/*"],
   "compilerOptions": {
-    "rootDir": ".",
-    "types": ["node", "jest"]
+    "types": ["jest"]
   }
 }

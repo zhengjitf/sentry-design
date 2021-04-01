@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "lib": ["es2017", "dom"],
     "target": "es2017",
     "allowJs": true,
     "moduleResolution": "node",
@@ -17,12 +18,14 @@
     "paths": {
       "dummy/tests/*": ["tests/*"],
       "dummy/*": ["tests/dummy/app/*", "app/*"],
+      "@sentry/*": ["../*/src"],
       "@sentry/ember": ["addon"],
       "@sentry/ember/*": ["addon/*"],
       "@sentry/ember/test-support": ["addon-test-support"],
       "@sentry/ember/test-support/*": ["addon-test-support/*"],
       "*": ["types/*"]
-    }
+    },
+    "types": ["node"]
   },
   "include": ["app/**/*", "addon/**/*", "tests/**/*", "types/**/*", "test-support/**/*", "addon-test-support/**/*"]
 }

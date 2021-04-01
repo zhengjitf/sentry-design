@@ -37,6 +37,7 @@ if (!process.env.GITHUB_ACTIONS) {
 // so I think it's better to have a classic package directory with node_modules file structure.
 
 /** Recursively traverse all the dependencies and collect all the info to the map */
+// TODO: Unify this with `integration-node-modules` and node `discoverIntegrations`
 async function collectPackages(cwd, packages = {}) {
   const packageJson = await readPkg({ cwd });
 

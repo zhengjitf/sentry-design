@@ -4,9 +4,9 @@ import { TransportRequest } from '@sentry/transport-base';
 import { SentryEvent, Severity, Span } from '@sentry/types';
 import { logger, SentryError, SyncPromise } from '@sentry/utils';
 
-import { TestClient } from '../mocks/client';
-import { TestIntegration } from '../mocks/integration';
-import { FakeTransport } from '../mocks/transport';
+import { TestClient } from './mocks/client';
+import { TestIntegration } from './mocks/integration';
+import { FakeTransport } from './mocks/transport';
 
 const PUBLIC_DSN = 'https://username@domain/123';
 // eslint-disable-next-line no-var

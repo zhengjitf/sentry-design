@@ -8,16 +8,16 @@ module.exports = {
     ecmaVersion: 2018,
   },
   extends: ['prettier', 'eslint:recommended', 'plugin:import/errors', 'plugin:import/warnings'],
-  ignorePatterns: [
-    'coverage/**',
-    'build/**',
-    'dist/**',
-    'esm/**',
-    'cjs/**',
-    'examples/**',
-    'scripts/**',
-    'test/manual/**',
-  ],
+  // ignorePatterns: [
+  //   'coverage/**',
+  //   'build/**',
+  //   'dist/**',
+  //   'esm/**',
+  //   'cjs/**',
+  //   'examples/**',
+  //   'scripts/**',
+  //   'test/manual/**',
+  // ],
   rules: {
     // We want to prevent usage of unary operators outside of for loops
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
@@ -35,7 +35,7 @@ module.exports = {
     'prefer-template': 'error',
 
     // We should require a whitespace beginning a comment
-    'spaced-comment': 'error',
+    'spaced-comment': ['error', 'always', { markers: ['/'] }],
 
     // Disallow usage of bitwise operators - this makes it an opt in operation
     'no-bitwise': 'error',

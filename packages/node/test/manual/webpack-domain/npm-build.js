@@ -1,6 +1,7 @@
 const path = require('path');
-const webpack = require('webpack');
 const { execSync } = require('child_process');
+
+const webpack = require('webpack');
 
 // prettier-ignore
 webpack(
@@ -39,7 +40,7 @@ webpack(
 
 function runTests() {
   try {
-    execSync('node ' + path.resolve(__dirname, 'dist', 'bundle.js'));
+    execSync(`node ${path.resolve(__dirname, 'dist', 'bundle.js')}`);
   } catch (_) {
     process.exit(1);
   }

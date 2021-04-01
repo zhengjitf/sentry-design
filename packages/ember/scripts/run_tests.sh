@@ -3,8 +3,11 @@
 
 if [[ $TRAVIS || $GITHUB_ACTIONS ]]; then
   echo "In CI - running tests against multiple versions of Ember"
-  yarn npm-run-all lint:* test:*
+  yarn lint
+  yarn test:ember
+  yarn test:ember-compatibility
 else
   echo "Tests running locally - will only run tests against default version of Ember"
-  yarn npm-run-all lint:* test:ember
+  yarn lint
+  yarn test:ember
 fi

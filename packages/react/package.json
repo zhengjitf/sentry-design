@@ -1,28 +1,28 @@
 {
   "name": "@sentry/react",
-  "version": "6.2.3",
+  "version": "7.0.0-alpha.0",
   "description": "Offical Sentry SDK for React.js",
   "repository": "git://github.com/getsentry/sentry-javascript.git",
   "homepage": "https://github.com/getsentry/sentry-javascript/tree/master/packages/react",
   "author": "Sentry",
   "license": "BSD-3-Clause",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
-  "main": "dist/index.js",
+  "main": "cjs/index.js",
   "module": "esm/index.js",
-  "types": "dist/index.d.ts",
+  "types": "types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@sentry/browser": "6.2.3",
-    "@sentry/core": "6.2.3",
-    "@sentry/minimal": "6.2.3",
+    "@sentry/browser": "7.0.0-alpha.0",
+    "@sentry/core": "7.0.0-alpha.0",
+    "@sentry/minimal": "7.0.0-alpha.0",
     "@sentry/scope": "7.0.0-alpha.0",
     "@sentry/transport-base": "7.0.0-alpha.0",
-    "@sentry/types": "6.2.3",
-    "@sentry/utils": "6.2.3",
+    "@sentry/types": "7.0.0-alpha.0",
+    "@sentry/utils": "7.0.0-alpha.0",
     "hoist-non-react-statics": "^3.3.2"
   },
   "peerDependencies": {
@@ -42,7 +42,7 @@
     "eslint-plugin-react": "^7.22.0",
     "history-4": "npm:history@4.6.0",
     "history-5": "npm:history@4.9.0",
-    "jsdom": "^16.2.2",
+    "jsdom": "^16.2.9",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-router-3": "npm:react-router@3.2.0",
@@ -52,23 +52,16 @@
     "redux": "^4.0.5"
   },
   "scripts": {
-    "build": "run-p build:es5 build:esm",
-    "build:es5": "tsc -p tsconfig.build.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:watch": "run-p build:watch:es5 build:watch:esm",
-    "build:watch:es5": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
-    "build:watch:esm": "tsc -p tsconfig.esm.json -w --preserveWatchOutput",
-    "clean": "rimraf dist coverage build esm",
-    "link:yarn": "yarn link",
-    "lint": "run-s lint:prettier lint:eslint",
-    "lint:prettier": "prettier --check \"{src,test}/**/*.ts\"",
-    "lint:eslint": "eslint .",
-    "fix": "run-s fix:eslint fix:prettier",
-    "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
-    "fix:eslint": "eslint . --fix",
+    "build": "yarn build:dev",
+    "build:watch": "yarn build --watch",
+    "build:dev": "rollup -c ../../rollup.config.dev.js",
+    "build:prod": "rollup -c ../../rollup.config.prod.js",
+    "clean": "rimraf cjs dist esm types coverage",
+    "lint": "yarn lint:prettier & yarn lint:eslint",
+    "lint:prettier": "prettier --write \"src/**\" \"test/**\"",
+    "lint:eslint": "eslint --fix \"src/**\" \"test/**\"",
     "test": "jest -c ../../jest.config.js",
-    "test:watch": "npm run test -- --watch",
-    "pack": "npm pack"
+    "test:watch": "yarn test --watch"
   },
   "volta": {
     "extends": "../../package.json"

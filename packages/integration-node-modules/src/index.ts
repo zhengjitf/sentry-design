@@ -12,6 +12,7 @@ function getPaths(): string[] {
   }
 }
 
+// TODO: Reuse it for node discoverIntegrations instead of external package?
 /** Extract information about package.json modules */
 function collectModules(): {
   [name: string]: string;
