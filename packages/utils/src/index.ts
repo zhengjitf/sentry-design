@@ -7,7 +7,6 @@ export * from './misc';
 export * from './node';
 export * from './object';
 export * from './path';
-export * from './promisebuffer';
 export * from './stacktrace';
 export * from './string';
 export * from './supports';
