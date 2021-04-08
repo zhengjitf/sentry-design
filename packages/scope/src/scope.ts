@@ -284,46 +284,22 @@ export class Scope implements ScopeLike {
   /**
    * @inheritDoc
    */
-  public update(captureContext?: ScopeContext): this {
-    if (!captureContext) {
+  public update(captureContext: ScopeContext): this {
+    if (!isPlainObject(captureContext)) {
       return this;
     }
-
-    if (typeof captureContext === 'function') {
-      const updatedScope = (captureContext as <T>(scope: T) => T)(this);
-      return updatedScope instanceof Scope ? updatedScope : this;
+    this.tags = { ...this.tags, ...captureContext.tags };
+    this.extra = { ...this.extra, ...captureContext.extra };
+    this.contexts = { ...this.contexts, ...captureContext.contexts };
+    if (captureContext.user && Object.keys(captureContext.user).length) {
+      this.user = captureContext.user;
     }
-
-    if (captureContext instanceof Scope) {
-      this.tags = { ...this.tags, ...captureContext.tags };
-      this.extra = { ...this.extra, ...captureContext.extra };
-      this.contexts = { ...this.contexts, ...captureContext.contexts };
-      if (captureContext.user && Object.keys(captureContext.user).length) {
-        this.user = captureContext.user;
-      }
-      if (captureContext.level) {
-        this.level = captureContext.level;
-      }
-      if (captureContext.fingerprint) {
-        this.fingerprint = captureContext.fingerprint;
-      }
-    } else if (isPlainObject(captureContext)) {
-      // eslint-disable-next-line no-param-reassign
-      captureContext = captureContext as ScopeContext;
-      this.tags = { ...this.tags, ...captureContext.tags };
-      this.extra = { ...this.extra, ...captureContext.extra };
-      this.contexts = { ...this.contexts, ...captureContext.contexts };
-      if (captureContext.user) {
-        this.user = captureContext.user;
-      }
-      if (captureContext.level) {
-        this.level = captureContext.level;
-      }
-      if (captureContext.fingerprint) {
-        this.fingerprint = captureContext.fingerprint;
-      }
+    if (captureContext.level) {
+      this.level = captureContext.level;
     }
-
+    if (captureContext.fingerprint) {
+      this.fingerprint = captureContext.fingerprint;
+    }
     return this;
   }
 

@@ -5,7 +5,7 @@ const testStrings = [`/// <reference types="node" />`];
 
 describe('build', () => {
   test('not contains types', () => {
-    const paths = [path.join('./dist'), path.join('./esm')];
+    const paths = [path.join('./cjs'), path.join('./esm')];
     paths.forEach(dir => {
       if (!fs.existsSync(dir)) {
         expect(dir).toBe(`${dir} doesn't exist please build first`);

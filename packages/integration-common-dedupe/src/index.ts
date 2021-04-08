@@ -6,18 +6,20 @@ export class Dedupe implements Integration {
   private _previousEvent?: SentryEvent;
 
   public install(client: ClientLike): void {
-    client.addEventProcessor((currentEvent: SentryEvent) => {
-      // Juuust in case something goes wrong
-      try {
-        if (this._shouldDropEvent(currentEvent, this._previousEvent)) {
-          return null;
-        }
-      } catch (_oO) {
-        // no-empty
+    client.addEventProcessor((currentEvent: SentryEvent) => this.process(currentEvent, this._previousEvent));
+  }
+
+  public process(currentEvent: SentryEvent, previousEvent?: SentryEvent): SentryEvent | null {
+    // Juuust in case something goes wrong
+    try {
+      if (this._shouldDropEvent(currentEvent, previousEvent)) {
+        return null;
       }
-      this._previousEvent = currentEvent;
-      return currentEvent;
-    });
+    } catch (_oO) {
+      // no-empty
+    }
+    this._previousEvent = currentEvent;
+    return currentEvent;
   }
 
   private _shouldDropEvent(currentEvent: SentryEvent, previousEvent?: SentryEvent): boolean {

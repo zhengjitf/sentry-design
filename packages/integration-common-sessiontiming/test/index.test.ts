@@ -10,7 +10,7 @@ describe('SessionTiming', () => {
       },
     });
 
-    expect(typeof event.extra!['session:start']).toBe('number');
+    expect(typeof event.extra!['session:start']).toBeIn('number');
     expect(typeof event.extra!['session:duration']).toBe('number');
     expect(typeof event.extra!['session:end']).toBe('number');
     expect(event.extra!.some).toEqual('value');

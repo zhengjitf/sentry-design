@@ -1,59 +1,61 @@
 import { readFileSync } from 'fs';
 
-import { ClientLike, Integration, StackFrame } from '@sentry/types';
+import { ClientLike, Integration, SentryEvent, StackFrame } from '@sentry/types';
 import { snipLine } from '@sentry/utils';
 import { LRUMap } from 'lru_map';
 
+// TODO: Write some performance tests for LRU/Promise memory issue.
 const FILE_CONTENT_CACHE = new LRUMap<string, string | null>(100);
 
-// TODO: Write some performance tests for LRU/Promise memory issue.
-
-/**
- * Resets the file cache. Exists for testing purposes.
- * @hidden
- */
-export function resetFileContentCache(): void {
-  FILE_CONTENT_CACHE.clear();
-}
+type ContextLinesOptions = {
+  frameContextLines?: number;
+};
 
 /** Add node modules / packages to the event */
 export class ContextLines implements Integration {
   public name = this.constructor.name;
 
+  private _linesOfContext: number;
+
+  public constructor(options: ContextLinesOptions = {}) {
+    this._linesOfContext = options.frameContextLines ?? 7;
+  }
+
   public install(client: ClientLike): void {
-    const linesOfContext = (client.options as { frameContextLines?: number }).frameContextLines ?? 7;
+    this._linesOfContext = (client.options as ContextLinesOptions).frameContextLines ?? this._linesOfContext;
+    client.addEventProcessor(event => this.process(event));
+  }
 
-    client.addEventProcessor(event => {
-      const frames = event.exception?.values?.[0].stacktrace?.frames;
+  public process(event: SentryEvent): SentryEvent {
+    const frames = event.exception?.values?.[0].stacktrace?.frames;
 
-      if (frames) {
-        const filenames: string[] = [];
+    if (frames) {
+      const filenames: string[] = [];
 
-        for (const frame of frames) {
-          if (frame.filename && !filenames.includes(frame.filename)) {
-            filenames.push(frame.filename);
+      for (const frame of frames) {
+        if (frame.filename && !filenames.includes(frame.filename)) {
+          filenames.push(frame.filename);
+        }
+      }
+
+      const sourceFiles = readSourceFiles(filenames);
+
+      for (const frame of frames) {
+        if (frame.filename && sourceFiles[frame.filename]) {
+          try {
+            const lines = (sourceFiles[frame.filename] as string).split('\n');
+            addContextToFrame(lines, frame, this._linesOfContext);
+          } catch (e) {
+            // anomaly, being defensive in case
+            // unlikely to ever happen in practice but can definitely happen in theory
           }
         }
-
-        const sourceFiles = readSourceFiles(filenames);
-
-        for (const frame of frames) {
-          if (frame.filename && sourceFiles[frame.filename]) {
-            try {
-              const lines = (sourceFiles[frame.filename] as string).split('\n');
-              addContextToFrame(lines, frame, linesOfContext);
-            } catch (e) {
-              // anomaly, being defensive in case
-              // unlikely to ever happen in practice but can definitely happen in theory
-            }
-          }
-        }
-
-        return event;
       }
 
       return event;
-    });
+    }
+
+    return event;
   }
 }
 
@@ -64,7 +66,7 @@ export class ContextLines implements Integration {
  * @param frame StackFrame that will be mutated
  * @param linesOfContext number of context lines we want to add pre/post
  */
-function addContextToFrame(lines: string[], frame: StackFrame, linesOfContext: number): void {
+export function addContextToFrame(lines: string[], frame: StackFrame, linesOfContext: number): void {
   const lineno = frame.lineno || 0;
   const maxLines = lines.length;
   const sourceLine = Math.max(Math.min(maxLines, lineno - 1), 0);

@@ -1,148 +1,132 @@
-import { SentryEvent, ExtendedError } from '@sentry/types';
-import { expect } from 'chai';
-import { stub } from 'sinon';
+import { ExtendedError, SentryEvent } from '@sentry/types';
 
 import { LinkedErrors } from '../src/index';
 
-class BrowserBackend {
-  eventFromException: (ex: unknown) => PromiseLike<SentryEvent> = () => Promise.resolve({});
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let linkedErrors: any;
-
 describe('LinkedErrors', () => {
-  beforeEach(() => {
-    linkedErrors = new LinkedErrors();
+  const linkedErrors = new LinkedErrors();
+
+  it('should do nothing if event doesnt contain exception', () => {
+    const event = linkedErrors.process({
+      message: 'foo',
+    });
+    expect(event).toEqual({ message: 'foo' });
   });
 
-  describe('handler', () => {
-    it('should bail out if event doesnt contain exception', () => {
-      const spy = stub(linkedErrors, '_walkErrorTree');
-      const event = {
-        message: 'foo',
-      };
-      const result = linkedErrors._handler(event);
-      expect(spy.called).equal(false);
-      expect(result).to.deep.equal(event);
+  it('should do nothing if event contains exception, but no hint', () => {
+    const event = linkedErrors.process({ exception: { values: [{}] } });
+    expect(event).toEqual({ exception: { values: [{}] } });
+  });
+
+  it('should recursively walk error to find linked exceptions and assign them to the event', async () => {
+    let event: SentryEvent = {
+      exception: {
+        values: [
+          {
+            type: 'Error',
+            value: 'one',
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    };
+    const one: ExtendedError = new Error('one');
+    const two: ExtendedError = new TypeError('two');
+    const three: ExtendedError = new SyntaxError('three');
+    one.cause = two;
+    two.cause = three;
+
+    event = linkedErrors.process(event, {
+      originalException: one,
     });
 
-    it('should bail out if event contains exception, but no hint', () => {
-      const spy = stub(linkedErrors, '_walkErrorTree');
-      const event = {
-        exception: {
-          values: [],
-        },
-        message: 'foo',
-      };
-      const result = linkedErrors._handler(event);
-      expect(spy.called).equal(false);
-      expect(result).to.deep.equal(event);
+    expect(event.exception!.values!.length).toEqual(3);
+    expect(event.exception!.values![0].type).toEqual('SyntaxError');
+    expect(event.exception!.values![0].value).toEqual('three');
+    expect(event.exception!.values![0].stacktrace).toHaveProperty('frames');
+    expect(event.exception!.values![1].type).toEqual('TypeError');
+    expect(event.exception!.values![1].value).toEqual('two');
+    expect(event.exception!.values![1].stacktrace).toHaveProperty('frames');
+    expect(event.exception!.values![2].type).toEqual('Error');
+    expect(event.exception!.values![2].value).toEqual('one');
+    expect(event.exception!.values![2].stacktrace).toHaveProperty('frames');
+  });
+
+  it('should allow to change walk key', () => {
+    const linkedErrorsChangedKey = new LinkedErrors({
+      key: 'reason',
     });
 
-    it('should call walkErrorTree if event contains exception and hint with originalException', () => {
-      const spy = stub(linkedErrors, '_walkErrorTree').callsFake(() => []);
-      const event = {
-        exception: {
-          values: [],
-        },
-        message: 'foo',
-      };
-      const hint = {
-        originalException: new Error('originalException'),
-      };
-      linkedErrors._handler(event, hint);
-      expect(spy.calledOnce).equal(true);
+    let event: SentryEvent = {
+      exception: {
+        values: [
+          {
+            type: 'Error',
+            value: 'one',
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    };
+    const one: ExtendedError = new Error('one');
+    const two: ExtendedError = new TypeError('two');
+    const three: ExtendedError = new SyntaxError('three');
+    one.reason = two;
+    two.reason = three;
+
+    event = linkedErrorsChangedKey.process(event, {
+      originalException: one,
     });
 
-    it('should recursively walk error to find linked exceptions and assign them to the event', async () => {
-      const three: ExtendedError = new SyntaxError('three');
+    expect(event.exception!.values!.length).toEqual(3);
+    expect(event.exception!.values![0].type).toEqual('SyntaxError');
+    expect(event.exception!.values![0].value).toEqual('three');
+    expect(event.exception!.values![0].stacktrace).toHaveProperty('frames');
+    expect(event.exception!.values![1].type).toEqual('TypeError');
+    expect(event.exception!.values![1].value).toEqual('two');
+    expect(event.exception!.values![1].stacktrace).toHaveProperty('frames');
+    expect(event.exception!.values![2].type).toEqual('Error');
+    expect(event.exception!.values![2].value).toEqual('one');
+    expect(event.exception!.values![2].stacktrace).toHaveProperty('frames');
+  });
 
-      const two: ExtendedError = new TypeError('two');
-      two.cause = three;
-
-      const one: ExtendedError = new Error('one');
-      one.cause = two;
-
-      const originalException = one;
-      const backend = new BrowserBackend();
-      return backend.eventFromException(originalException).then(event => {
-        const result = linkedErrors._handler(event, {
-          originalException,
-        });
-
-        // It shouldn't include root exception, as it's already processed in the event by the main error handler
-        expect(result.exception.values.length).equal(3);
-        expect(result.exception.values[0].type).equal('SyntaxError');
-        expect(result.exception.values[0].value).equal('three');
-        expect(result.exception.values[0].stacktrace).to.have.property('frames');
-        expect(result.exception.values[1].type).equal('TypeError');
-        expect(result.exception.values[1].value).equal('two');
-        expect(result.exception.values[1].stacktrace).to.have.property('frames');
-        expect(result.exception.values[2].type).equal('Error');
-        expect(result.exception.values[2].value).equal('one');
-        expect(result.exception.values[2].stacktrace).to.have.property('frames');
-      });
+  it('should allow to change stack size limit', () => {
+    const linkedErrorsChangedLimit = new LinkedErrors({
+      limit: 2,
     });
 
-    it('should allow to change walk key', async () => {
-      linkedErrors = new LinkedErrors({
-        key: 'reason',
-      });
+    let event: SentryEvent = {
+      exception: {
+        values: [
+          {
+            type: 'Error',
+            value: 'one',
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    };
+    const one: ExtendedError = new Error('one');
+    const two: ExtendedError = new TypeError('two');
+    const three: ExtendedError = new SyntaxError('three');
+    one.cause = two;
+    two.cause = three;
 
-      const three: ExtendedError = new SyntaxError('three');
-
-      const two: ExtendedError = new TypeError('two');
-      two.reason = three;
-
-      const one: ExtendedError = new Error('one');
-      one.reason = two;
-
-      const originalException = one;
-      const backend = new BrowserBackend();
-      return backend.eventFromException(originalException).then(event => {
-        const result = linkedErrors._handler(event, {
-          originalException,
-        });
-
-        expect(result.exception.values.length).equal(3);
-        expect(result.exception.values[0].type).equal('SyntaxError');
-        expect(result.exception.values[0].value).equal('three');
-        expect(result.exception.values[0].stacktrace).to.have.property('frames');
-        expect(result.exception.values[1].type).equal('TypeError');
-        expect(result.exception.values[1].value).equal('two');
-        expect(result.exception.values[1].stacktrace).to.have.property('frames');
-        expect(result.exception.values[2].type).equal('Error');
-        expect(result.exception.values[2].value).equal('one');
-        expect(result.exception.values[2].stacktrace).to.have.property('frames');
-      });
+    event = linkedErrorsChangedLimit.process(event, {
+      originalException: one,
     });
 
-    it('should allow to change stack size limit', async () => {
-      linkedErrors = new LinkedErrors({
-        limit: 2,
-      });
-
-      const one: ExtendedError = new Error('one');
-      const two: ExtendedError = new TypeError('two');
-      const three: ExtendedError = new SyntaxError('three');
-      one.cause = two;
-      two.cause = three;
-
-      const backend = new BrowserBackend();
-      return backend.eventFromException(one).then(event => {
-        const result = linkedErrors._handler(event, {
-          originalException: one,
-        });
-
-        expect(result.exception.values.length).equal(2);
-        expect(result.exception.values[0].type).equal('TypeError');
-        expect(result.exception.values[0].value).equal('two');
-        expect(result.exception.values[0].stacktrace).to.have.property('frames');
-        expect(result.exception.values[1].type).equal('Error');
-        expect(result.exception.values[1].value).equal('one');
-        expect(result.exception.values[1].stacktrace).to.have.property('frames');
-      });
-    });
+    expect(event.exception!.values!.length).toEqual(2);
+    expect(event.exception!.values![0].type).toEqual('TypeError');
+    expect(event.exception!.values![0].value).toEqual('two');
+    expect(event.exception!.values![0].stacktrace).toHaveProperty('frames');
+    expect(event.exception!.values![1].type).toEqual('Error');
+    expect(event.exception!.values![1].value).toEqual('one');
+    expect(event.exception!.values![1].stacktrace).toHaveProperty('frames');
   });
 });

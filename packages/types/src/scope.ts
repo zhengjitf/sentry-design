@@ -121,11 +121,7 @@ export interface ScopeLike extends ScopeContext {
   getSession(): Session | undefined;
 
   /**
-   * Updates the scope with provided data. Can work in three variations:
-   * - plain object containing updatable attributes
-   * - Scope instance that'll extract the attributes from
-   * - callback function that'll receive the current scope as an argument and allow for modifications
-   * @param captureContext scope modifier to be used
+   * Updates the scope with provided data
    */
   update(captureContext?: ScopeContext): this;
 

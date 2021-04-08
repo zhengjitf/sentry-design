@@ -6,8 +6,7 @@ export function getCarrier(source: unknown & SentryGlobal = getGlobalObject()): 
   return source.__SENTRY_V7__;
 }
 
-export function getCurrentClient(): ClientLike | undefined {
-  const carrier = getCarrier();
+export function getCurrentClient(carrier = getCarrier()): ClientLike | undefined {
   if (!carrier.client) {
     logger.warn('No client available on the carrier.');
     return;
@@ -15,8 +14,7 @@ export function getCurrentClient(): ClientLike | undefined {
   return carrier.client;
 }
 
-export function getCurrentScope(): ScopeLike | undefined {
-  const carrier = getCarrier();
+export function getCurrentScope(carrier = getCarrier()): ScopeLike | undefined {
   if (!carrier.scope) {
     logger.warn('No scope available on the carrier.');
     return;

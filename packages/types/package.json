@@ -24,8 +24,8 @@
     "lint": "yarn lint:prettier & yarn lint:eslint",
     "lint:prettier": "prettier --write \"src/**\" \"test/**\"",
     "lint:eslint": "eslint --fix \"src/**\" \"test/**\"",
-    "test": "jest -c ../../jest.config.js",
-    "test:watch": "yarn test --watch"
+    "test": "echo \"No tests implemented for @sentry/types\"",
+    "test:watch": "echo \"No tests implemented for @sentry/types\""
   },
   "volta": {
     "extends": "../../package.json"

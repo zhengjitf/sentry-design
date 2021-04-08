@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { SentryEvent } from '@sentry/types';
+
 import { Dedupe } from '../src/index';
 
 function clone<T>(data: T): T {
   return JSON.parse(JSON.stringify(data));
 }
 
-const dedupe = new Dedupe();
-const messageEvent = {
+const messageEvent: SentryEvent = {
   fingerprint: ['MrSnuffles'],
   message: 'PickleRick',
   stacktrace: {
@@ -26,7 +26,7 @@ const messageEvent = {
     ],
   },
 };
-const exceptionEvent = {
+const exceptionEvent: SentryEvent = {
   exception: {
     values: [
       {
@@ -55,40 +55,44 @@ const exceptionEvent = {
 };
 
 describe('Dedupe', () => {
-  describe('shouldDropEvent(messageEvent)', () => {
+  let dedupe: Dedupe;
+
+  beforeEach(() => {
+    dedupe = new Dedupe();
+  });
+
+  describe('messageEvent', () => {
     it('should not drop if there was no previous event', () => {
       const event = clone(messageEvent);
-      expect((dedupe as any)._shouldDropEvent(event)).toBe(false);
+      expect(dedupe.process(event)).toBe(event);
     });
 
     it('should not drop if events have different messages', () => {
       const eventA = clone(messageEvent);
       const eventB = clone(messageEvent);
       eventB.message = 'EvilMorty';
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
+      expect(dedupe.process(eventA, eventB)).toBe(eventA);
     });
 
     it('should not drop if events have same messages, but different stacktraces', () => {
       const eventA = clone(messageEvent);
       const eventB = clone(messageEvent);
-      eventB.stacktrace.frames[0].colno = 1337;
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
+      eventB.stacktrace!.frames![0].colno = 1337;
+      expect(dedupe.process(eventA, eventB)).toBe(eventA);
     });
 
     it('should drop if there are two events with same messages and no fingerprints', () => {
       const eventA = clone(messageEvent);
-      // @ts-expect-error
       delete eventA.fingerprint;
       const eventB = clone(messageEvent);
-      // @ts-expect-error
       delete eventB.fingerprint;
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(true);
+      expect(dedupe.process(eventA, eventB)).toEqual(null);
     });
 
     it('should drop if there are two events with same messages and same fingerprints', () => {
       const eventA = clone(messageEvent);
       const eventB = clone(messageEvent);
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(true);
+      expect(dedupe.process(eventA, eventB)).toEqual(null);
     });
 
     it('should not drop if there are two events with same message but different fingerprints', () => {
@@ -96,60 +100,57 @@ describe('Dedupe', () => {
       const eventB = clone(messageEvent);
       eventA.fingerprint = ['Birdperson'];
       const eventC = clone(messageEvent);
-      // @ts-expect-error
       delete eventC.fingerprint;
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
-      expect((dedupe as any)._shouldDropEvent(eventA, eventC)).toBe(false);
-      expect((dedupe as any)._shouldDropEvent(eventB, eventC)).toBe(false);
+      expect(dedupe.process(eventA, eventB)).toBe(eventA);
+      expect(dedupe.process(eventA, eventC)).toBe(eventA);
+      expect(dedupe.process(eventB, eventC)).toBe(eventB);
     });
   });
 
-  describe('shouldDropEvent(exceptionEvent)', () => {
+  describe('exceptionEvent', () => {
     it('should not drop if there was no previous event', () => {
       const event = clone(exceptionEvent);
-      expect((dedupe as any)._shouldDropEvent(event)).toBe(false);
+      expect(dedupe.process(event)).toBe(event);
     });
 
     it('should drop when events type, value and stacktrace are the same', () => {
       const event = clone(exceptionEvent);
-      expect((dedupe as any)._shouldDropEvent(event, event)).toBe(true);
+      expect(dedupe.process(event, event)).toEqual(null);
     });
 
     it('should not drop if types are different', () => {
       const eventA = clone(exceptionEvent);
       const eventB = clone(exceptionEvent);
-      eventB.exception.values[0].type = 'TypeError';
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
+      eventB.exception!.values![0].type = 'TypeError';
+      expect(dedupe.process(eventA, eventB)).toBe(eventA);
     });
 
     it('should not drop if values are different', () => {
       const eventA = clone(exceptionEvent);
       const eventB = clone(exceptionEvent);
-      eventB.exception.values[0].value = 'Expected number, got string';
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
+      eventB.exception!.values![0].value = 'Expected number, got string';
+      expect(dedupe.process(eventA, eventB)).toBe(eventA);
     });
 
     it('should not drop if stacktraces are different', () => {
       const eventA = clone(exceptionEvent);
       const eventB = clone(exceptionEvent);
-      eventB.exception.values[0].stacktrace.frames[0].colno = 1337;
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
+      eventB.exception!.values![0].stacktrace!.frames![0].colno = 1337;
+      expect(dedupe.process(eventA, eventB)).toBe(eventA);
     });
 
     it('should drop if there are two events with same exception and no fingerprints', () => {
       const eventA = clone(exceptionEvent);
-      // @ts-expect-error
       delete eventA.fingerprint;
       const eventB = clone(exceptionEvent);
-      // @ts-expect-error
       delete eventB.fingerprint;
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(true);
+      expect(dedupe.process(eventA, eventB)).toEqual(null);
     });
 
     it('should drop if there are two events with same exception and same fingerprints', () => {
       const eventA = clone(exceptionEvent);
       const eventB = clone(exceptionEvent);
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(true);
+      expect(dedupe.process(eventA, eventB)).toEqual(null);
     });
 
     it('should not drop if there are two events with same exception but different fingerprints', () => {
@@ -157,11 +158,10 @@ describe('Dedupe', () => {
       const eventB = clone(exceptionEvent);
       eventA.fingerprint = ['Birdperson'];
       const eventC = clone(exceptionEvent);
-      // @ts-expect-error
       delete eventC.fingerprint;
-      expect((dedupe as any)._shouldDropEvent(eventA, eventB)).toBe(false);
-      expect((dedupe as any)._shouldDropEvent(eventA, eventC)).toBe(false);
-      expect((dedupe as any)._shouldDropEvent(eventB, eventC)).toBe(false);
+      expect(dedupe.process(eventA, eventB)).toBe(eventA);
+      expect(dedupe.process(eventA, eventC)).toBe(eventA);
+      expect(dedupe.process(eventB, eventC)).toBe(eventB);
     });
   });
 });

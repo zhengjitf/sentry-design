@@ -14,14 +14,16 @@ export class LinkedErrors implements Integration {
   }
 
   public install(client: ClientLike): void {
-    client.addEventProcessor((event: SentryEvent, hint?: EventHint) => {
-      if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
-        return event;
-      }
-      const linkedErrors = this._walkErrorTree(hint.originalException as ExtendedError, this._key);
-      event.exception.values = [...linkedErrors, ...event.exception.values];
+    client.addEventProcessor((event: SentryEvent, hint?: EventHint) => this.process(event, hint));
+  }
+
+  public process(event: SentryEvent, hint?: EventHint): SentryEvent {
+    if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
       return event;
-    });
+    }
+    const linkedErrors = this._walkErrorTree(hint.originalException as ExtendedError, this._key);
+    event.exception.values = [...linkedErrors, ...event.exception.values];
+    return event;
   }
 
   private _walkErrorTree(error: ExtendedError, key: string, stack: Exception[] = []): Exception[] {

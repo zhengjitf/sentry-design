@@ -18,6 +18,29 @@ import {
 
 import { getCurrentClient } from './carrier';
 
+export function configureScope(callback: (scope: ScopeLike) => void): void {
+  const client = getCurrentClient();
+  if (client) {
+    callback(client.getScope());
+  }
+}
+
+export function withScope(callback: (scope: ScopeLike) => void): void {
+  const client = getCurrentClient();
+
+  if (client) {
+    const currentScope = client.getScope();
+    const newScope = currentScope.clone();
+    try {
+      client.setScope(newScope);
+      callback(newScope);
+    } catch (_oO) {
+      // no-empty
+    }
+    client.setScope(currentScope);
+  }
+}
+
 // TODO: Used in Electron and RN
 // export function addScopeListener(callback: (scope: ScopeLike) => void): void {
 //   return getCurrentClient()?.getScope().addScopeListener(callback)

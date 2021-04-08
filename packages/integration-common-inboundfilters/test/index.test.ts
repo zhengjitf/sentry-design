@@ -5,14 +5,19 @@ let inboundFilters: any;
 describe('InboundFilters', () => {
   beforeEach(() => {
     inboundFilters = new InboundFilters();
+    inboundFilters._client = {
+      logger: {
+        warn() {
+          // no-empty
+        },
+        error() {
+          // no-empty
+        },
+      },
+    };
   });
 
   describe('shouldDropEvent', () => {
-    it('should drop when error is internal one', () => {
-      inboundFilters._isSentryError = () => true;
-      expect(inboundFilters._shouldDropEvent({}, inboundFilters._mergeOptions())).toBe(true);
-    });
-
     it('should drop when error is ignored', () => {
       inboundFilters._isIgnoredError = () => true;
       expect(inboundFilters._shouldDropEvent({}, inboundFilters._mergeOptions())).toBe(true);
@@ -51,47 +56,6 @@ describe('InboundFilters', () => {
       inboundFilters._isDeniedUrl = () => false;
       inboundFilters._isAllowedUrl = () => true;
       expect(inboundFilters._shouldDropEvent({}, inboundFilters._mergeOptions())).toBe(false);
-    });
-  });
-
-  describe('isSentryError', () => {
-    const messageEvent = {
-      message: 'captureMessage',
-    };
-    const exceptionEvent = {
-      exception: {
-        values: [
-          {
-            type: 'SyntaxError',
-            value: 'unidentified ? at line 1337',
-          },
-        ],
-      },
-    };
-    const sentryEvent = {
-      exception: {
-        values: [
-          {
-            type: 'SentryError',
-            value: 'something something server connection',
-          },
-        ],
-      },
-    };
-
-    it('should work as expected', () => {
-      expect(inboundFilters._isSentryError(messageEvent, inboundFilters._mergeOptions())).toBe(false);
-      expect(inboundFilters._isSentryError(exceptionEvent, inboundFilters._mergeOptions())).toBe(false);
-      expect(inboundFilters._isSentryError(sentryEvent, inboundFilters._mergeOptions())).toBe(true);
-    });
-
-    it('should be configurable', () => {
-      inboundFilters = new InboundFilters({
-        ignoreInternal: false,
-      });
-      expect(inboundFilters._isSentryError(messageEvent, inboundFilters._mergeOptions())).toBe(false);
-      expect(inboundFilters._isSentryError(exceptionEvent, inboundFilters._mergeOptions())).toBe(false);
-      expect(inboundFilters._isSentryError(sentryEvent, inboundFilters._mergeOptions())).toBe(false);
     });
   });
 
