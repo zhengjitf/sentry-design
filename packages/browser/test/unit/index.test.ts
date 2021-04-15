@@ -185,6 +185,13 @@ describe('SentryBrowser initialization', () => {
     expect(global.__SENTRY__.hub._stack[0].client.getOptions().release).to.be.undefined;
   });
 
+  it('should use window.SENTRY_RELEASE to set release on initialization if available', () => {
+    const releaseObj = { name: 'release hello world' };
+    // @ts-ignore
+    init({ dsn, release: releaseObj });
+    expect(global.__SENTRY__.hub._stack[0].client.getOptions().release).equal(JSON.stringify(releaseObj));
+  });
+
   describe('SDK metadata', () => {
     it('should set SDK data when Sentry.init() is called', () => {
       init({ dsn });

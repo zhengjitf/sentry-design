@@ -83,7 +83,10 @@ export function init(options: BrowserOptions = {}): void {
     if (window.SENTRY_RELEASE && window.SENTRY_RELEASE.id) {
       options.release = window.SENTRY_RELEASE.id;
     }
+  } else if (typeof options.release !== 'string') {
+    options.release = JSON.stringify(options.release);
   }
+
   if (options.autoSessionTracking === undefined) {
     options.autoSessionTracking = true;
   }

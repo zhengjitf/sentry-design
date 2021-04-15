@@ -97,6 +97,8 @@ export function init(options: NodeOptions = {}): void {
     if (detectedRelease !== undefined) {
       options.release = detectedRelease;
     }
+  } else if (typeof options.release !== 'string') {
+    options.release = JSON.stringify(options.release);
   }
 
   if (options.environment === undefined && process.env.SENTRY_ENVIRONMENT) {

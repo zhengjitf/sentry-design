@@ -279,6 +279,13 @@ describe('SentryNode initialization', () => {
     global.SENTRY_RELEASE = undefined;
   });
 
+  test('release is stringified, if options.release is passed as an object', () => {
+    const releaseObj = { name: 'release hello world' };
+    // @ts-ignore
+    init({ dsn, release: releaseObj });
+    expect(global.__SENTRY__.hub._stack[0].client.getOptions().release).toEqual(JSON.stringify(releaseObj));
+  });
+
   describe('SDK metadata', () => {
     it('should set SDK data when Sentry.init() is called', () => {
       init({ dsn });
