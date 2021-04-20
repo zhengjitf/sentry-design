@@ -149,7 +149,21 @@ export async function close(timeout?: number): Promise<boolean> {
 }
 
 /**
- * A function that returns a Sentry release string dynamically from env variables
+ * Function that takes an instance of NodeClient and checks if autoSessionTracking option is enabled for that client
+ */
+export function isAutoSessionTrackingEnabled(client?: NodeClient): boolean {
+  if (client === undefined) {
+    return false;
+  }
+  const clientOptions: NodeOptions = client && client.getOptions();
+  if (clientOptions && clientOptions.autoSessionTracking !== undefined) {
+    return clientOptions.autoSessionTracking;
+  }
+  return false;
+}
+
+/**
+ * Returns a release dynamically from environment variables.
  */
 export function getSentryRelease(): string | undefined {
   // Always read first as Sentry takes this as precedence
