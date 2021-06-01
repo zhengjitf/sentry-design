@@ -5,6 +5,8 @@ import * as SentryWebpackPlugin from '@sentry/webpack-plugin';
 import * as fs from 'fs';
 import * as path from 'path';
 
+logger.enable();
+
 const SENTRY_CLIENT_CONFIG_FILE = './sentry.client.config.js';
 const SENTRY_SERVER_CONFIG_FILE = './sentry.server.config.js';
 // this is where the transpiled/bundled version of `SENTRY_SERVER_CONFIG_FILE` will end up

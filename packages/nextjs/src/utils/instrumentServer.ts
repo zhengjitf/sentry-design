@@ -11,6 +11,7 @@ import * as url from 'url';
 
 import * as Sentry from '../index.server';
 
+logger.enable();
 console.log('logger: ', logger);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
