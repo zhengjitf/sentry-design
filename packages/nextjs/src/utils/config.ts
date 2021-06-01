@@ -153,6 +153,8 @@ export function withSentryConfig(
   }
 
   const newWebpackExport = (config: WebpackConfig, options: WebpackOptions): WebpackConfig => {
+    console.log('webpack config:', config);
+    debugger;
     // if we're building server code, store the webpack output path as an env variable, so we know where to look for the
     // webpack-processed version of `sentry.server.config.js` when we need it
     if (config.target === 'node') {
@@ -187,6 +189,7 @@ export function withSentryConfig(
     // could also be fixed by using `bind`, but this is way simpler.)
     const origEntryProperty = newConfig.entry;
     newConfig.entry = () => injectSentry(origEntryProperty, options.isServer);
+    console.log(newConfig.entry);
 
     // Add the Sentry plugin, which uploads source maps to Sentry when not in dev
     newConfig.plugins.push(
