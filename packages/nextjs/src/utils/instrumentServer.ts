@@ -11,6 +11,8 @@ import * as url from 'url';
 
 import * as Sentry from '../index.server';
 
+console.log('logger: ', logger);
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PlainObject<T = any> = { [key: string]: T };
 
@@ -96,6 +98,8 @@ export function instrumentServer(): void {
   // handled and the wrapped `Server.findPageComponents` is called:
   //    Replace URL in transaction name with parameterized version
 
+  console.log('in instrumentServer()');
+
   const nextServerPrototype = Object.getPrototypeOf(createNextServer({}));
   fill(nextServerPrototype, 'getServerRequestHandler', makeWrappedHandlerGetter);
 }
@@ -108,9 +112,12 @@ export function instrumentServer(): void {
  * @returns A wrapped version of the same method, to monkeypatch in at server startup
  */
 function makeWrappedHandlerGetter(origHandlerGetter: HandlerGetter): WrappedHandlerGetter {
+  console.log('in makeWrappedHandlerGetter');
   // We wrap this purely in order to be able to grab data and do further monkeypatching the first time it runs.
   // Otherwise, it's just a pass-through to the original method.
   const wrappedHandlerGetter = async function(this: NextServer): Promise<ReqHandler> {
+    console.log('in wrappedHandlerGetter');
+
     if (!sdkSetupComplete) {
       try {
         // `SENTRY_SERVER_INIT_PATH` is set at build time, and points to a webpack-processed version of the user's
@@ -157,7 +164,11 @@ function makeWrappedHandlerGetter(origHandlerGetter: HandlerGetter): WrappedHand
  * @returns A wrapped version of that logger
  */
 function makeWrappedErrorLogger(origErrorLogger: ErrorLogger): WrappedErrorLogger {
+  console.log('in makeWrappedErrorLogger');
+
   return function(this: Server, err: Error): void {
+    console.log('in wrappedErrorLogger');
+
     // TODO add context data here
     Sentry.captureException(err);
     return origErrorLogger.call(this, err);
@@ -188,6 +199,8 @@ function getPublicDirFiles(): Set<string> {
  * @returns A wrapped version of that handler
  */
 function makeWrappedReqHandler(origReqHandler: ReqHandler): WrappedReqHandler {
+  console.log('in makeWrappedReqHandler');
+
   const publicDirFiles = getPublicDirFiles();
   // add transaction start and stop to the normal request handling
   const wrappedReqHandler = async function(
@@ -196,6 +209,8 @@ function makeWrappedReqHandler(origReqHandler: ReqHandler): WrappedReqHandler {
     res: NextResponse,
     parsedUrl?: url.UrlWithParsedQuery,
   ): Promise<void> {
+    console.log('in wrappedReqHandler');
+
     // wrap everything in a domain in order to prevent scope bleed between requests
     const local = domain.create();
     local.add(req);
@@ -204,6 +219,7 @@ function makeWrappedReqHandler(origReqHandler: ReqHandler): WrappedReqHandler {
     // local.on('error', Sentry.captureException);
 
     local.run(() => {
+      console.log('in domain callback');
       const currentScope = Sentry.getCurrentHub().getScope();
 
       if (currentScope) {
@@ -274,8 +290,12 @@ function makeWrappedReqHandler(origReqHandler: ReqHandler): WrappedReqHandler {
 function makeWrappedMethodForGettingParameterizedPath(
   origMethod: ApiPageEnsurer | PageComponentFinder,
 ): WrappedApiPageEnsurer | WrappedPageComponentFinder {
+  console.log('in makeWrappedMethodForGettingParameterizedPath');
+  console.log('orig method:', origMethod);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wrappedMethod = async function(this: Server, parameterizedPath: string, ...args: any[]): Promise<any> {
+    console.log('in wrapped paramaterized path getter');
     const transaction = getActiveTransaction();
 
     // replace specific URL with parameterized version
