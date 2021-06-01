@@ -49,4 +49,5 @@ export { withSentryConfig } from './utils/config';
 export { withSentry } from './utils/handlers';
 
 // wrap various server methods to enable error monitoring and tracing
+console.log('about to instrument the server');
 instrumentServer();
