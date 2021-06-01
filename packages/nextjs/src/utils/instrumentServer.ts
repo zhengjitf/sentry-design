@@ -102,6 +102,7 @@ export function instrumentServer(): void {
   console.log('in instrumentServer()');
 
   const nextServerPrototype = Object.getPrototypeOf(createNextServer({}));
+  console.log('about to call fill() on getServerRequestHandler');
   fill(nextServerPrototype, 'getServerRequestHandler', makeWrappedHandlerGetter);
 }
 
@@ -114,6 +115,7 @@ export function instrumentServer(): void {
  */
 function makeWrappedHandlerGetter(origHandlerGetter: HandlerGetter): WrappedHandlerGetter {
   console.log('in makeWrappedHandlerGetter');
+  console.log(new Error('').stack);
   // We wrap this purely in order to be able to grab data and do further monkeypatching the first time it runs.
   // Otherwise, it's just a pass-through to the original method.
   const wrappedHandlerGetter = async function(this: NextServer): Promise<ReqHandler> {
