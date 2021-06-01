@@ -19,7 +19,9 @@ import { truncate } from './string';
  * @returns void
  */
 export function fill(source: { [key: string]: any }, name: string, replacementFactory: (...args: any[]) => any): void {
+  console.log(`in fill(${source}, ${name}, <factory>)`);
   if (!(name in source)) {
+    console.log('name is not in source!');
     return;
   }
 
@@ -43,6 +45,7 @@ export function fill(source: { [key: string]: any }, name: string, replacementFa
     }
   }
 
+  console.log(`replacing ${name} in ${source}`);
   source[name] = wrapped;
 }
 
