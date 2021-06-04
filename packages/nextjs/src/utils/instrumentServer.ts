@@ -120,6 +120,8 @@ function makeWrappedHandlerGetter(origHandlerGetter: HandlerGetter): WrappedHand
   // Otherwise, it's just a pass-through to the original method.
   const wrappedHandlerGetter = async function(this: NextServer): Promise<ReqHandler> {
     console.log('in wrappedHandlerGetter');
+    const cwd = (process.env.cwd as unknown) as () => string;
+    console.log(cwd());
 
     if (!sdkSetupComplete) {
       try {
