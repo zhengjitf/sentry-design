@@ -223,7 +223,7 @@ export function withSentryConfig(
  */
 function setRuntimeEnvVars(projectDir: string, vars: PlainObject<string>): void {
   console.log('project dir');
-  const cwd = (process.env.cwd as unknown) as () => string;
+  const cwd = (process.cwd as unknown) as () => string;
   console.log('cwd() in setRuntimeEnvVars', cwd());
   // ensure the file exists
   const envFilePath = path.join(projectDir, '.env.local');
