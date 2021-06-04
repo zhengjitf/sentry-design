@@ -28,6 +28,7 @@ export function fill(source: { [key: string]: any }, name: string, replacementFa
   const original = source[name] as () => any;
   const wrapped = replacementFactory(original) as WrappedFunction;
   console.log(`just created wrapped function for ${source}.${name}`);
+  process.exit(26);
 
   // Make sure it's a function first, as we need to attach an empty prototype for `defineProperties` to work
   // otherwise it'll throw "TypeError: Object.defineProperties called on non-object"
