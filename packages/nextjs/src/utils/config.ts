@@ -155,7 +155,7 @@ export function withSentryConfig(
   }
 
   const newWebpackExport = (config: WebpackConfig, options: WebpackOptions): WebpackConfig => {
-    console.log('webpack config:', config);
+    // console.log('webpack config:', config);
     debugger;
     // if we're building server code, store the webpack output path as an env variable, so we know where to look for the
     // webpack-processed version of `sentry.server.config.js` when we need it
@@ -191,7 +191,7 @@ export function withSentryConfig(
     // could also be fixed by using `bind`, but this is way simpler.)
     const origEntryProperty = newConfig.entry;
     newConfig.entry = () => injectSentry(origEntryProperty, options.isServer);
-    console.log(newConfig.entry);
+    // console.log(newConfig.entry);
 
     // Add the Sentry plugin, which uploads source maps to Sentry when not in dev
     newConfig.plugins.push(
@@ -222,7 +222,7 @@ export function withSentryConfig(
  * @param vars Object containing vars to set
  */
 function setRuntimeEnvVars(projectDir: string, vars: PlainObject<string>): void {
-  console.log('project dir');
+  console.log('project dir', projectDir);
   const cwd = (process.cwd as unknown) as () => string;
   console.log('cwd() in setRuntimeEnvVars', cwd());
   // ensure the file exists
