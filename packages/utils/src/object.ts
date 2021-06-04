@@ -27,10 +27,12 @@ export function fill(source: { [key: string]: any }, name: string, replacementFa
 
   const original = source[name] as () => any;
   const wrapped = replacementFactory(original) as WrappedFunction;
+  console.log(`just created wrapped function for ${source}.${name}`);
 
   // Make sure it's a function first, as we need to attach an empty prototype for `defineProperties` to work
   // otherwise it'll throw "TypeError: Object.defineProperties called on non-object"
   if (typeof wrapped === 'function') {
+    console.log('wrapped function is indeed a function');
     try {
       wrapped.prototype = wrapped.prototype || {};
       Object.defineProperties(wrapped, {
@@ -40,6 +42,7 @@ export function fill(source: { [key: string]: any }, name: string, replacementFa
         },
       });
     } catch (_Oo) {
+      console.log('got error trying to set __sentry_original__:', _Oo);
       // This can throw if multiple fill happens on a global object like XMLHttpRequest
       // Fixes https://github.com/getsentry/sentry-javascript/issues/2043
     }
