@@ -159,6 +159,7 @@ function makeWrappedHandlerGetter(origHandlerGetter: HandlerGetter): WrappedHand
     return origHandlerGetter.call(this);
   };
 
+  console.log('returning wrappedHandlerGetter');
   return wrappedHandlerGetter;
 }
 
