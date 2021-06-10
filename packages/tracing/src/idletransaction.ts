@@ -13,7 +13,7 @@ export const DEFAULT_IDLE_TIMEOUT = 1000;
  */
 export class IdleTransactionSpanRecorder extends SpanRecorder {
   public constructor(
-    private readonly _pushActivity: (id: string) => void,
+    private readonly _pushActivity: (span: Span) => void,
     private readonly _popActivity: (id: string) => void,
     public transactionSpanId: string = '',
     maxlen?: number,
@@ -36,7 +36,7 @@ export class IdleTransactionSpanRecorder extends SpanRecorder {
 
       // We should only push new activities if the span does not have an end timestamp.
       if (span.endTimestamp === undefined) {
-        this._pushActivity(span.spanId);
+        this._pushActivity(span);
       }
     }
 
@@ -53,7 +53,7 @@ export type BeforeFinishCallback = (transactionSpan: IdleTransaction, endTimesta
  */
 export class IdleTransaction extends Transaction {
   // Activities store a list of active spans
-  public activities: Record<string, boolean> = {};
+  public activities: Record<string, Span> = {};
 
   // Stores reference to the timeout that calls _beat().
   private _heartbeatTimer: number = 0;
@@ -165,11 +165,11 @@ export class IdleTransaction extends Transaction {
    */
   public initSpanRecorder(maxlen?: number): void {
     if (!this.spanRecorder) {
-      const pushActivity = (id: string): void => {
+      const pushActivity = (span: Span): void => {
         if (this._finished) {
           return;
         }
-        this._pushActivity(id);
+        this._pushActivity(span);
       };
       const popActivity = (id: string): void => {
         if (this._finished) {
@@ -191,13 +191,13 @@ export class IdleTransaction extends Transaction {
    * Start tracking a specific activity.
    * @param spanId The span id that represents the activity
    */
-  private _pushActivity(spanId: string): void {
+  private _pushActivity(span: Span): void {
     if (this._initTimeout) {
       clearTimeout(this._initTimeout);
       this._initTimeout = undefined;
     }
-    logger.log(`[Tracing] pushActivity: ${spanId}`);
-    this.activities[spanId] = true;
+    logger.log(`[Tracing] pushActivity: ${span}`);
+    this.activities[span.spanId] = span;
     logger.log('[Tracing] new activities count', Object.keys(this.activities).length);
   }
 
@@ -208,6 +208,7 @@ export class IdleTransaction extends Transaction {
   private _popActivity(spanId: string): void {
     if (this.activities[spanId]) {
       logger.log(`[Tracing] popActivity ${spanId}`);
+      console.log(this.activities[spanId]);
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete this.activities[spanId];
       logger.log('[Tracing] new activities count', Object.keys(this.activities).length);
