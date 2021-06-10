@@ -78,8 +78,7 @@ export const withSentry = (handler: NextApiHandler): WrappedNextApiHandler => {
         // `addRequestDataToEvent`
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         delete transaction.metadata.requestPath;
-
-        transaction.finish();
+        setImmediate(() => transaction.finish());
       }
       try {
         await flush(2000);
