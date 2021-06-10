@@ -137,6 +137,7 @@ function _createWrappedRequestMethodFactory(
               span.setHttpStatus(res.statusCode);
             }
             span.description = cleanSpanDescription(span.description, requestOptions, req);
+            console.log(`finishing span ${span.description}`);
             span.finish();
           }
         })
