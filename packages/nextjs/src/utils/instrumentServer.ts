@@ -1,7 +1,7 @@
 import { deepReadDirSync } from '@sentry/node';
 import { extractTraceparentData, getActiveTransaction, hasTracingEnabled } from '@sentry/tracing';
 import { Event as SentryEvent } from '@sentry/types';
-import { fill, isString, logger, stripUrlQueryAndFragment } from '@sentry/utils';
+import { fill, isString, logger, normalize, stripUrlQueryAndFragment } from '@sentry/utils';
 import * as domain from 'domain';
 import * as http from 'http';
 import { default as createNextServer } from 'next';
@@ -36,6 +36,7 @@ export interface NextRequest extends http.IncomingMessage {
   url: string;
   query: { [key: string]: string };
   headers: { [key: string]: string };
+  body: string | { [key: string]: any };
 }
 type NextResponse = http.ServerResponse;
 
@@ -339,7 +340,7 @@ function shouldTraceRequest(url: string, publicDirFiles: Set<string>): boolean {
 export function addRequestDataToEvent(event: SentryEvent, req: NextRequest): SentryEvent {
   event.request = {
     ...event.request,
-    // TODO body/data
+    data: isString(req.body) ? req.body : JSON.stringify(normalize(req.body)),
     url: req.url.split('?')[0],
     cookies: req.cookies,
     headers: req.headers,
