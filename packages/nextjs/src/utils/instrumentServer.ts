@@ -11,6 +11,8 @@ import * as url from 'url';
 
 import * as Sentry from '../index.server';
 
+Error.stackTraceLimit = Infinity;
+
 logger.enable();
 console.log('logger: ', logger);
 
