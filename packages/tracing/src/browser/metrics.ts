@@ -5,14 +5,17 @@ import { browserPerformanceTimeOrigin, getGlobalObject, htmlTreeAsString, isNode
 
 import { Span } from '../span';
 import { Transaction } from '../transaction';
-import { msToSec } from '../utils';
+import { getActiveTransaction, msToSec } from '../utils';
 import { getCLS, LayoutShift } from './web-vitals/getCLS';
 import { getFID } from './web-vitals/getFID';
 import { getLCP, LargestContentfulPaint } from './web-vitals/getLCP';
 import { getVisibilityWatcher } from './web-vitals/lib/getVisibilityWatcher';
+import { observe } from './web-vitals/lib/observe';
 import { NavigatorDeviceMemory, NavigatorNetworkInformation } from './web-vitals/types';
 
 const global = getGlobalObject<Window>();
+
+const CAN_USE_PERF_APIS = global && global.performance && global.performance.getEntries && browserPerformanceTimeOrigin;
 
 /** Class tracking metrics  */
 export class MetricsInstrumentation {
@@ -21,6 +24,8 @@ export class MetricsInstrumentation {
   private _performanceCursor: number = 0;
   private _lcpEntry: LargestContentfulPaint | undefined;
   private _clsEntry: LayoutShift | undefined;
+
+  private _timeOrigin: number = msToSec(browserPerformanceTimeOrigin as number);
 
   public constructor() {
     if (!isNodeEnv() && global?.performance) {
@@ -31,19 +36,22 @@ export class MetricsInstrumentation {
       this._trackCLS();
       this._trackLCP();
       this._trackFID();
+
+      if (CAN_USE_PERF_APIS) {
+        observe('longtask', this._addLongTaskSpans);
+      }
     }
   }
 
   /** Add performance related spans to a transaction */
   public addPerformanceEntries(transaction: Transaction): void {
-    if (!global || !global.performance || !global.performance.getEntries || !browserPerformanceTimeOrigin) {
+    if (!CAN_USE_PERF_APIS) {
       // Gatekeeper if performance API not available
       return;
     }
 
     logger.log('[Tracing] Adding & adjusting spans using Performance API');
 
-    const timeOrigin = msToSec(browserPerformanceTimeOrigin);
     let entryScriptSrc: string | undefined;
 
     if (global.document && global.document.scripts) {
@@ -71,21 +79,21 @@ export class MetricsInstrumentation {
         const startTime = msToSec(entry.startTime as number);
         const duration = msToSec(entry.duration as number);
 
-        if (transaction.op === 'navigation' && timeOrigin + startTime < transaction.startTimestamp) {
+        if (transaction.op === 'navigation' && this._timeOrigin + startTime < transaction.startTimestamp) {
           return;
         }
 
         switch (entry.entryType) {
           case 'navigation': {
-            addNavigationSpans(transaction, entry, timeOrigin);
-            responseStartTimestamp = timeOrigin + msToSec(entry.responseStart as number);
-            requestStartTimestamp = timeOrigin + msToSec(entry.requestStart as number);
+            addNavigationSpans(transaction, entry, this._timeOrigin);
+            responseStartTimestamp = this._timeOrigin + msToSec(entry.responseStart as number);
+            requestStartTimestamp = this._timeOrigin + msToSec(entry.requestStart as number);
             break;
           }
           case 'mark':
           case 'paint':
           case 'measure': {
-            const startTimestamp = addMeasureSpans(transaction, entry, startTime, duration, timeOrigin);
+            const startTimestamp = addMeasureSpans(transaction, entry, startTime, duration, this._timeOrigin);
             if (tracingInitMarkStartTime === undefined && entry.name === 'sentry-tracing-init') {
               tracingInitMarkStartTime = startTimestamp;
             }
@@ -112,7 +120,14 @@ export class MetricsInstrumentation {
           }
           case 'resource': {
             const resourceName = (entry.name as string).replace(window.location.origin, '');
-            const endTimestamp = addResourceSpans(transaction, entry, resourceName, startTime, duration, timeOrigin);
+            const endTimestamp = addResourceSpans(
+              transaction,
+              entry,
+              resourceName,
+              startTime,
+              duration,
+              this._timeOrigin,
+            );
             // We remember the entry script end time to calculate the difference to the first init mark
             if (entryScriptStartTimestamp === undefined && (entryScriptSrc || '').indexOf(resourceName) > -1) {
               entryScriptStartTimestamp = endTimestamp;
@@ -139,10 +154,6 @@ export class MetricsInstrumentation {
 
     // Measurements are only available for pageload transactions
     if (transaction.op === 'pageload') {
-      // normalize applicable web vital values to be relative to transaction.startTimestamp
-
-      const timeOrigin = msToSec(browserPerformanceTimeOrigin);
-
       // Generate TTFB (Time to First Byte), which measured as the time between the beginning of the transaction and the
       // start of the response in milliseconds
       if (typeof responseStartTimestamp === 'number') {
@@ -157,7 +168,7 @@ export class MetricsInstrumentation {
       }
 
       ['fcp', 'fp', 'lcp'].forEach(name => {
-        if (!this._measurements[name] || timeOrigin >= transaction.startTimestamp) {
+        if (!this._measurements[name] || this._timeOrigin >= transaction.startTimestamp) {
           return;
         }
 
@@ -166,7 +177,7 @@ export class MetricsInstrumentation {
         // to be adjusted to be relative to transaction.startTimestamp.
 
         const oldValue = this._measurements[name].value;
-        const measurementTimestamp = timeOrigin + msToSec(oldValue);
+        const measurementTimestamp = this._timeOrigin + msToSec(oldValue);
         // normalizedValue should be in milliseconds
         const normalizedValue = Math.abs((measurementTimestamp - transaction.startTimestamp) * 1000);
 
@@ -293,11 +304,10 @@ export class MetricsInstrumentation {
         return;
       }
 
-      const timeOrigin = msToSec(browserPerformanceTimeOrigin as number);
       const startTime = msToSec(entry.startTime as number);
       logger.log('[Measurements] Adding LCP');
       this._measurements['lcp'] = { value: metric.value };
-      this._measurements['mark.lcp'] = { value: timeOrigin + startTime };
+      this._measurements['mark.lcp'] = { value: this._timeOrigin + startTime };
       this._lcpEntry = entry as LargestContentfulPaint;
     });
   }
@@ -311,12 +321,25 @@ export class MetricsInstrumentation {
         return;
       }
 
-      const timeOrigin = msToSec(browserPerformanceTimeOrigin as number);
       const startTime = msToSec(entry.startTime as number);
       logger.log('[Measurements] Adding FID');
       this._measurements['fid'] = { value: metric.value };
-      this._measurements['mark.fid'] = { value: timeOrigin + startTime };
+      this._measurements['mark.fid'] = { value: this._timeOrigin + startTime };
     });
+  }
+
+  /**
+   *
+   * @param entry
+   */
+  private _addLongTaskSpans(entry: PerformanceEntry): void {
+    const transaction = getActiveTransaction();
+    if (transaction) {
+      _startChild(transaction as Transaction, {
+        startTimestamp: this._timeOrigin + entry.startTime,
+        endTimestamp: this._timeOrigin,
+      });
+    }
   }
 }
 
