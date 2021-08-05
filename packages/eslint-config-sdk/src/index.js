@@ -4,7 +4,7 @@ module.exports = {
     node: true,
   },
   extends: ['prettier', 'eslint:recommended', 'plugin:import/errors', 'plugin:import/warnings'],
-  plugins: ['@sentry-internal/eslint-plugin-sdk', 'simple-import-sort'],
+  plugins: ['@sentry-internal/eslint-plugin-sdk', 'simple-import-sort', 'spellcheck'],
   overrides: [
     {
       // Configuration for JavaScript files
@@ -199,5 +199,7 @@ module.exports = {
 
     // Make sure for in loops check for properties
     'guard-for-in': 'error',
+
+    'spellcheck/spell-checker': ['warn'],
   },
 };
